@@ -489,34 +489,34 @@ def tab_roleplay() -> None:
 
 
 def _inject_app_styles(is_admin: bool) -> None:
-    """파스텔 톤 + 슬림 헤더: 툴바 숨김, 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
+    """파스텔 톤 + 슬림 헤더: 툴바 공간 제거(display:none), 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
     toolbar_rule = (
-        '[data-testid="stToolbar"] { visibility: visible !important; }'
+        '[data-testid="stToolbar"] { display: block !important; }'
         if is_admin
-        else '[data-testid="stToolbar"] { visibility: hidden !important; }'
+        else '[data-testid="stToolbar"] { display: none !important; }'
     )
     st.markdown(
         f"""
         <style>
-        /* ─── 1. 상단 툴바: 손님에게 숨김, 관리자일 때만 표시 ─── */
-        {toolbar_rule}
-
-        /* ─── 2. 메인 컨테이너 여백 강제 축소 (Nuclear Option) ─── */
-        .main .block-container {{
+        /* 1. 본문 상단 여백 강제 삭제 (가장 중요) */
+        .block-container {{
             padding-top: 1rem !important;
             padding-bottom: 5rem !important;
+        }}
+        .main .block-container {{
             max-width: 900px;
         }}
 
-        /* 기본 헤더 바 투명화 및 간섭 제거 */
+        /* 2. 헤더 바 배경 투명화 */
         header[data-testid="stHeader"] {{
-            background: transparent !important;
-            padding-top: 0 !important;
-            padding-bottom: 0 !important;
-            min-height: 0 !important;
+            background-color: transparent !important;
+            z-index: 1;
         }}
 
-        /* ─── 3. 앱 배경: 파스텔 톤 ─── */
+        /* 3. 우측 상단 툴바: 관리자일 때만 표시, 아니면 공간까지 제거 */
+        {toolbar_rule}
+
+        /* ─── 4. 앱 배경: 파스텔 톤 ─── */
         .main {{
             background-color: #FFF8E1 !important;
         }}
@@ -524,7 +524,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             background-color: #FFF3E0 !important;
         }}
 
-        /* ─── 4. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
+        /* ─── 5. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
         .header-container {{
             display: flex;
             align-items: center;
@@ -546,7 +546,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             margin-left: 1rem !important;
         }}
 
-        /* ─── 5. 카드 스타일 ─── */
+        /* ─── 6. 카드 스타일 ─── */
         .main .block-container > div {{
             background-color: white !important;
             border-radius: 15px !important;
@@ -555,7 +555,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             margin-bottom: 1rem !important;
         }}
 
-        /* ─── 6. 탭: 파스텔 Coral/Peach, 선택 시 부드러운 강조 ─── */
+        /* ─── 7. 탭: 파스텔 Coral/Peach, 선택 시 부드러운 강조 ─── */
         [data-testid="stTabs"] {{
             padding: 0.5rem 0 1rem 0 !important;
             border-bottom: 2px solid #FFCCBC !important;
