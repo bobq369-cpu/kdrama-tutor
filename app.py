@@ -450,62 +450,61 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
 
 
 def tab_roleplay() -> None:
-    st.header("AI 점원과 주문 연습")
-    st.caption("마당 식당 AI 점원과 한국어로 주문 연습해 보세요.")
-
+    """카카오톡 스타일: 위쪽에 과거 대화, 맨 아래에 고정 입력창."""
     if "roleplay_seed" not in st.session_state:
         st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
         return
 
     seed = st.session_state["roleplay_seed"]
 
-    # 2. 채팅 기록 초기화 (새로운 시나리오면 리셋)
     if "last_seed" not in st.session_state or st.session_state.last_seed != seed["kr"]:
         st.session_state.roleplay_history = [
             {"role": "model", "content": "어서오세요! 치앙마이 마당(Madang) 식당입니다. 주문하시겠어요? 😊"}
         ]
         st.session_state.last_seed = seed["kr"]
 
-    # 3. 오늘의 미션: 채팅창 상단에 따로 표시
+    # 카카오톡 스타일: 입력창을 화면 맨 아래에 고정
+    st.markdown(
+        """
+        <style>
+            .stChatInputContainer { position: sticky !important; bottom: 0 !important; z-index: 999; }
+            /* 롤플레이 탭에서 대화 영역 아래 여백 (입력창에 가리지 않도록) */
+            .main .block-container { padding-bottom: 5rem !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 1) 상단: 오늘의 미션
     st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
 
-    # 4. 이전 대화 출력
+    # 2) 위쪽: roleplay_history에 저장된 과거 대화 전부 표시
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # 5. 사용자 입력 및 AI 응답
-    if prompt := st.chat_input("직원에게 할 말을 입력하세요..."):
-        # 사용자 말 표시
+    # 3) 맨 아래 고정: st.chat_input만 사용 (엔터 시 새 메시지가 대화 맨 아래에 추가)
+    if prompt := st.chat_input("메시지 입력..."):
         st.session_state.roleplay_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
-        # AI 로딩 및 응답
         with st.chat_message("model"):
             message_placeholder = st.empty()
             message_placeholder.markdown("Thinking...")
-            
             try:
-                # 프롬프트 구성
                 full_prompt = f"""
                 당신은 태국 치앙마이의 한식당 '마당(Madang)'의 친절한 직원입니다. 
                 상대방은 한국어를 배우는 손님입니다.
-                
                 현재 연습 상황: "{seed['kr']}"
                 직원의 태도: 친절함, 정중함, 격려해주는 태도.
-                
                 대화 내역:
                 {[m['content'] for m in st.session_state.roleplay_history]}
-                
                 위 맥락에 맞춰 손님(user)의 말에 자연스럽게 한국어로 답변하세요.
                 """
-                
                 response_text = try_generate_content(full_prompt)
-                
                 message_placeholder.markdown(response_text)
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
-            
             except Exception as e:
                 message_placeholder.error(f"오류가 발생했습니다: {e}")
 
