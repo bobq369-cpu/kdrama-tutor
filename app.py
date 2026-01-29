@@ -605,30 +605,31 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 톱니바퀴 버튼: 헤더 박스 우측 상단 고정, 투명 아이콘만 표시 ─── */
+        /* ─── 9. 설정 버튼: 가장 작은 크기의 깔끔한 흰색 버튼, 우측 상단 고정 ─── */
         div[data-testid="stPopover"] {{
-            position: absolute !important;
-            top: 1.5rem !important;
-            right: 2rem !important;
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
             z-index: 999999 !important;
+            width: auto !important;
         }}
         div[data-testid="stPopover"] > button {{
-            background-color: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            color: #5D4037 !important;
+            background-color: white !important;
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            width: 40px !important;
+            height: 40px !important;
             padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+            color: #5D4037 !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
-            background-color: rgba(0,0,0,0.05) !important;
+            background-color: #f5f5f5 !important;
+            border-color: #d0d0d0 !important;
             color: #E65100 !important;
-            border: none !important;
-        }}
-        div[data-testid="stPopover"] > button:active,
-        div[data-testid="stPopover"] > button:focus {{
-            background-color: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
         }}
         </style>
         """,
