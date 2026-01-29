@@ -605,12 +605,12 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 설정 버튼: 헤더 박스 안에 위치 (absolute + 투명 스타일) ─── */
+        /* ─── 9. 설정 버튼: 헤더 박스(베이지) 안에 완전히 안착 (absolute + 투명 스타일) ─── */
         div[data-testid="stPopover"] {{
             position: absolute !important;
-            top: 2.2rem !important;
-            right: 1rem !important;
-            z-index: 1000 !important;
+            top: 3.8rem !important;
+            right: 2rem !important;
+            z-index: 99999 !important;
         }}
         div[data-testid="stPopover"] > button {{
             background-color: transparent !important;
