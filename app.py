@@ -109,12 +109,16 @@ def add_history(event_type: str, payload: Dict) -> None:
 
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
 def try_generate_content(prompt: str) -> str:
-    # 이 목록에 있는 모델들을 하나씩 다 찔러봅니다
-    candidates = ["gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-flash-002", "gemini-pro"]
+    # 최신 모델부터 순서대로 시도 (버전 번호 없이 사용)
+    # Gemini API는 모델 이름만 사용하며, 자동으로 최신 버전을 사용합니다
+    candidates = ["gemini-1.5-flash", "gemini-1.5-pro"]
     
     api_key = st.session_state.get("gemini_api_key", "").strip()
     if not api_key:
         raise ValueError("API 키가 없습니다.")
+        
+    if not GEMINI_AVAILABLE:
+        raise ValueError("google-generativeai 패키지가 설치되지 않았습니다.")
         
     genai.configure(api_key=api_key)
     
@@ -123,9 +127,18 @@ def try_generate_content(prompt: str) -> str:
         try:
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(prompt)
-            return response.text.strip()
+            if response and response.text:
+                return response.text.strip()
+            else:
+                errors.append(f"{model_name}: 응답이 비어있습니다.")
+                continue
         except Exception as e:
-            errors.append(f"{model_name} 실패: {str(e)}")
+            error_msg = str(e)
+            # 404 에러는 모델이 존재하지 않음을 의미
+            if "404" in error_msg or "not found" in error_msg.lower():
+                errors.append(f"{model_name}: 모델을 찾을 수 없습니다.")
+            else:
+                errors.append(f"{model_name}: {error_msg}")
             continue
             
     raise Exception(f"모든 모델 연결 실패. 다음 에러들을 확인하세요: {'; '.join(errors)}")
