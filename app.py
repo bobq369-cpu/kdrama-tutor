@@ -110,7 +110,7 @@ def sidebar_profile() -> None:
   st.sidebar.header("Gemini API Key")
     
   # [수정됨] 비밀 금고(Secrets) 확인 로직
-    if "GEMINI_API_KEY" in st.secrets:
+  if "GEMINI_API_KEY" in st.secrets:
         st.sidebar.success("✅ 주인님, 자동으로 로그인했습니다! (Secrets)")
         api_key = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)  # <--- 이 핵심 부품이 꼭 있어야 AI가 작동합니다!
@@ -120,7 +120,7 @@ def sidebar_profile() -> None:
             "API 키를 입력하세요",
             value=st.session_state.get("gemini_api_key", ""),
             type="password",
-            help="Gemini API 키를 입력하면 AI 기능을 사용할 수 있습니다.",
+            help="Gemini API 키를 입력하면 AI 기능을 사용할 수 있습니다.",  
             key="gemini_api_key_input"
         )
     if api_key != st.session_state.get("gemini_api_key", ""):
