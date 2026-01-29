@@ -608,7 +608,7 @@ def _inject_app_styles(is_admin: bool) -> None:
         /* ─── 9. 설정 버튼: 가장 작은 크기의 깔끔한 흰색 버튼, 우측 상단 고정 ─── */
         div[data-testid="stPopover"] {{
             position: fixed !important;
-            top: 20px !important;
+            top: 60px !important;
             right: 20px !important;
             z-index: 999999 !important;
             width: auto !important;
