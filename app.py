@@ -583,11 +583,22 @@ def _inject_app_styles(is_admin: bool) -> None:
             border-bottom: none !important;
         }}
 
-        /* ─── 8. 하단 풋터 및 Manage app 버튼 숨김 ─── */
-        footer {{ visibility: hidden !important; }}
+        /* ─── 8. 하단 풋터 및 Manage app 버튼 완전 숨김 ─── */
+        footer {{
+            display: none !important;
+            visibility: hidden !important;
+        }}
         [data-testid="stManageAppButton"] {{
             display: none !important;
             visibility: hidden !important;
+        }}
+        /* 하단 데코레이션 영역(Manage app 포함) 숨김 */
+        [data-testid="stDecoration"] {{
+            display: none !important;
+        }}
+        /* 하단 Manage app 링크(풋터 내부) */
+        footer a[href*="manage"] {{
+            display: none !important;
         }}
 
         /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정 ─── */
