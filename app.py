@@ -173,40 +173,19 @@ def _logo_transparent_png_bytes(logo_path: str):
         return None
 
 
-def render_header() -> None:
-    import os
-    import base64
-    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
-    logo_b64 = None
-    if os.path.exists(logo_path):
-        png_bytes = _logo_transparent_png_bytes(logo_path)
-        if png_bytes:
-            logo_b64 = base64.b64encode(png_bytes).decode("utf-8")
+# GitHub 등 원격 로고 URL (로컬 assets/logo.png 대신 사용 가능)
+HEADER_LOGO_URL = "https://raw.githubusercontent.com/bobq369-cpu/kdrama-tutor/main/assets/madang_logo.png"
 
-    if logo_b64:
-        st.markdown(
-            """
-            <style>
-                /* 로고를 헤더에 삽입: 사이드바 버튼(>>) 오른쪽, 높이 2.5rem */
-                [data-testid="stHeader"]::before {
-                    content: "";
-                    background-image: url('data:image/png;base64,%s');
-                    background-repeat: no-repeat;
-                    background-size: auto 2.5rem;
-                    background-position: left center;
-                    height: 2.5rem;
-                    width: 10rem;
-                    position: absolute;
-                    top: 0.5rem;
-                    left: 3.5rem;
-                    z-index: 999;
-                }
-            </style>
-            """ % logo_b64,
-            unsafe_allow_html=True,
-        )
+
+def render_header() -> None:
+    """슬림 헤더: 로고 + 텍스트 한 줄 Flexbox, 파스텔 톤."""
     st.markdown(
-        '<div class="hero-header">🍲 마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>',
+        f"""
+        <div class="header-container">
+            <img src="{HEADER_LOGO_URL}" alt="Madang" class="header-logo">
+            <div class="header-text">🍲 마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
     st.divider()
@@ -510,7 +489,7 @@ def tab_roleplay() -> None:
 
 
 def _inject_app_styles(is_admin: bool) -> None:
-    """모바일 앱형 Card UI: 상단 여백 축소, 툴바 숨김, 배경·카드·헤더·탭 스타일."""
+    """파스텔 톤 + 슬림 헤더: 툴바 숨김, 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
     toolbar_rule = (
         '[data-testid="stToolbar"] { visibility: visible !important; }'
         if is_admin
@@ -522,22 +501,44 @@ def _inject_app_styles(is_admin: bool) -> None:
         /* ─── 1. 상단 툴바: 손님에게 숨김, 관리자일 때만 표시 ─── */
         {toolbar_rule}
 
-        /* ─── 2. 상단 여백 대폭 축소 (로고·제목이 맨 위로) ─── */
+        /* ─── 2. 상단 여백 축소 (슬림 헤더와 맞춤) ─── */
         .main .block-container {{
             padding-top: 1rem !important;
             padding-bottom: 2rem !important;
             max-width: 900px;
         }}
 
-        /* ─── 3. 앱 배경: 연한 웜그레이 (모바일 앱 느낌) ─── */
+        /* ─── 3. 앱 배경: 파스텔 톤 ─── */
         .main {{
-            background-color: #F7F7F5 !important;
+            background-color: #FFF8E1 !important;
         }}
         section[data-testid="stSidebar"] {{
-            background-color: #F0EFEC !important;
+            background-color: #FFF3E0 !important;
         }}
 
-        /* ─── 4. 카드 스타일: 콘텐츠를 카드처럼 감쌈 ─── */
+        /* ─── 4. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
+        .header-container {{
+            display: flex;
+            align-items: center;
+            background-color: #FFF3E0 !important;
+            padding: 0.6rem 1.2rem !important;
+            border-radius: 12px !important;
+            margin-bottom: 1rem !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        }}
+        .header-logo {{
+            height: 2.2rem !important;
+            width: auto !important;
+            object-fit: contain;
+        }}
+        .header-text {{
+            font-size: 1.1rem !important;
+            font-weight: bold !important;
+            color: #5D4037 !important;
+            margin-left: 1rem !important;
+        }}
+
+        /* ─── 5. 카드 스타일 ─── */
         .main .block-container > div {{
             background-color: white !important;
             border-radius: 15px !important;
@@ -546,44 +547,33 @@ def _inject_app_styles(is_admin: bool) -> None:
             margin-bottom: 1rem !important;
         }}
 
-        /* ─── 5. 히어로 섹션 (헤더 박스): 브랜드 컬러 그라데이션 ─── */
-        .hero-header {{
-            background: linear-gradient(135deg, #d4a574 0%, #b8956e 50%, #8b6914 100%) !important;
-            color: white !important;
-            padding: 1rem 1.5rem !important;
-            border-radius: 15px !important;
-            font-weight: 700 !important;
-            font-size: 1.15rem !important;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            box-shadow: 0 4px 12px rgba(139,105,20,0.2);
-        }}
-
-        /* ─── 6. 탭: 크게, 선택 시 브랜드 컬러 ─── */
+        /* ─── 6. 탭: 파스텔 Coral/Peach, 선택 시 부드러운 강조 ─── */
         [data-testid="stTabs"] {{
             padding: 0.5rem 0 1rem 0 !important;
-            border-bottom: 2px solid #e8e6e3 !important;
+            border-bottom: 2px solid #FFCCBC !important;
         }}
         [data-testid="stTabs"] button,
         [data-testid="stTabs"] [role="tab"],
         [data-testid="stTabs"] [data-baseweb="tab"] {{
-            font-size: 1.08rem !important;
-            font-weight: 700 !important;
-            padding: 0.65rem 1.35rem !important;
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            padding: 0.6rem 1.2rem !important;
             border-radius: 10px !important;
-            color: #555 !important;
+            color: #5D4037 !important;
         }}
         [data-testid="stTabs"] button:hover,
         [data-testid="stTabs"] [role="tab"]:hover {{
-            color: #333 !important;
-            background-color: #f5f3f0 !important;
+            color: #3E2723 !important;
+            background-color: #FFE0B2 !important;
         }}
         [data-testid="stTabs"] button[aria-selected="true"],
         [data-testid="stTabs"] [role="tab"][aria-selected="true"],
-        [data-testid="stTabs"] [aria-selected="true"] {{
+        [data-testid="stTabs"] [aria-selected="true"],
+        div[data-baseweb="tab-list"] button[aria-selected="true"] {{
             font-weight: 700 !important;
-            color: white !important;
-            background: linear-gradient(135deg, #b8956e 0%, #8b6914 100%) !important;
+            background-color: #FFF3E0 !important;
+            color: #E65100 !important;
+            border-radius: 10px !important;
             border-bottom: none !important;
         }}
         </style>
