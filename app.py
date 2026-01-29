@@ -450,12 +450,13 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
 
 
 def tab_roleplay() -> None:
-    """Streamlit 정석 Chat Interaction Pattern: 헤더 → 과거 대화 → 입력창(하단 고정) → 입력 시 처리 → rerun."""
+    """Chat Pattern: 헤더 → 과거 대화 전부 출력 → (대기 중 입력이면 처리) → st.chat_input 맨 마지막 → 입력창 하단 고정."""
     if "roleplay_seed" not in st.session_state:
         st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
         return
 
     seed = st.session_state["roleplay_seed"]
+    st.session_state.setdefault("pending_prompt", None)
 
     if "last_seed" not in st.session_state or st.session_state.last_seed != seed["kr"]:
         st.session_state.roleplay_history = [
@@ -463,23 +464,24 @@ def tab_roleplay() -> None:
         ]
         st.session_state.last_seed = seed["kr"]
 
-    # ─── 1. 헤더 출력 ─────────────────────────────────────────────────────
+    # ─── 1. 헤더/미션 출력 ───────────────────────────────────────────────
     st.header("AI 점원과 주문 연습")
     st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
 
-    # ─── 2. 과거 대화 출력 (Display History) ─────────────────────────────
+    # ─── 2. st.chat_input 호출 전에 과거 대화(history) 전부 출력 ─────────
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # ─── 3. 입력창 고정 및 처리 (Handle Input) ───────────────────────────
-    if prompt := st.chat_input("메시지 입력..."):
-        # 사용자 메시지 즉시 표시 및 history에 추가
+    # ─── 3. 이전 제출분(pending) 처리: 사용자 말 → AI 말풍선(Thinking... → 응답) → history 추가 ───
+    if st.session_state.get("pending_prompt") is not None:
+        prompt = st.session_state.pending_prompt
+        st.session_state.pending_prompt = None
+
         st.session_state.roleplay_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
-        # AI 응답 처리 (Thinking): 말풍선 위치에 "Thinking..." → 응답으로 교체
         with st.chat_message("model"):
             placeholder = st.empty()
             placeholder.markdown("Thinking...")
@@ -499,7 +501,11 @@ def tab_roleplay() -> None:
             except Exception as e:
                 placeholder.error(f"오류가 발생했습니다: {e}")
 
-        # 저장 및 새로고침: 화면을 깔끔하게 갱신
+        st.rerun()
+
+    # ─── 4. 입력창은 항상 맨 마지막에 호출 → 화면 하단 고정, Thinking 중에도 움직이지 않음 ───
+    if prompt := st.chat_input("메시지 입력..."):
+        st.session_state.pending_prompt = prompt
         st.rerun()
 
 
