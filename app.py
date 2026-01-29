@@ -149,19 +149,18 @@ def try_generate_content(prompt: str) -> str:
     raise Exception(f"모든 모델 연결 실패. 다음 에러들을 확인하세요: {'; '.join(errors)}")
 
 
-def _logo_with_transparent_bg(logo_path: str):
-    """로고에서 체크무늬/밝은 배경을 투명하게 제거해 MADANG·마당 글자만 남김."""
+def _logo_transparent_png_bytes(logo_path: str):
+    """로고의 체크무늬/밝은 배경을 제거해 완전히 투명한 PNG 바이트 반환."""
     try:
         from PIL import Image
         import io
         img = Image.open(logo_path).convert("RGBA")
-        w, h = img.size
         data = list(img.getdata())
         new_data = []
         for item in data:
             r, g, b, a = item
-            # 밝은 픽셀(체크무늬·흰색·회색)을 투명 처리
-            if r > 220 and g > 220 and b > 220:
+            # 밝은 픽셀(체크무늬·흰색·연한 회색) 완전 투명 처리
+            if r > 215 and g > 215 and b > 215:
                 new_data.append((255, 255, 255, 0))
             else:
                 new_data.append(item)
@@ -169,26 +168,45 @@ def _logo_with_transparent_bg(logo_path: str):
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         buf.seek(0)
-        return buf
+        return buf.read()
     except Exception:
         return None
 
 
 def render_header() -> None:
     import os
+    import base64
     logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+    logo_b64 = None
     if os.path.exists(logo_path):
-        # 배경 제거 시도 후, 로고를 작게 화면 맨 위 중앙에 배치
-        logo_bytes = _logo_with_transparent_bg(logo_path)
-        _, col_center, _ = st.columns([1, 1, 1])
-        with col_center:
-            if logo_bytes is not None:
-                st.image(logo_bytes, width=180, use_column_width=False)
-            else:
-                st.image(logo_path, width=180, use_column_width=False)
-    else:
+        png_bytes = _logo_transparent_png_bytes(logo_path)
+        if png_bytes:
+            logo_b64 = base64.b64encode(png_bytes).decode("utf-8")
+
+    if logo_b64:
         st.markdown(
-            "<p style='text-align: center; color: #666; font-size: 0.95rem;'>치앙마이 한식당 · 한국어 주문 연습</p>",
+            """
+            <style>
+                /* 로고를 헤더에 삽입: 사이드바 버튼(>>) 오른쪽, 높이 2.5rem */
+                [data-testid="stHeader"]::before {
+                    content: "";
+                    background-image: url('data:image/png;base64,%s');
+                    background-repeat: no-repeat;
+                    background-size: auto 2.5rem;
+                    background-position: left center;
+                    height: 2.5rem;
+                    width: 10rem;
+                    position: absolute;
+                    top: 0.5rem;
+                    left: 3.5rem;
+                    z-index: 999;
+                }
+                /* 본문이 로고에 가리지 않도록 상단 여백 */
+                .main .block-container {
+                    padding-top: 5rem !important;
+                }
+            </style>
+            """ % logo_b64,
             unsafe_allow_html=True,
         )
     st.divider()
