@@ -509,11 +509,62 @@ def tab_roleplay() -> None:
         st.rerun()
 
 
+def _inject_app_styles(is_admin: bool) -> None:
+    """상단 툴바(관리자 시에만 표시) + 탭 네비게이션 바 스타일 주입."""
+    toolbar_rule = (
+        '[data-testid="stToolbar"] { visibility: visible !important; }'
+        if is_admin
+        else '[data-testid="stToolbar"] { visibility: hidden !important; }'
+    )
+    tab_styles = """
+        /* 탭을 네비게이션 바 스타일로: 크게, 구분 명확 */
+        [data-testid="stTabs"] {
+            padding: 0.5rem 0 1rem 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        [data-testid="stTabs"] button,
+        [data-testid="stTabs"] [role="tab"],
+        [data-testid="stTabs"] [data-baseweb="tab"] {
+            font-size: 1.05rem !important;
+            font-weight: 500 !important;
+            padding: 0.6rem 1.25rem !important;
+            border-radius: 8px;
+            color: #555 !important;
+        }
+        [data-testid="stTabs"] button:hover,
+        [data-testid="stTabs"] [role="tab"]:hover {
+            color: #333 !important;
+            background-color: #f5f5f5 !important;
+        }
+        [data-testid="stTabs"] button[aria-selected="true"],
+        [data-testid="stTabs"] [role="tab"][aria-selected="true"],
+        [data-testid="stTabs"] [aria-selected="true"] {
+            font-weight: 700 !important;
+            color: #1a1a1a !important;
+            background-color: #e8f5e9 !important;
+            border-bottom: 2px solid #2e7d32 !important;
+        }
+    """
+    st.markdown(
+        f"""
+        <style>
+        /* 상단 툴바: 손님에게는 숨김, 관리자(is_admin)일 때만 표시 */
+        {toolbar_rule}
+        {tab_styles}
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
     render_header()
     sidebar_profile()
+
+    is_admin = st.session_state.get("admin_mode", False)
+    _inject_app_styles(is_admin)
 
     tabs = st.tabs(["메뉴 표현 익히기", "AI 점원과 주문 연습"])
     with tabs[0]:
