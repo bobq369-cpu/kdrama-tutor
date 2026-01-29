@@ -17,6 +17,9 @@ except ImportError:
 APP_TITLE = "K-드라마 튜터 (마당 식당 에디션)"
 APP_SUBTITLE = "치앙마이 마당(Madang) 식당 — 실전 한국어 주문/응대 연습"
 
+# 설정 버튼(⚙️) 세로 위치(px). 값을 바꾸면 버튼이 위/아래로 이동합니다.
+SETTINGS_BUTTON_TOP_PX = 60
+
 
 @dataclass
 class LineItem:
@@ -608,7 +611,7 @@ def _inject_app_styles(is_admin: bool) -> None:
         /* ─── 9. 설정 버튼: 가장 작은 크기의 깔끔한 흰색 버튼, 우측 상단 고정 ─── */
         div[data-testid="stPopover"] {{
             position: fixed !important;
-            top: 60px !important;
+            top: {SETTINGS_BUTTON_TOP_PX}px !important;
             right: 20px !important;
             z-index: 999999 !important;
             width: auto !important;
