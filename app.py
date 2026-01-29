@@ -178,9 +178,9 @@ HEADER_LOGO_URL = "https://raw.githubusercontent.com/bobq369-cpu/kdrama-tutor/ma
 
 
 def render_header() -> None:
-    """슬림 헤더: 로고 + 텍스트 한 줄 Flexbox, 파스텔 톤."""
+    """슬림 헤더: 로고 + 텍스트 한 줄 Flexbox, 파스텔 톤. (divider는 호출부에서 처리)"""
     st.markdown(
-        f"""
+        """
         <div class="header-container">
             <span style="font-size: 1.5rem; margin-right: 0.5rem;">🍲</span>
             <div class="header-text">마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>
@@ -188,7 +188,6 @@ def render_header() -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.divider()
 
 
 def sidebar_profile() -> None:
@@ -198,7 +197,7 @@ def sidebar_profile() -> None:
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
-    # 관리자 모드는 우측 하단 ⚙️ 설정 버튼(팝오버)에서만 제어. 여기서는 표시만.
+    # 관리자 모드는 상단 헤더 우측 ⚙️ 설정(팝오버)에서만 제어. 여기서는 표시만.
     if not st.session_state.get("admin_mode", False):
         return  # 관리자 모드 꺼져 있으면 사이드바 관리 UI 숨김
 
@@ -522,6 +521,12 @@ def _inject_app_styles(is_admin: bool) -> None:
             background-color: #FFF3E0 !important;
         }}
 
+        /* 헤더 행(columns): c1·c2 수직 중앙 정렬 */
+        .main .block-container > div:first-child {{
+            display: flex !important;
+            align-items: center !important;
+        }}
+
         /* ─── 5. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
         .header-container {{
             display: flex;
@@ -529,7 +534,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             background-color: #FFF3E0 !important;
             padding: 0.6rem 1.2rem !important;
             border-radius: 12px !important;
-            margin-bottom: 1rem !important;
+            margin-bottom: 0 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
         }}
         .header-logo {{
@@ -544,8 +549,8 @@ def _inject_app_styles(is_admin: bool) -> None:
             margin-left: 1rem !important;
         }}
 
-        /* ─── 6. 카드 스타일 ─── */
-        .main .block-container > div {{
+        /* ─── 6. 카드 스타일 (헤더 행 제외) ─── */
+        .main .block-container > div:not(:first-child) {{
             background-color: white !important;
             border-radius: 15px !important;
             padding: 20px !important;
@@ -601,37 +606,30 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정, 톱니바퀴만 보이게 ─── */
-        div[data-testid="stPopover"] {{
-            position: fixed !important;
-            bottom: 30px !important;
-            right: 30px !important;
-            z-index: 9999 !important;
-        }}
+        /* ─── 9. 상단 헤더 우측 설정 버튼: 톱니바퀴만, 심플하게 ─── */
         div[data-testid="stPopover"] > button {{
             border-radius: 50% !important;
-            width: 48px !important;
-            height: 48px !important;
-            min-width: 48px !important;
-            max-width: 48px !important;
-            min-height: 48px !important;
-            max-height: 48px !important;
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            max-width: 40px !important;
+            min-height: 40px !important;
+            max-height: 40px !important;
             padding: 0 !important;
             overflow: hidden !important;
             text-align: center !important;
-            line-height: 48px !important;
+            line-height: 40px !important;
             background-color: white !important;
             border: 1px solid #ddd !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-            font-size: 1.5rem !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+            font-size: 1.25rem !important;
         }}
-        /* 버튼 안 텍스트/아이콘만 보이게, 여백 없음 */
         div[data-testid="stPopover"] > button span {{
             margin: 0 !important;
             padding: 0 !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
         }}
         </style>
         """,
@@ -660,7 +658,20 @@ def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
     _inject_hide_footer_early()
-    render_header()
+    # 상단 헤더: 왼쪽 로고/텍스트, 오른쪽 설정 버튼
+    c1, c2 = st.columns([9, 1])
+    with c1:
+        render_header()
+    with c2:
+        with st.popover("⚙️", help="설정"):
+            st.toggle(
+                "관리자 모드 (Admin Mode)",
+                value=st.session_state.get("admin_mode", False),
+                key="admin_mode",
+            )
+            st.link_button("Manage App (편집하기)", "https://share.streamlit.io")
+    st.divider()
+
     sidebar_profile()
 
     is_admin = st.session_state.get("admin_mode", False)
@@ -671,15 +682,6 @@ def main() -> None:
         tab_menu_learn()
     with tabs[1]:
         tab_roleplay()
-
-    # 플로팅 설정 버튼 (우측 하단 고정은 CSS로 처리, streamlit>=1.35.0 필요)
-    with st.popover("⚙️", help="설정"):
-        st.toggle(
-            "관리자 모드 (Admin Mode)",
-            value=st.session_state.get("admin_mode", False),
-            key="admin_mode",
-        )
-        st.link_button("Manage App (편집하기)", "https://share.streamlit.io")
 
 
 if __name__ == "__main__":
