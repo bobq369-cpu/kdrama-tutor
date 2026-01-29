@@ -628,9 +628,27 @@ def _inject_app_styles(is_admin: bool) -> None:
     )
 
 
+def _inject_hide_footer_early() -> None:
+    """앱 로드 시 가장 먼저 풋터/Manage app 숨김 CSS 주입 (우선 적용)."""
+    st.markdown(
+        """
+        <style>
+        footer { display: none !important; visibility: hidden !important; }
+        [data-testid="stManageAppButton"] { display: none !important; visibility: hidden !important; }
+        [data-testid="stDecoration"] { display: none !important; }
+        [data-testid="stBottom"] { display: none !important; }
+        .stDeployButton { display: none !important; }
+        div[data-testid="stAppViewContainer"] > footer { display: none !important; }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
+    _inject_hide_footer_early()
     render_header()
     sidebar_profile()
 
