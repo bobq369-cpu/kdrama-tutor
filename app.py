@@ -198,13 +198,11 @@ def sidebar_profile() -> None:
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
-    # 사이드바 맨 위: 관리자 설정 체크박스 (끄면 아래 UI 전부 숨김)
-    is_admin = st.sidebar.checkbox("관리자 설정 (Admin)", value=False, key="admin_mode")
+    # 관리자 모드는 우측 하단 ⚙️ 설정 버튼(팝오버)에서만 제어. 여기서는 표시만.
+    if not st.session_state.get("admin_mode", False):
+        return  # 관리자 모드 꺼져 있으면 사이드바 관리 UI 숨김
 
-    if not is_admin:
-        return  # 체크 해제 시 사이드바에는 체크박스만 남김
-
-    # --- 아래는 is_admin 일 때만 표시 ---
+    # --- 아래는 admin_mode 일 때만 표시 (API 키, 학습 설정, 데이터) ---
     st.sidebar.divider()
     st.sidebar.header("Gemini API Key")
 
@@ -584,6 +582,32 @@ def _inject_app_styles(is_admin: bool) -> None:
             border-radius: 10px !important;
             border-bottom: none !important;
         }}
+
+        /* ─── 8. 하단 풋터 및 Manage app 버튼 숨김 ─── */
+        footer {{ visibility: hidden !important; }}
+        [data-testid="stManageAppButton"] {{ display: none !important; }}
+
+        /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정 ─── */
+        div[data-testid="stPopover"] {{
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 9999 !important;
+        }}
+        div[data-testid="stPopover"] > button {{
+            border-radius: 50% !important;
+            width: 60px !important;
+            height: 60px !important;
+            min-width: 60px !important;
+            min-height: 60px !important;
+            background-color: white !important;
+            border: 1px solid #ddd !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            font-size: 1.5rem !important;
+        }}
+        div[data-testid="stPopover"] > button:hover {{
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+        }}
         </style>
         """,
         unsafe_allow_html=True,
@@ -604,6 +628,19 @@ def main() -> None:
         tab_menu_learn()
     with tabs[1]:
         tab_roleplay()
+
+    # 플로팅 설정 버튼 (우측 하단 고정은 CSS로 처리)
+    with st.popover("⚙️", help="설정", key="settings_fab"):
+        st.toggle(
+            "관리자 모드 (Admin Mode)",
+            value=st.session_state.get("admin_mode", False),
+            key="admin_mode",
+        )
+        st.link_button(
+            "Manage App (편집하기)",
+            "https://share.streamlit.io",
+            key="manage_app_link",
+        )
 
 
 if __name__ == "__main__":
