@@ -6,6 +6,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import streamlit as st
+import google.generativeai as genai
+st.write(f"🔍 현재 AI 도구 버전: {genai.__version__}")
 
 try:
     import google.generativeai as genai
