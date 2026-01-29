@@ -247,7 +247,7 @@ def generate_support_card(kr: str, profile_level: str) -> LineItem:
     if api_key and GEMINI_AVAILABLE:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             prompt = f"""다음 한국어 드라마 대사를 분석해주세요. JSON 형식으로 답변해주세요.
 
@@ -487,7 +487,7 @@ def coach_message(msg: str, profile_level: str, tone: str) -> Dict:
     if api_key and GEMINI_AVAILABLE:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
+            model = genai.GenerativeModel("gemini-1.5-flash")
             
             prompt = f"""다음 한국어 대사를 K-드라마 {tone} 톤으로 개선해주세요.
 
