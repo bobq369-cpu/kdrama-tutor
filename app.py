@@ -605,12 +605,12 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 설정 버튼: 헤더 박스 위에 겹쳐 표시 (absolute + 투명 스타일) ─── */
+        /* ─── 9. 설정 버튼: 헤더 박스 안에 위치 (absolute + 투명 스타일) ─── */
         div[data-testid="stPopover"] {{
             position: absolute !important;
-            top: 1rem !important;
-            right: 1.5rem !important;
-            z-index: 999 !important;
+            top: 2.2rem !important;
+            right: 1rem !important;
+            z-index: 1000 !important;
         }}
         div[data-testid="stPopover"] > button {{
             background-color: transparent !important;
@@ -623,6 +623,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             min-height: 2rem !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
+            color: #E65100 !important;
             background-color: rgba(0,0,0,0.05) !important;
             border-radius: 6px !important;
         }}
