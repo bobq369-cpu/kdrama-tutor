@@ -601,7 +601,7 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정 ─── */
+        /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정, 톱니바퀴만 보이게 ─── */
         div[data-testid="stPopover"] {{
             position: fixed !important;
             bottom: 30px !important;
@@ -610,14 +610,25 @@ def _inject_app_styles(is_admin: bool) -> None:
         }}
         div[data-testid="stPopover"] > button {{
             border-radius: 50% !important;
-            width: 60px !important;
-            height: 60px !important;
-            min-width: 60px !important;
-            min-height: 60px !important;
+            width: 48px !important;
+            height: 48px !important;
+            min-width: 48px !important;
+            max-width: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            text-align: center !important;
+            line-height: 48px !important;
             background-color: white !important;
             border: 1px solid #ddd !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
             font-size: 1.5rem !important;
+        }}
+        /* 버튼 안 텍스트/아이콘만 보이게, 여백 없음 */
+        div[data-testid="stPopover"] > button span {{
+            margin: 0 !important;
+            padding: 0 !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
             box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
