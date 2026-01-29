@@ -585,7 +585,10 @@ def _inject_app_styles(is_admin: bool) -> None:
 
         /* ─── 8. 하단 풋터 및 Manage app 버튼 숨김 ─── */
         footer {{ visibility: hidden !important; }}
-        [data-testid="stManageAppButton"] {{ display: none !important; }}
+        [data-testid="stManageAppButton"] {{
+            display: none !important;
+            visibility: hidden !important;
+        }}
 
         /* ─── 9. 플로팅 설정 버튼: 우측 하단 고정 ─── */
         div[data-testid="stPopover"] {{
