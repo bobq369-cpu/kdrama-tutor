@@ -140,7 +140,8 @@ GOOGLE_SEARCH_TOOLS = [{"google_search": {}}]
 
 
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
-def try_generate_content(prompt: str) -> str:
+# use_grounding=False: 역할플레이 등에서 두 번째 메시지부터 답장이 없어지는 현상 방지 (도구 없이만 호출)
+def try_generate_content(prompt: str, use_grounding: bool = True) -> str:
     # Gemini API 공식 문서 기준 현재 지원 모델 (gemini-1.5 시리즈는 deprecated)
     # https://ai.google.dev/gemini-api/docs/models
     candidates = [
@@ -502,6 +503,7 @@ def tab_roleplay() -> None:
         with st.chat_message("model"):
             placeholder = st.empty()
             placeholder.markdown("Thinking...")
+            fallback_msg = "잠시 답변이 어려워요. 주문이든 메뉴든 다시 말씀해 주세요! 😅"
             try:
                 current_time_str = get_current_kst_str()
                 full_prompt = f"""
@@ -529,11 +531,14 @@ def tab_roleplay() -> None:
                 {[m['content'] for m in st.session_state.roleplay_history]}
                 위 맥락에 맞춰 손님(user)의 말에 자연스럽게 한국어로 답변하세요.
                 """
-                response_text = try_generate_content(full_prompt)
+                response_text = try_generate_content(full_prompt, use_grounding=False)
+                if not (response_text and response_text.strip()):
+                    response_text = fallback_msg
                 placeholder.markdown(response_text)
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
             except Exception as e:
                 placeholder.error(f"오류가 발생했습니다: {e}")
+                st.session_state.roleplay_history.append({"role": "model", "content": fallback_msg})
 
         st.rerun()
 
