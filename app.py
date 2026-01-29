@@ -139,6 +139,21 @@ def add_history(event_type: str, payload: Dict) -> None:
 GOOGLE_SEARCH_TOOLS = [{"google_search": {}}]
 
 
+def _get_response_text(response) -> str:
+    """Gemini 응답에서 텍스트 추출 (response.text 또는 candidates에서)."""
+    if not response:
+        return ""
+    if getattr(response, "text", None) and response.text:
+        return response.text
+    try:
+        if getattr(response, "candidates", None) and response.candidates:
+            parts = response.candidates[0].content.parts
+            return "".join(p.text for p in parts if getattr(p, "text", None))
+    except (IndexError, AttributeError, TypeError):
+        pass
+    return ""
+
+
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
 # use_grounding=False: 역할플레이 등에서 두 번째 메시지부터 답장이 없어지는 현상 방지 (도구 없이만 호출)
 def try_generate_content(prompt: str, use_grounding: bool = True) -> str:
@@ -168,14 +183,16 @@ def try_generate_content(prompt: str, use_grounding: bool = True) -> str:
             # 1) 먼저 Google Search Grounding으로 시도 (실시간 검색 반영)
             try:
                 response = model.generate_content(prompt, tools=GOOGLE_SEARCH_TOOLS)
-                if response and getattr(response, "text", None) and response.text.strip():
-                    return response.text.strip()
+                text = _get_response_text(response)
+                if text and text.strip():
+                    return text.strip()
             except Exception:
                 pass
             # 2) 도구 미지원/오류 시 같은 모델로 도구 없이 재시도 (답장은 반드시 보장)
             response = model.generate_content(prompt)
-            if response and response.text:
-                return response.text.strip()
+            text = _get_response_text(response)
+            if text and text.strip():
+                return text.strip()
             else:
                 errors.append(f"{model_name}: 응답이 비어있습니다.")
                 continue
@@ -538,7 +555,8 @@ def tab_roleplay() -> None:
                 대화 내역 (마지막 말에 자연스럽게 답하세요):
                 """
                 history_lines = []
-                for m in st.session_state.roleplay_history:
+                recent = st.session_state.roleplay_history[-8:]  # 최근 8턴만 (토큰/오류 방지)
+                for m in recent:
                     role = "손님" if m["role"] == "user" else "점원"
                     history_lines.append(f"{role}: {m['content']}")
                 full_prompt += "\n".join(history_lines)
@@ -546,8 +564,9 @@ def tab_roleplay() -> None:
                 try:
                     response_text = try_generate_content(full_prompt, use_grounding=False)
                 except Exception as api_err:
-                    st.error(f"AI 연결 오류: {api_err}")
-                    response_text = None
+                    err_str = str(api_err)
+                    st.error(f"AI 연결 오류: {err_str}")
+                    response_text = f"⚠️ **연결 오류:** {err_str}\n\n위 오류가 반복되면 ⚙️ 설정 → 관리자 모드에서 **Gemini API 키**를 확인해 주세요."
                 if not (response_text and response_text.strip()):
                     response_text = fallback_msg
                 placeholder.markdown(response_text)
