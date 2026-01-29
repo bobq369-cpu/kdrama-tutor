@@ -450,7 +450,7 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
 
 
 def tab_roleplay() -> None:
-    """카카오톡 스타일: 위쪽에 과거 대화, 맨 아래에 고정 입력창."""
+    """Standard Chat Pattern: 과거 대화 출력 → 입력 대기 → 입력 시 반응·저장 → rerun."""
     if "roleplay_seed" not in st.session_state:
         st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
         return
@@ -463,32 +463,22 @@ def tab_roleplay() -> None:
         ]
         st.session_state.last_seed = seed["kr"]
 
-    # 카카오톡 스타일: 입력창을 화면 맨 아래에 고정
-    st.markdown(
-        """
-        <style>
-            .stChatInputContainer { position: sticky !important; bottom: 0 !important; z-index: 999; }
-            /* 롤플레이 탭에서 대화 영역 아래 여백 (입력창에 가리지 않도록) */
-            .main .block-container { padding-bottom: 5rem !important; }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # 1) 상단: 오늘의 미션
     st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
 
-    # 2) 위쪽: roleplay_history에 저장된 과거 대화 전부 표시
+    # 2) 과거 대화 내용을 먼저 전부 출력
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # 3) 맨 아래 고정: st.chat_input만 사용 (엔터 시 새 메시지가 대화 맨 아래에 추가)
+    # 3) 그 다음 입력 대기 (입력창은 자동으로 화면 맨 아래에 고정됨)
     if prompt := st.chat_input("메시지 입력..."):
+        # 사용자 말 즉시 표시 및 history에 추가
         st.session_state.roleplay_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
+        # AI 응답 생성 후 표시 및 history에 추가
         with st.chat_message("model"):
             message_placeholder = st.empty()
             message_placeholder.markdown("Thinking...")
@@ -507,6 +497,9 @@ def tab_roleplay() -> None:
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
             except Exception as e:
                 message_placeholder.error(f"오류가 발생했습니다: {e}")
+
+        # 대화가 끝나면 새로고침해서 대화가 깔끔하게 누적되도록
+        st.rerun()
 
 
 def main() -> None:
