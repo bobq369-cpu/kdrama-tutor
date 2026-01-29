@@ -6,13 +6,6 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import streamlit as st
-import google.generativeai as genai
-
-# 버전 확인 (디버깅용)
-try:
-    st.write(f"🔍 현재 AI 도구 버전: {genai.__version__}")
-except:
-    pass
 
 try:
     import google.generativeai as genai
@@ -157,8 +150,16 @@ def try_generate_content(prompt: str) -> str:
 
 
 def render_header() -> None:
-    st.title(APP_TITLE)
-    st.caption(APP_SUBTITLE)
+    import os
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "logo.png")
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)
+    else:
+        st.markdown(
+            "<p style='text-align: center; color: #666; font-size: 0.95rem;'>치앙마이 한식당 · 한국어 주문 연습</p>",
+            unsafe_allow_html=True,
+        )
+    st.divider()
 
 
 def sidebar_profile() -> None:
@@ -407,20 +408,23 @@ def tab_roleplay() -> None:
         return
 
     seed = st.session_state["roleplay_seed"]
-    
+
     # 2. 채팅 기록 초기화 (새로운 시나리오면 리셋)
     if "last_seed" not in st.session_state or st.session_state.last_seed != seed["kr"]:
         st.session_state.roleplay_history = [
-            {"role": "model", "content": f"어서오세요! 치앙마이 마당(Madang) 식당입니다. 😊\n(상황: {seed['kr']})"}
+            {"role": "model", "content": "어서오세요! 치앙마이 마당(Madang) 식당입니다. 주문하시겠어요? 😊"}
         ]
         st.session_state.last_seed = seed["kr"]
 
-    # 3. 이전 대화 출력
+    # 3. 오늘의 미션: 채팅창 상단에 따로 표시
+    st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
+
+    # 4. 이전 대화 출력
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # 4. 사용자 입력 및 AI 응답
+    # 5. 사용자 입력 및 AI 응답
     if prompt := st.chat_input("직원에게 할 말을 입력하세요..."):
         # 사용자 말 표시
         st.session_state.roleplay_history.append({"role": "user", "content": prompt})
