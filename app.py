@@ -2,8 +2,28 @@ import hashlib
 import re
 import time
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple
+
+# 한국 시간(KST) = UTC + 9
+KST = timezone(timedelta(hours=9))
+WEEKDAYS_KO = ("월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일")
+
+
+def get_current_kst_str() -> str:
+    """현재 한국 시간(KST)을 '2025년 1월 30일 금요일 오후 4시 35분' 형식으로 반환."""
+    now = datetime.now(KST)
+    wd = WEEKDAYS_KO[now.weekday()]
+    h = now.hour
+    if h == 0:
+        ampm, h12 = "오전", 12
+    elif h < 12:
+        ampm, h12 = "오전", h
+    elif h == 12:
+        ampm, h12 = "오후", 12
+    else:
+        ampm, h12 = "오후", h - 12
+    return f"{now.year}년 {now.month}월 {now.day}일 {wd} {ampm} {h12}시 {now.minute}분"
 
 import streamlit as st
 
@@ -470,11 +490,13 @@ def tab_roleplay() -> None:
             placeholder = st.empty()
             placeholder.markdown("Thinking...")
             try:
+                current_time_str = get_current_kst_str()
                 full_prompt = f"""
                 당신은 태국 치앙마이의 한식당 '마당(Madang)'의 친절한 직원입니다. 
                 상대방은 한국어를 배우는 손님입니다.
                 현재 연습 상황: "{seed['kr']}"
                 직원의 태도: 친절함, 정중함, 격려해주는 태도.
+                너는 현재 {current_time_str} 기준의 상황에 있다. 사용자가 시간이나 날짜를 물어보면 이 정보를 바탕으로 대답해라.
                 대화 내역:
                 {[m['content'] for m in st.session_state.roleplay_history]}
                 위 맥락에 맞춰 손님(user)의 말에 자연스럽게 한국어로 답변하세요.
