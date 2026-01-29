@@ -201,14 +201,14 @@ def render_header() -> None:
                     left: 3.5rem;
                     z-index: 999;
                 }
-                /* 본문이 로고에 가리지 않도록 상단 여백 */
-                .main .block-container {
-                    padding-top: 5rem !important;
-                }
             </style>
             """ % logo_b64,
             unsafe_allow_html=True,
         )
+    st.markdown(
+        '<div class="hero-header">🍲 마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>',
+        unsafe_allow_html=True,
+    )
     st.divider()
 
 
@@ -510,47 +510,82 @@ def tab_roleplay() -> None:
 
 
 def _inject_app_styles(is_admin: bool) -> None:
-    """상단 툴바(관리자 시에만 표시) + 탭 네비게이션 바 스타일 주입."""
+    """모바일 앱형 Card UI: 상단 여백 축소, 툴바 숨김, 배경·카드·헤더·탭 스타일."""
     toolbar_rule = (
         '[data-testid="stToolbar"] { visibility: visible !important; }'
         if is_admin
         else '[data-testid="stToolbar"] { visibility: hidden !important; }'
     )
-    tab_styles = """
-        /* 탭을 네비게이션 바 스타일로: 크게, 구분 명확 */
-        [data-testid="stTabs"] {
-            padding: 0.5rem 0 1rem 0;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        [data-testid="stTabs"] button,
-        [data-testid="stTabs"] [role="tab"],
-        [data-testid="stTabs"] [data-baseweb="tab"] {
-            font-size: 1.05rem !important;
-            font-weight: 500 !important;
-            padding: 0.6rem 1.25rem !important;
-            border-radius: 8px;
-            color: #555 !important;
-        }
-        [data-testid="stTabs"] button:hover,
-        [data-testid="stTabs"] [role="tab"]:hover {
-            color: #333 !important;
-            background-color: #f5f5f5 !important;
-        }
-        [data-testid="stTabs"] button[aria-selected="true"],
-        [data-testid="stTabs"] [role="tab"][aria-selected="true"],
-        [data-testid="stTabs"] [aria-selected="true"] {
-            font-weight: 700 !important;
-            color: #1a1a1a !important;
-            background-color: #e8f5e9 !important;
-            border-bottom: 2px solid #2e7d32 !important;
-        }
-    """
     st.markdown(
         f"""
         <style>
-        /* 상단 툴바: 손님에게는 숨김, 관리자(is_admin)일 때만 표시 */
+        /* ─── 1. 상단 툴바: 손님에게 숨김, 관리자일 때만 표시 ─── */
         {toolbar_rule}
-        {tab_styles}
+
+        /* ─── 2. 상단 여백 대폭 축소 (로고·제목이 맨 위로) ─── */
+        .main .block-container {{
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+            max-width: 900px;
+        }}
+
+        /* ─── 3. 앱 배경: 연한 웜그레이 (모바일 앱 느낌) ─── */
+        .main {{
+            background-color: #F7F7F5 !important;
+        }}
+        section[data-testid="stSidebar"] {{
+            background-color: #F0EFEC !important;
+        }}
+
+        /* ─── 4. 카드 스타일: 콘텐츠를 카드처럼 감쌈 ─── */
+        .main .block-container > div {{
+            background-color: white !important;
+            border-radius: 15px !important;
+            padding: 20px !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+            margin-bottom: 1rem !important;
+        }}
+
+        /* ─── 5. 히어로 섹션 (헤더 박스): 브랜드 컬러 그라데이션 ─── */
+        .hero-header {{
+            background: linear-gradient(135deg, #d4a574 0%, #b8956e 50%, #8b6914 100%) !important;
+            color: white !important;
+            padding: 1rem 1.5rem !important;
+            border-radius: 15px !important;
+            font-weight: 700 !important;
+            font-size: 1.15rem !important;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 12px rgba(139,105,20,0.2);
+        }}
+
+        /* ─── 6. 탭: 크게, 선택 시 브랜드 컬러 ─── */
+        [data-testid="stTabs"] {{
+            padding: 0.5rem 0 1rem 0 !important;
+            border-bottom: 2px solid #e8e6e3 !important;
+        }}
+        [data-testid="stTabs"] button,
+        [data-testid="stTabs"] [role="tab"],
+        [data-testid="stTabs"] [data-baseweb="tab"] {{
+            font-size: 1.08rem !important;
+            font-weight: 700 !important;
+            padding: 0.65rem 1.35rem !important;
+            border-radius: 10px !important;
+            color: #555 !important;
+        }}
+        [data-testid="stTabs"] button:hover,
+        [data-testid="stTabs"] [role="tab"]:hover {{
+            color: #333 !important;
+            background-color: #f5f3f0 !important;
+        }}
+        [data-testid="stTabs"] button[aria-selected="true"],
+        [data-testid="stTabs"] [role="tab"][aria-selected="true"],
+        [data-testid="stTabs"] [aria-selected="true"] {{
+            font-weight: 700 !important;
+            color: white !important;
+            background: linear-gradient(135deg, #b8956e 0%, #8b6914 100%) !important;
+            border-bottom: none !important;
+        }}
         </style>
         """,
         unsafe_allow_html=True,
