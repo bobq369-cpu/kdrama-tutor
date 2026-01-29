@@ -501,9 +501,10 @@ def _inject_app_styles(is_admin: bool) -> None:
         /* ─── 1. 상단 툴바: 손님에게 숨김, 관리자일 때만 표시 ─── */
         {toolbar_rule}
 
-        /* ─── 2. 상단 여백 축소 (슬림 헤더와 맞춤) ─── */
+        /* ─── 2. 메인 컨테이너 상단 여백 최소화 ─── */
         .main .block-container {{
-            padding-top: 1rem !important;
+            padding-top: 0 !important; /* 여백을 0으로 만듦 */
+            /* 만약 너무 딱 붙으면 1rem 정도로 조절 */
             padding-bottom: 2rem !important;
             max-width: 900px;
         }}

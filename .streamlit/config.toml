@@ -1,0 +1,7 @@
+# Streamlit 테마 설정 (파스텔 코랄)
+[theme]
+primaryColor = "#FFAB91"           # 부드러운 파스텔 코랄 (버튼, 탭 강조색)
+backgroundColor = "#FFF8E1"        # 아주 연한 크림색 배경
+secondaryBackgroundColor = "#FFF3E0"  # 사이드바 등 보조 배경색
+textColor = "#5D4037"              # 부드러운 커피색 글씨
+font = "sans serif"
