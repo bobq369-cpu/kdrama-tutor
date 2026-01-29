@@ -6,14 +6,13 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 
 import streamlit as st
-import google.generativeai as genai
-st.write(f"🔍 현재 AI 도구 버전: {genai.__version__}")
 
 try:
     import google.generativeai as genai
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
+    genai = None
 
 
 APP_TITLE = "K-드라마 튜터"
@@ -34,44 +33,44 @@ class LineItem:
 
 SAMPLE_LINES: List[LineItem] = [
     LineItem(
-        show="(샘플) 오피스/로코",
+        show="(마당 식당) 주문하기",
         level="A1",
-        kr="괜찮아요? 많이 놀랐죠?",
-        roman="Gwaenchana-yo? Mani nollat-jyo?",
-        en="Are you okay? You must have been really surprised.",
-        notes="상대 상태 확인 + 공감/배려 표현.",
-        vocab=[("괜찮아요", "괜찮습니다/OK"), ("놀라다", "to be surprised"), ("많이", "a lot")],
-        patterns=[("-(으)ㄹ까요?", "제안/의향을 부드럽게 묻기"), ("-죠?", "상대의 동의를 기대하며 확인")],
+        kr="여기 짜장면 하나랑 탕수육 소(小)자 주세요.",
+        roman="Yeogi Jjajangmyeon hana-rang Tangsuyuk so-ja juseyo.",
+        en="I'd like one Jjajangmyeon and a small Tangsuyuk, please.",
+        notes="식당에서 음식을 주문할 때 쓰는 가장 기본적인 표현.",
+        vocab=[("짜장면", "Jjajangmyeon"), ("탕수육", "Tangsuyuk"), ("주세요", "Please give me")],
+        patterns=[("~ 주세요", "무언가를 정중하게 요청할 때")],
     ),
     LineItem(
-        show="(샘플) 스릴러",
+        show="(마당 식당) 맵기 조절",
+        level="A1",
+        kr="짬뽕은 덜 맵게 해주실 수 있나요?",
+        roman="Jjamppong-eun deol maep-ge hae-jusil su innayo?",
+        en="Can you make the Jjamppong less spicy?",
+        notes="매운 음식을 잘 못 먹을 때 요청하는 표현.",
+        vocab=[("짬뽕", "Jjamppong"), ("덜 맵게", "Less spicy")],
+        patterns=[("~ 해주실 수 있나요?", "가능한지 물어볼 때")],
+    ),
+    LineItem(
+        show="(마당 식당) 추천 메뉴",
         level="A2",
-        kr="지금 어디예요? 바로 갈게요.",
-        roman="Jigeum eodieyo? Baro galgeyo.",
-        en="Where are you now? I'll come right away.",
-        notes="현재 위치 질문 + 즉시 행동 약속.",
-        vocab=[("지금", "now"), ("어디예요", "where is it/are you"), ("바로", "right away"), ("가다", "to go")],
-        patterns=[("-게요", "화자의 의지/약속 표현"), ("어디예요?", "장소/상태 질문")],
+        kr="사장님, 여기 태국 분들이 제일 좋아하는 메뉴가 뭐예요?",
+        roman="Sajang-nim, yeogi Taeguk bun-deuri jeil joa-haneun menu-ga mwo-yeyo?",
+        en="Boss, what is the most popular menu item for Thai people here?",
+        notes="현지인에게 인기 있는 메뉴를 물어볼 때.",
+        vocab=[("사장님", "Boss/Owner"), ("제일", "Most/Best"), ("좋아하는", "Favorite")],
+        patterns=[("~가 뭐예요?", "정보를 물어볼 때")],
     ),
     LineItem(
-        show="(샘플) 가족/휴먼",
-        level="B1",
-        kr="네가 하고 싶은 대로 해. 나는 네 편이야.",
-        roman="Nega hago sipeun-daero hae. Naneun ne pyeoniya.",
-        en="Do it the way you want. I'm on your side.",
-        notes="지지/응원, 감정적 안정감을 주는 표현.",
-        vocab=[("하고 싶은 대로", "as you want"), ("편", "side/team"), ("네 편", "your side")],
-        patterns=[("-대로", "‘~한 방식/그대로’ 의미"), ("-야", "친근한 해체 종결")],
-    ),
-    LineItem(
-        show="(샘플) 로맨스",
-        level="A2",
-        kr="그렇게 보면 내가 설레잖아.",
-        roman="Geureoke bomyeon naega seollee-jana.",
-        en="If you look at me like that, you make my heart flutter.",
-        notes="감정 표현(설레다). 친근한 말투 ‘-잖아’.",
-        vocab=[("그렇게", "like that"), ("보다", "to look/see"), ("설레다", "to flutter/be excited")],
-        patterns=[("-잖아", "이미 알고 있거나 당연함을 강조/투덜/설명")],
+        show="(마당 식당) 계산하기",
+        level="A1",
+        kr="잘 먹었습니다! 계산해 주세요.",
+        roman="Jal meogeot-seumnida! Gyesan-hae juseyo.",
+        en="It was delicious! Check, please.",
+        notes="식사를 마치고 나갈 때 쓰는 인사와 요청.",
+        vocab=[("잘 먹었습니다", "Thank you for the meal"), ("계산", "Bill/Check")],
+        patterns=[("~해 주세요", "행동을 부탁할 때")],
     ),
 ]
 
@@ -113,7 +112,8 @@ def sidebar_profile() -> None:
     if "GEMINI_API_KEY" in st.secrets:
         st.sidebar.success("✅ 주인님, 자동으로 로그인했습니다! (Secrets)")
         api_key = st.secrets["GEMINI_API_KEY"]
-        genai.configure(api_key=api_key)  # <--- 이 핵심 부품이 꼭 있어야 AI가 작동합니다!
+        if GEMINI_AVAILABLE:
+            genai.configure(api_key=api_key)  # <--- 이 핵심 부품이 꼭 있어야 AI가 작동합니다!
         st.session_state.gemini_api_key = api_key
     else:
         api_key = st.sidebar.text_input(
@@ -258,7 +258,7 @@ def generate_support_card(kr: str, profile_level: str) -> LineItem:
     if api_key and GEMINI_AVAILABLE:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash-latest")
             
             prompt = f"""다음 한국어 드라마 대사를 분석해주세요. JSON 형식으로 답변해주세요.
 
@@ -498,7 +498,7 @@ def coach_message(msg: str, profile_level: str, tone: str) -> Dict:
     if api_key and GEMINI_AVAILABLE:
         try:
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-1.5-flash-latest")
             
             prompt = f"""다음 한국어 대사를 K-드라마 {tone} 톤으로 개선해주세요.
 
