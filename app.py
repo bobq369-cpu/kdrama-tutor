@@ -630,7 +630,7 @@ def main() -> None:
         tab_roleplay()
 
     # 플로팅 설정 버튼 (우측 하단 고정은 CSS로 처리, streamlit>=1.35.0 필요)
-    with st.popover("⚙️", key="settings_fab"):
+    with st.popover("⚙️", help="설정"):
         st.toggle(
             "관리자 모드 (Admin Mode)",
             value=st.session_state.get("admin_mode", False),
