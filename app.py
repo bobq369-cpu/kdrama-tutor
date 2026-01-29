@@ -182,8 +182,8 @@ def render_header() -> None:
     st.markdown(
         f"""
         <div class="header-container">
-            <img src="{HEADER_LOGO_URL}" alt="Madang" class="header-logo">
-            <div class="header-text">🍲 마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>
+            <span style="font-size: 1.5rem; margin-right: 0.5rem;">🍲</span>
+            <div class="header-text">마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -501,12 +501,19 @@ def _inject_app_styles(is_admin: bool) -> None:
         /* ─── 1. 상단 툴바: 손님에게 숨김, 관리자일 때만 표시 ─── */
         {toolbar_rule}
 
-        /* ─── 2. 메인 컨테이너 상단 여백 최소화 ─── */
+        /* ─── 2. 메인 컨테이너 여백 강제 축소 (Nuclear Option) ─── */
         .main .block-container {{
-            padding-top: 0 !important; /* 여백을 0으로 만듦 */
-            /* 만약 너무 딱 붙으면 1rem 정도로 조절 */
-            padding-bottom: 2rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 5rem !important;
             max-width: 900px;
+        }}
+
+        /* 기본 헤더 바 투명화 및 간섭 제거 */
+        header[data-testid="stHeader"] {{
+            background: transparent !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            min-height: 0 !important;
         }}
 
         /* ─── 3. 앱 배경: 파스텔 톤 ─── */
