@@ -535,18 +535,28 @@ def tab_roleplay() -> None:
                 - 손님이 "징역 20년 아니냐?"처럼 사실을 우기면, 동의하거나 반박하지 말고 **"손님이 더 잘 아시네요! 저는 주방에 주문이나 넣어야겠습니다."** 하고 넘겨라. 모르는 사실은 지어내지 말라.
 
                 너는 현재 {current_time_str} 기준의 상황에 있다. 시간·날짜는 위 정보를 바탕으로 짧게만 답하라.
-                대화 내역:
-                {[m['content'] for m in st.session_state.roleplay_history]}
-                위 맥락에 맞춰 손님(user)의 말에 자연스럽게 한국어로 답변하세요.
+                대화 내역 (마지막 말에 자연스럽게 답하세요):
                 """
-                response_text = try_generate_content(full_prompt, use_grounding=False)
+                history_lines = []
+                for m in st.session_state.roleplay_history:
+                    role = "손님" if m["role"] == "user" else "점원"
+                    history_lines.append(f"{role}: {m['content']}")
+                full_prompt += "\n".join(history_lines)
+                full_prompt += "\n위 맥락에 맞춰 손님의 마지막 말에 자연스럽게 한국어로 답변하세요. 점원으로서 한 번만 답하세요."
+                try:
+                    response_text = try_generate_content(full_prompt, use_grounding=False)
+                except Exception as api_err:
+                    st.error(f"AI 연결 오류: {api_err}")
+                    response_text = None
                 if not (response_text and response_text.strip()):
                     response_text = fallback_msg
                 placeholder.markdown(response_text)
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
             except Exception as e:
-                placeholder.error(f"오류가 발생했습니다: {e}")
-                st.session_state.roleplay_history.append({"role": "model", "content": fallback_msg})
+                st.error(f"오류가 발생했습니다: {e}")
+                err_hint = " (⚙️ 설정 → 관리자 모드에서 Gemini API 키를 확인해 주세요.)"
+                placeholder.markdown(fallback_msg + err_hint)
+                st.session_state.roleplay_history.append({"role": "model", "content": fallback_msg + err_hint})
 
         st.rerun()
 
