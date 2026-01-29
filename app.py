@@ -97,6 +97,7 @@ def init_state() -> None:
     ss = st.session_state
     ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "K-드라마로 자연스러운 회화 익히기"})
     ss.setdefault("gemini_api_key", "")
+    ss.setdefault("admin_mode", False)
     ss.setdefault("history", [])
     ss.setdefault("saved_lines", [])
     ss.setdefault("deck", [])
@@ -156,14 +157,24 @@ def render_header() -> None:
 
 
 def sidebar_profile() -> None:
+    # [항상 실행] API 키는 관리자 UI와 무관하게 동작하도록 먼저 적용
+    if "GEMINI_API_KEY" in st.secrets:
+        st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
+        if GEMINI_AVAILABLE:
+            genai.configure(api_key=st.session_state.gemini_api_key)
+
+    # 사이드바 맨 위: 관리자 설정 체크박스
+    st.sidebar.checkbox("관리자 설정(Admin)", value=st.session_state.get("admin_mode", False), key="admin_mode")
+
+    # 체크 시에만 아래 UI 표시 (API 키 상태/입력, 학습 설정, 데이터 초기화)
+    if not st.session_state.get("admin_mode", False):
+        return
+
+    st.sidebar.divider()
     st.sidebar.header("Gemini API Key")
 
-    # 비밀 금고(Secrets) 확인
     if "GEMINI_API_KEY" in st.secrets:
         st.sidebar.success("✅ 주인님, 자동으로 로그인했습니다! (Secrets)")
-        api_key = st.secrets["GEMINI_API_KEY"]
-        genai.configure(api_key=api_key)
-        st.session_state.gemini_api_key = api_key
     else:
         api_key = st.sidebar.text_input(
             "API 키를 입력하세요",
@@ -172,28 +183,26 @@ def sidebar_profile() -> None:
             help="Gemini API 키를 입력하면 AI 기능을 사용할 수 있습니다.",
             key="gemini_api_key_input"
         )
+        if api_key != st.session_state.get("gemini_api_key", ""):
+            st.session_state.gemini_api_key = api_key.strip()
+            if api_key.strip():
+                try:
+                    if GEMINI_AVAILABLE:
+                        genai.configure(api_key=api_key.strip())
+                        st.sidebar.success("API 키가 설정되었습니다.")
+                        add_history("api_key_set", {"status": "success"})
+                    else:
+                        st.sidebar.warning("google-generativeai 패키지가 설치되지 않았습니다.")
+                except Exception as e:
+                    st.sidebar.error(f"API 키 설정 오류: {str(e)}")
+            else:
+                st.sidebar.info("API 키가 제거되었습니다.")
 
-    # 1층으로 내려온 if문 (들여쓰기 교정됨)
-    if api_key != st.session_state.get("gemini_api_key", ""):
-        st.session_state.gemini_api_key = api_key.strip()
-        if api_key.strip():
-            try:
-                if GEMINI_AVAILABLE:
-                    genai.configure(api_key=api_key.strip())
-                    st.sidebar.success("API 키가 설정되었습니다.")
-                    add_history("api_key_set", {"status": "success"})
-                else:
-                    st.sidebar.warning("google-generativeai 패키지가 설치되지 않았습니다.")
-            except Exception as e:
-                st.sidebar.error(f"API 키 설정 오류: {str(e)}")
-        else:
-            st.sidebar.info("API 키가 제거되었습니다.")
-    
     if st.session_state.get("gemini_api_key", ""):
         st.sidebar.success("✅ AI 기능 활성화됨")
     else:
         st.sidebar.info("ℹ 기본 모드 (규칙 기반)")
-    
+
     st.sidebar.divider()
     st.sidebar.header("학습 설정")
     name = st.sidebar.text_input("이름", value=st.session_state.profile["name"])
