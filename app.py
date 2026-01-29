@@ -521,10 +521,9 @@ def _inject_app_styles(is_admin: bool) -> None:
             background-color: #FFF3E0 !important;
         }}
 
-        /* 헤더 행(columns): c1·c2 수직 중앙 정렬 */
-        .main .block-container > div:first-child {{
-            display: flex !important;
-            align-items: center !important;
+        /* 본문 컨테이너: 설정 버튼 absolute 위치의 기준 */
+        .main .block-container {{
+            position: relative !important;
         }}
 
         /* ─── 5. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
@@ -606,30 +605,26 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 상단 헤더 우측 설정 버튼: 톱니바퀴만, 심플하게 ─── */
-        div[data-testid="stPopover"] > button {{
-            border-radius: 50% !important;
-            width: 40px !important;
-            height: 40px !important;
-            min-width: 40px !important;
-            max-width: 40px !important;
-            min-height: 40px !important;
-            max-height: 40px !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            text-align: center !important;
-            line-height: 40px !important;
-            background-color: white !important;
-            border: 1px solid #ddd !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
-            font-size: 1.25rem !important;
+        /* ─── 9. 설정 버튼: 헤더 박스 위에 겹쳐 표시 (absolute + 투명 스타일) ─── */
+        div[data-testid="stPopover"] {{
+            position: absolute !important;
+            top: 1rem !important;
+            right: 1.5rem !important;
+            z-index: 999 !important;
         }}
-        div[data-testid="stPopover"] > button span {{
-            margin: 0 !important;
-            padding: 0 !important;
+        div[data-testid="stPopover"] > button {{
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #5D4037 !important;
+            font-size: 1.2rem !important;
+            padding: 0.25rem !important;
+            min-width: 2rem !important;
+            min-height: 2rem !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
-            box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;
+            background-color: rgba(0,0,0,0.05) !important;
+            border-radius: 6px !important;
         }}
         </style>
         """,
@@ -658,18 +653,15 @@ def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
     _inject_hide_footer_early()
-    # 상단 헤더: 왼쪽 로고/텍스트, 오른쪽 설정 버튼
-    c1, c2 = st.columns([9, 1])
-    with c1:
-        render_header()
-    with c2:
-        with st.popover("⚙️", help="설정"):
-            st.toggle(
-                "관리자 모드 (Admin Mode)",
-                value=st.session_state.get("admin_mode", False),
-                key="admin_mode",
-            )
-            st.link_button("Manage App (편집하기)", "https://share.streamlit.io")
+    # 상단 헤더 (HTML) → 바로 아래 설정 버튼(popover), CSS로 헤더 박스 위에 겹쳐 표시
+    render_header()
+    with st.popover("⚙️", help="설정"):
+        st.toggle(
+            "관리자 모드 (Admin Mode)",
+            value=st.session_state.get("admin_mode", False),
+            key="admin_mode",
+        )
+        st.link_button("Manage App (편집하기)", "https://share.streamlit.io")
     st.divider()
 
     sidebar_profile()
