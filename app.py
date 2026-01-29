@@ -22,7 +22,7 @@ SETTINGS_BUTTON_TOP_PX = 42
 SETTINGS_BUTTON_RIGHT_PX = 100  # 오른쪽에서의 거리. 크게 하면 버튼이 왼쪽으로 이동
 
 # 설정(관리자 모드) 진입용 4자리 비밀번호. 원하는 값으로 변경하세요.
-ADMIN_PIN = "1234"
+ADMIN_PIN = "1920"
 
 
 @dataclass
@@ -667,6 +667,10 @@ def _inject_hide_footer_early() -> None:
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
+    # 팝업을 닫거나 다른 곳을 클릭하면 자동으로 다시 잠금 (방금 비밀번호 통과한 경우만 유지)
+    if not st.session_state.get("just_unlocked", False):
+        st.session_state["settings_unlocked"] = False
+    st.session_state["just_unlocked"] = False
     _inject_hide_footer_early()
     # 상단 헤더 (HTML) → 바로 아래 설정 버튼(popover), CSS로 헤더 박스 위에 겹쳐 표시
     render_header()
@@ -682,6 +686,7 @@ def main() -> None:
             if st.button("확인", key="settings_pin_confirm"):
                 if pin == ADMIN_PIN:
                     st.session_state["settings_unlocked"] = True
+                    st.session_state["just_unlocked"] = True  # 이번 실행에서만 잠금 해제 유지
                     st.rerun()
                 else:
                     st.error("비밀번호가 올바르지 않습니다.")
