@@ -134,6 +134,11 @@ def add_history(event_type: str, payload: Dict) -> None:
     st.session_state.history.append({"ts": now_iso(), "type": event_type, "payload": payload})
 
 
+# Google Search Grounding: 실시간 검색 결과를 답변에 반영 (REST API 형식)
+# https://ai.google.dev/gemini-api/docs/grounding
+GOOGLE_SEARCH_TOOLS = [{"google_search": {}}]
+
+
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
 def try_generate_content(prompt: str) -> str:
     # Gemini API 공식 문서 기준 현재 지원 모델 (gemini-1.5 시리즈는 deprecated)
@@ -159,6 +164,14 @@ def try_generate_content(prompt: str) -> str:
     for model_name in candidates:
         try:
             model = genai.GenerativeModel(model_name)
+            # 1) 먼저 Google Search Grounding으로 시도 (실시간 검색 반영)
+            try:
+                response = model.generate_content(prompt, tools=GOOGLE_SEARCH_TOOLS)
+                if response and getattr(response, "text", None) and response.text.strip():
+                    return response.text.strip()
+            except Exception:
+                pass
+            # 2) 도구 미지원/오류 시 같은 모델로 도구 없이 재시도 (답장은 반드시 보장)
             response = model.generate_content(prompt)
             if response and response.text:
                 return response.text.strip()
