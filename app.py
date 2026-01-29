@@ -134,6 +134,11 @@ def add_history(event_type: str, payload: Dict) -> None:
     st.session_state.history.append({"ts": now_iso(), "type": event_type, "payload": payload})
 
 
+# Google Search Grounding: 실시간 검색 결과를 답변에 반영 (REST API 형식)
+# https://ai.google.dev/gemini-api/docs/grounding
+GOOGLE_SEARCH_TOOLS = [{"google_search": {}}]
+
+
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
 def try_generate_content(prompt: str) -> str:
     # Gemini API 공식 문서 기준 현재 지원 모델 (gemini-1.5 시리즈는 deprecated)
@@ -159,12 +164,23 @@ def try_generate_content(prompt: str) -> str:
     for model_name in candidates:
         try:
             model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
+            # Google Search Grounding: 필요 시 자동으로 검색 후 최신 정보를 답변에 반영
+            response = model.generate_content(prompt, tools=GOOGLE_SEARCH_TOOLS)
             if response and response.text:
                 return response.text.strip()
             else:
                 errors.append(f"{model_name}: 응답이 비어있습니다.")
                 continue
+        except TypeError:
+            # tools 인자를 지원하지 않는 구버전 SDK: tools 없이 재시도
+            try:
+                response = model.generate_content(prompt)
+                if response and response.text:
+                    return response.text.strip()
+            except Exception:
+                pass
+            errors.append(f"{model_name}: tools 미지원 또는 오류.")
+            continue
         except Exception as e:
             error_msg = str(e)
             # 404 에러는 모델이 존재하지 않음을 의미
