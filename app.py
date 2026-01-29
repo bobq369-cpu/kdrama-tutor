@@ -35,9 +35,10 @@ class LineItem:
     notes: str
     vocab: List[Tuple[str, str]]
     patterns: List[Tuple[str, str]]
+    th: Optional[str] = None  # 태국어 뜻/발음 (예: อยากได้ จาจังมยอน)
 
 
-# 마당 식당 전용 데이터
+# 마당 식당 전용 데이터 (roman: 로마자, en: 영어, th: 태국어 설명)
 SAMPLE_LINES: List[LineItem] = [
     LineItem(
         show="(마당 식당) 주문하기",
@@ -47,7 +48,8 @@ SAMPLE_LINES: List[LineItem] = [
         en="I'd like one Jjajangmyeon and a small Tangsuyuk, please.",
         notes="식당에서 음식을 주문할 때 쓰는 가장 기본적인 표현.",
         vocab=[("짜장면", "Jjajangmyeon"), ("탕수육", "Tangsuyuk"), ("주세요", "Please give me")],
-        patterns=[("~ 주세요", "무언가를 정중하게 요청할 때")]
+        patterns=[("~ 주세요", "무언가를 정중하게 요청할 때")],
+        th=None,  # 예: อยากได้ จาจังมยอน หนึ่ง ที่ กับ ทังซูยุก ขนาดเล็ก
     ),
     LineItem(
         show="(마당 식당) 맵기 조절",
@@ -57,7 +59,8 @@ SAMPLE_LINES: List[LineItem] = [
         en="Can you make the Jjamppong less spicy?",
         notes="매운 음식을 잘 못 먹을 때 요청하는 표현.",
         vocab=[("짬뽕", "Jjamppong"), ("덜 맵게", "Less spicy")],
-        patterns=[("~ 해주실 수 있나요?", "가능한지 물어볼 때")]
+        patterns=[("~ 해주실 수 있나요?", "가능한지 물어볼 때")],
+        th=None,
     ),
     LineItem(
         show="(마당 식당) 추천 메뉴",
@@ -67,7 +70,8 @@ SAMPLE_LINES: List[LineItem] = [
         en="Boss, what is the most popular menu item for Thai people here?",
         notes="현지인에게 인기 있는 메뉴를 물어볼 때.",
         vocab=[("사장님", "Boss/Owner"), ("제일", "Most/Best"), ("좋아하는", "Favorite")],
-        patterns=[("~가 뭐예요?", "정보를 물어볼 때")]
+        patterns=[("~가 뭐예요?", "정보를 물어볼 때")],
+        th=None,
     ),
     LineItem(
         show="(마당 식당) 계산하기",
@@ -77,8 +81,9 @@ SAMPLE_LINES: List[LineItem] = [
         en="It was delicious! Check, please.",
         notes="식사를 마치고 나갈 때 쓰는 인사와 요청.",
         vocab=[("잘 먹었습니다", "Thank you for the meal"), ("계산", "Bill/Check")],
-        patterns=[("~해 주세요", "행동을 부탁할 때")]
-    )
+        patterns=[("~해 주세요", "행동을 부탁할 때")],
+        th=None,
+    ),
 ]
 
 
@@ -279,32 +284,34 @@ def make_quiz_from_line(item: LineItem) -> None:
     )
 
 
-def tab_home() -> None:
-    st.header("대사 선택")
-    profile = st.session_state.profile
-    eligible = line_picker(SAMPLE_LINES, preferred_level=profile["level"])
-    if not eligible:
-        eligible = SAMPLE_LINES
+def tab_menu_learn() -> None:
+    """심플 메뉴판: SAMPLE_LINES만 보여주고, 선택한 표현으로 주문 연습 연결."""
+    st.header("메뉴 표현 익히기")
+    st.caption("마당 식당에서 쓸 수 있는 표현을 골라 보세요.")
 
     idx = st.selectbox(
-        "샘플 대사",
-        options=list(range(len(eligible))),
-        format_func=lambda i: f"{eligible[i].level} · {eligible[i].kr}",
+        "표현 고르기",
+        options=list(range(len(SAMPLE_LINES))),
+        format_func=lambda i: SAMPLE_LINES[i].kr,
     )
-    item = eligible[idx]
-    card_line(item)
+    item = SAMPLE_LINES[idx]
 
-    st.divider()
-    st.subheader("내 대사로 학습하기")
-    user_line = st.text_area("드라마 대사(자막/대사) 붙여넣기", placeholder="예) 그건 아니지.", height=90)
-    if st.button("이 대사로 학습 카드 만들기"):
-        kr = normalize_ws(user_line)
-        if not kr:
-            st.error("대사를 입력해 주세요.")
-            return
-        generated = generate_support_card(kr, profile_level=profile["level"])
-        add_history("custom_line_generated", {"kr": kr})
-        card_line(generated)
+    st.markdown(f"**{item.kr}**")
+    st.caption(f"로마자: {item.roman}")
+    st.write(f"의미: {item.en}" + (f"  \n(TH) {item.th}" if getattr(item, "th", None) else ""))
+    if item.notes:
+        st.info(item.notes)
+    with st.expander("핵심 단어"):
+        for w, m in item.vocab:
+            st.write(f"- **{w}**: {m}")
+    with st.expander("패턴"):
+        for p, e in item.patterns:
+            st.write(f"- **{p}**: {e}")
+
+    if st.button("AI 점원과 주문 연습하기", type="primary"):
+        st.session_state.roleplay_seed = {"kr": item.kr, "en": item.en}
+        add_history("roleplay_start", {"kr": item.kr})
+        st.success("→ 오른쪽 탭 **AI 점원과 주문 연습**에서 연습해 보세요.")
 
 
 def generate_support_card(kr: str, profile_level: str) -> LineItem:
@@ -391,49 +398,12 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
     return found[:6]
 
 
-def tab_quiz() -> None:
-    st.header("퀴즈")
-    deck = st.session_state.deck
-    stats = st.session_state.deck_stats
-
-    if not deck:
-        st.info("아직 퀴즈 덱이 비어있어요.")
-        return
-
-    st.caption(f"덱 카드: {len(deck)} · 정답 {stats['correct']} / 오답 {stats['wrong']}")
-    st.session_state.setdefault("quiz_i", 0)
-    i = st.session_state.quiz_i % len(deck)
-    q = deck[i]
-
-    st.subheader(f"문항 {i+1}")
-    st.write(q["prompt"])
-    user = st.text_input("답", key=f"quiz_answer_{i}")
-    
-    cols = st.columns(3)
-    if cols[0].button("채점", use_container_width=True):
-        if user == q.get("answer"):
-            stats["correct"] += 1
-            st.success("정답!")
-        else:
-            stats["wrong"] += 1
-            st.error(f"오답! 정답은 {q.get('answer')} 입니다.")
-
-    if cols[1].button("다음", use_container_width=True):
-        st.session_state.quiz_i += 1
-        st.rerun()
-
-    if cols[2].button("삭제", use_container_width=True):
-        deck.pop(i)
-        st.session_state.quiz_i = 0
-        st.rerun()
-
-
 def tab_roleplay() -> None:
-    st.header("💬 실전 롤플레이 (Madang Roleplay)")
-    
-    # 1. 시나리오(Seed) 확인
+    st.header("AI 점원과 주문 연습")
+    st.caption("마당 식당 AI 점원과 한국어로 주문 연습해 보세요.")
+
     if "roleplay_seed" not in st.session_state:
-        st.info("👋 먼저 [대사 선택] 탭에서 원하는 상황을 골라 '롤플레이 시작' 버튼을 눌러주세요.")
+        st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
         return
 
     seed = st.session_state["roleplay_seed"]
@@ -486,31 +456,17 @@ def tab_roleplay() -> None:
                 message_placeholder.error(f"오류가 발생했습니다: {e}")
 
 
-def tab_saved() -> None:
-    st.header("저장한 대사")
-    saved = st.session_state.saved_lines
-    for i, item in enumerate(reversed(saved), 1):
-        st.markdown(f"**{i}. {item['kr']}**")
-
-
-def tab_history() -> None:
-    st.header("학습 기록")
-    for h in st.session_state.history[-20:][::-1]:
-        st.write(f"- {h['ts']} : {h['type']}")
-
-
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
     init_state()
     render_header()
     sidebar_profile()
 
-    tabs = st.tabs(["대사 선택", "퀴즈", "롤플레이", "저장한 대사", "학습 기록"])
-    with tabs[0]: tab_home()
-    with tabs[1]: tab_quiz()
-    with tabs[2]: tab_roleplay()
-    with tabs[3]: tab_saved()
-    with tabs[4]: tab_history()
+    tabs = st.tabs(["메뉴 표현 익히기", "AI 점원과 주문 연습"])
+    with tabs[0]:
+        tab_menu_learn()
+    with tabs[1]:
+        tab_roleplay()
 
 
 if __name__ == "__main__":
