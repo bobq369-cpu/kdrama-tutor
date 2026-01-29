@@ -157,19 +157,19 @@ def render_header() -> None:
 
 
 def sidebar_profile() -> None:
-    # [항상 실행] API 키는 관리자 UI와 무관하게 동작하도록 먼저 적용
+    # [항상 실행] API 키 연결 로직은 백그라운드에서 항상 적용 (AI 기능 유지)
     if "GEMINI_API_KEY" in st.secrets:
         st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
-    # 사이드바 맨 위: 관리자 설정 체크박스
-    st.sidebar.checkbox("관리자 설정(Admin)", value=st.session_state.get("admin_mode", False), key="admin_mode")
+    # 사이드바 맨 위: 관리자 설정 체크박스 (끄면 아래 UI 전부 숨김)
+    is_admin = st.sidebar.checkbox("관리자 설정 (Admin)", value=False, key="admin_mode")
 
-    # 체크 시에만 아래 UI 표시 (API 키 상태/입력, 학습 설정, 데이터 초기화)
-    if not st.session_state.get("admin_mode", False):
-        return
+    if not is_admin:
+        return  # 체크 해제 시 사이드바에는 체크박스만 남김
 
+    # --- 아래는 is_admin 일 때만 표시 ---
     st.sidebar.divider()
     st.sidebar.header("Gemini API Key")
 
