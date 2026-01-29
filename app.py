@@ -109,9 +109,15 @@ def add_history(event_type: str, payload: Dict) -> None:
 
 # [핵심] 여러 모델을 순서대로 시도해보는 함수
 def try_generate_content(prompt: str) -> str:
-    # 최신 모델부터 순서대로 시도 (버전 번호 없이 사용)
-    # Gemini API는 모델 이름만 사용하며, 자동으로 최신 버전을 사용합니다
-    candidates = ["gemini-1.5-flash", "gemini-1.5-pro"]
+    # Gemini API 공식 문서 기준 현재 지원 모델 (gemini-1.5 시리즈는 deprecated)
+    # https://ai.google.dev/gemini-api/docs/models
+    candidates = [
+        "gemini-2.5-flash",      # Stable, 가성비 좋음
+        "gemini-2.5-pro",        # Stable, 고성능
+        "gemini-2.0-flash",      # Stable
+        "gemini-3-flash-preview", # Preview
+        "gemini-3-pro-preview",  # Preview
+    ]
     
     api_key = st.session_state.get("gemini_api_key", "").strip()
     if not api_key:
