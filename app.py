@@ -639,11 +639,7 @@ def main() -> None:
             value=st.session_state.get("admin_mode", False),
             key="admin_mode",
         )
-        st.link_button(
-            "Manage App (편집하기)",
-            "https://share.streamlit.io",
-            key="manage_app_link",
-        )
+        st.link_button("Manage App (편집하기)", "https://share.streamlit.io")
 
 
 if __name__ == "__main__":
