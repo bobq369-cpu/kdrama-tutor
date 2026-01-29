@@ -450,7 +450,7 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
 
 
 def tab_roleplay() -> None:
-    """Standard Chat Pattern: 과거 대화 출력 → 입력 대기 → 입력 시 반응·저장 → rerun."""
+    """Streamlit 정석 Chat Interaction Pattern: 헤더 → 과거 대화 → 입력창(하단 고정) → 입력 시 처리 → rerun."""
     if "roleplay_seed" not in st.session_state:
         st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
         return
@@ -463,25 +463,26 @@ def tab_roleplay() -> None:
         ]
         st.session_state.last_seed = seed["kr"]
 
-    # 1) 상단: 오늘의 미션
+    # ─── 1. 헤더 출력 ─────────────────────────────────────────────────────
+    st.header("AI 점원과 주문 연습")
     st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
 
-    # 2) 과거 대화 내용을 먼저 전부 출력
+    # ─── 2. 과거 대화 출력 (Display History) ─────────────────────────────
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    # 3) 그 다음 입력 대기 (입력창은 자동으로 화면 맨 아래에 고정됨)
+    # ─── 3. 입력창 고정 및 처리 (Handle Input) ───────────────────────────
     if prompt := st.chat_input("메시지 입력..."):
-        # 사용자 말 즉시 표시 및 history에 추가
+        # 사용자 메시지 즉시 표시 및 history에 추가
         st.session_state.roleplay_history.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
-        # AI 응답 생성 후 표시 및 history에 추가
+        # AI 응답 처리 (Thinking): 말풍선 위치에 "Thinking..." → 응답으로 교체
         with st.chat_message("model"):
-            message_placeholder = st.empty()
-            message_placeholder.markdown("Thinking...")
+            placeholder = st.empty()
+            placeholder.markdown("Thinking...")
             try:
                 full_prompt = f"""
                 당신은 태국 치앙마이의 한식당 '마당(Madang)'의 친절한 직원입니다. 
@@ -493,12 +494,12 @@ def tab_roleplay() -> None:
                 위 맥락에 맞춰 손님(user)의 말에 자연스럽게 한국어로 답변하세요.
                 """
                 response_text = try_generate_content(full_prompt)
-                message_placeholder.markdown(response_text)
+                placeholder.markdown(response_text)
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
             except Exception as e:
-                message_placeholder.error(f"오류가 발생했습니다: {e}")
+                placeholder.error(f"오류가 발생했습니다: {e}")
 
-        # 대화가 끝나면 새로고침해서 대화가 깔끔하게 누적되도록
+        # 저장 및 새로고침: 화면을 깔끔하게 갱신
         st.rerun()
 
 
