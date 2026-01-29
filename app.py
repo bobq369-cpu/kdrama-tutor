@@ -21,6 +21,9 @@ APP_SUBTITLE = "치앙마이 마당(Madang) 식당 — 실전 한국어 주문/�
 SETTINGS_BUTTON_TOP_PX = 42
 SETTINGS_BUTTON_RIGHT_PX = 100  # 오른쪽에서의 거리. 크게 하면 버튼이 왼쪽으로 이동
 
+# 설정(관리자 모드) 진입용 4자리 비밀번호. 원하는 값으로 변경하세요.
+ADMIN_PIN = "1234"
+
 
 @dataclass
 class LineItem:
@@ -100,6 +103,7 @@ def init_state() -> None:
     ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "K-드라마로 자연스러운 회화 익히기"})
     ss.setdefault("gemini_api_key", "")
     ss.setdefault("admin_mode", False)
+    ss.setdefault("settings_unlocked", False)  # 설정 팝오버 비밀번호 통과 여부
     ss.setdefault("history", [])
     ss.setdefault("saved_lines", [])
     ss.setdefault("deck", [])
@@ -667,11 +671,29 @@ def main() -> None:
     # 상단 헤더 (HTML) → 바로 아래 설정 버튼(popover), CSS로 헤더 박스 위에 겹쳐 표시
     render_header()
     with st.popover("⚙️", help="설정"):
-        st.toggle(
-            "관리자 모드 (Admin Mode)",
-            value=st.session_state.get("admin_mode", False),
-            key="admin_mode",
-        )
+        if not st.session_state.get("settings_unlocked", False):
+            pin = st.text_input(
+                "4자리 비밀번호",
+                type="password",
+                max_chars=4,
+                key="settings_pin_input",
+                placeholder="****",
+            )
+            if st.button("확인", key="settings_pin_confirm"):
+                if pin == ADMIN_PIN:
+                    st.session_state["settings_unlocked"] = True
+                    st.rerun()
+                else:
+                    st.error("비밀번호가 올바르지 않습니다.")
+        else:
+            st.toggle(
+                "관리자 모드 (Admin Mode)",
+                value=st.session_state.get("admin_mode", False),
+                key="admin_mode",
+            )
+            if st.button("잠금", key="settings_lock"):
+                st.session_state["settings_unlocked"] = False
+                st.rerun()
     st.divider()
 
     sidebar_profile()
