@@ -617,8 +617,10 @@ def _inject_app_styles(is_admin: bool) -> None:
             background-color: white !important;
             border: 1px solid #e0e0e0 !important;
             border-radius: 8px !important;
-            width: 40px !important;
-            height: 40px !important;
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+            min-width: 1.5rem !important;
+            min-height: 1.5rem !important;
             padding: 0 !important;
             display: flex !important;
             align-items: center !important;
