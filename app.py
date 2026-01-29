@@ -605,27 +605,30 @@ def _inject_app_styles(is_admin: bool) -> None:
             display: none !important;
         }}
 
-        /* ─── 9. 설정 버튼: 헤더 박스(베이지) 안에 완전히 안착 (absolute + 투명 스타일) ─── */
+        /* ─── 9. 톱니바퀴 버튼: 컨테이너 위치 강제 이동 (헤더 박스 안으로) ─── */
         div[data-testid="stPopover"] {{
             position: absolute !important;
-            top: 3.8rem !important;
-            right: 2rem !important;
+            top: 4.2rem !important;
+            right: 1rem !important;
             z-index: 99999 !important;
+            background: transparent !important;
+            border: none !important;
         }}
+
+        /* 톱니바퀴 버튼 내부 스타일 완전 초기화 (투명화) ─── */
         div[data-testid="stPopover"] > button {{
             background-color: transparent !important;
             border: none !important;
             box-shadow: none !important;
+            padding: 0.5rem !important;
             color: #5D4037 !important;
-            font-size: 1.2rem !important;
-            padding: 0.25rem !important;
-            min-width: 2rem !important;
-            min-height: 2rem !important;
+            font-size: 1.5rem !important;
+            width: auto !important;
+            height: auto !important;
         }}
         div[data-testid="stPopover"] > button:hover {{
             color: #E65100 !important;
-            background-color: rgba(0,0,0,0.05) !important;
-            border-radius: 6px !important;
+            background-color: rgba(93, 64, 55, 0.1) !important;
         }}
         </style>
         """,
