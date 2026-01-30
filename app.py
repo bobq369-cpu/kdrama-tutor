@@ -46,75 +46,15 @@ def inject_custom_css():
             }
             header {visibility: hidden;}
             footer {visibility: hidden;}
-            /* 모바일 메신저 레이아웃: 행 + flex */
-            .chat-row {
-                display: flex;
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            .chat-row.user {
-                justify-content: flex-end;
-            }
-            .chat-row.ai {
-                justify-content: flex-start;
-            }
-            .chat-row .bubble {
-                max-width: 70%;
-                width: fit-content;
-                padding: 12px 16px;
-                border-radius: 18px;
-                word-wrap: break-word;
-                font-size: 15px;
-                line-height: 1.45;
-            }
-            .chat-row.user .bubble.user-bubble {
-                background-color: #007AFF;
-                color: #FFFFFF;
-                border-top-right-radius: 4px;
-            }
-            .chat-row.ai .bubble.ai-bubble {
-                background-color: #F2F2F7;
-                color: #000000;
-                border-top-left-radius: 4px;
-            }
-            .chat-row.ai .msg-content {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                max-width: 70%;
-            }
-            .chat-row.ai .name {
-                font-size: 12px;
-                color: #8E8E93;
-                margin-bottom: 4px;
-                padding-left: 2px;
-            }
-            .chat-row.ai .avatar {
-                width: 36px;
-                height: 36px;
-                min-width: 36px;
-                border-radius: 50%;
-                background: #E9E9EB;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.2rem;
-                margin-right: 8px;
-                margin-top: 20px;
-            }
-            .chat-row.ai .chat-img {
-                max-width: 100%;
-                border-radius: 12px;
-                margin-top: 8px;
-            }
-            .chat-row.ai .correction {
-                font-size: 13px;
-                color: #8B0000;
-                margin-top: 6px;
-                padding: 8px 12px;
-                background: #FFF5F5;
-                border-radius: 10px;
-            }
+            /* 카카오톡 스타일: 말풍선 fit-content + max-width 70% */
+            .kakao-user-wrap { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+            .kakao-ai-wrap { display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start; }
+            .kakao-user-bubble { width: fit-content; max-width: 70%; word-wrap: break-word; }
+            .kakao-ai-bubble { width: fit-content; max-width: 100%; word-wrap: break-word; }
+            .kakao-ai-avatar { flex-shrink: 0; }
+            .kakao-ai-body { max-width: 70%; }
+            .kakao-chat-img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
+            .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
             .stTabs [data-baseweb="tab-list"] { gap: 10px; }
             .stTabs [data-baseweb="tab"] {
                 height: 50px;
@@ -130,12 +70,10 @@ def inject_custom_css():
                 color: white !important;
             }
             .tts-player-wrap {
-                margin-top: 6px;
-                margin-bottom: 10px;
-                padding: 10px 14px;
-                background: #F2F2F7;
-                border-radius: 14px;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+                margin-top: 8px;
+                padding: 8px 12px;
+                background: #F8F8F8;
+                border-radius: 12px;
             }
             .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
             .tts-player-wrap audio::-webkit-media-controls-panel { background: transparent; }
@@ -432,44 +370,50 @@ def main():
         for i, message in enumerate(messages):
             if message["role"] == "user":
                 safe_content = html.escape(message["content"])
-                st.markdown(
-                    f'<div class="chat-row user"><div class="bubble user-bubble">{safe_content}</div></div>',
-                    unsafe_allow_html=True,
+                user_html = (
+                    '<div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">'
+                    '<div style="background-color: #FEE500; padding: 10px 15px; border-radius: 15px; '
+                    'border-top-right-radius: 0; font-size: 16px; color: black; max-width: 70%; width: fit-content; '
+                    'box-shadow: 1px 1px 2px rgba(0,0,0,0.1); word-wrap: break-word;">'
+                    f"{safe_content}"
+                    "</div></div>"
                 )
+                st.markdown(user_html, unsafe_allow_html=True)
             else:
                 bubble_text, image_keys, correction = parse_ai_message(message["content"])
                 safe_bubble = html.escape(bubble_text) if bubble_text else ""
-                img_tags = ""
-                for key in image_keys:
-                    if key in IMAGE_GALLERY:
-                        url = html.escape(IMAGE_GALLERY[key])
-                        img_tags += f'<img class="chat-img" src="{url}" alt="">'
-                correction_div = ""
-                if correction:
-                    safe_correction = html.escape(correction)
-                    correction_div = f'<div class="correction">📝 빨간펜 선생님: {safe_correction}</div>'
-                ai_block = f"""
-                <div class="chat-row ai">
-                    <div class="avatar">👩‍🏫</div>
-                    <div class="msg-content">
-                        <div class="name">AI 튜터</div>
-                        <div class="bubble ai-bubble">{safe_bubble}</div>
-                        {img_tags}
-                        {correction_div}
-                    </div>
-                </div>
-                """
-                st.markdown(ai_block, unsafe_allow_html=True)
-                # 각 AI 답변마다 오디오바 (새 답변만 자동 재생)
                 is_last_message = (i == len(messages) - 1)
                 should_autoplay = is_last_message and st.session_state.get("play_tts")
                 if i not in st.session_state.tts_cache:
                     st.session_state.tts_cache[i] = text_to_speech_html(message["content"], autoplay=False)
-                tts_html = st.session_state.tts_cache[i]
+                tts_html = st.session_state.tts_cache[i] or ""
                 if tts_html and should_autoplay:
                     tts_html = tts_html.replace("<audio controls ", "<audio controls autoplay ", 1)
-                if tts_html:
-                    st.markdown(tts_html, unsafe_allow_html=True)
+                correction_html = ""
+                if correction:
+                    safe_correction = html.escape(correction)
+                    correction_html = f'<div class="kakao-correction">📝 빨간펜 선생님: {safe_correction}</div>'
+                img_tags = ""
+                for key in image_keys:
+                    if key in IMAGE_GALLERY:
+                        url = html.escape(IMAGE_GALLERY[key])
+                        img_tags += f'<img class="kakao-chat-img" src="{url}" alt="">'
+                ai_bubble_inner = safe_bubble + tts_html + correction_html
+                ai_html = (
+                    '<div style="display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start;">'
+                    '<div style="width: 40px; height: 40px; min-width: 40px; border-radius: 50%; background-color: #EFEFEF; '
+                    'display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 20px;">🤖</div>'
+                    '<div style="max-width: 70%;">'
+                    '<div style="font-size: 12px; color: #666; margin-bottom: 3px;">AI 튜터</div>'
+                    '<div style="background-color: #FFFFFF; border: 1px solid #E5E5E5; padding: 10px 15px; '
+                    'border-radius: 15px; border-top-left-radius: 0; font-size: 16px; color: black; max-width: 100%; '
+                    'width: fit-content; box-shadow: 1px 1px 2px rgba(0,0,0,0.05); word-wrap: break-word;">'
+                    f"{ai_bubble_inner}"
+                    "</div>"
+                    f"{img_tags}"
+                    "</div></div>"
+                )
+                st.markdown(ai_html, unsafe_allow_html=True)
 
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
