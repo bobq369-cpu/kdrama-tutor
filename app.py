@@ -88,6 +88,24 @@ def inject_custom_css():
                 background-color: #007AFF !important;
                 color: white !important;
             }
+            /* TTS 오디오 플레이어: 세련된 미니 플레이바 */
+            .tts-player-wrap {
+                margin-top: 8px;
+                margin-bottom: 12px;
+                padding: 10px 14px;
+                background: linear-gradient(135deg, #F8F9FA 0%, #F2F2F7 100%);
+                border-radius: 14px;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+                border: 1px solid rgba(0,122,255,0.08);
+            }
+            .tts-player-wrap audio {
+                width: 100%;
+                height: 36px;
+                outline: none;
+            }
+            .tts-player-wrap audio::-webkit-media-controls-panel {
+                background: transparent;
+            }
         </style>
         """,
         unsafe_allow_html=True
@@ -203,9 +221,11 @@ def text_to_speech_autoplay(text):
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
                 md = f"""
-                    <audio controls autoplay style="display: none;">
+                    <div class="tts-player-wrap">
+                    <audio controls autoplay>
                     <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
                     </audio>
+                    </div>
                     """
             os.unlink(fp.name)
             return md
