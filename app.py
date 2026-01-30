@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import os
+import re
 from gtts import gTTS
 import tempfile
 import base64
@@ -127,7 +128,15 @@ def inject_home_card_css():
 
 inject_custom_css()
 
-# --- 3. 시나리오 데이터 정의 (확장 가능) ---
+# --- 3. 동적 이미지 갤러리 (AI가 [IMAGE: key]로 요청 시 사용) ---
+IMAGE_GALLERY = {
+    "menu": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
+    "passport": "https://images.unsplash.com/photo-1544015759-42b786315268",
+    "money": "https://images.unsplash.com/photo-1554672723-bca4ef185960",
+    "baggage": "https://images.unsplash.com/photo-1553531384-cc64ac80f931",
+}
+
+# --- 4. 시나리오 데이터 정의 (확장 가능) ---
 SCENARIOS = {
     "airport": {
         "title": "공항 입국 심사 (Airport Immigration)",
@@ -170,19 +179,31 @@ SCENARIOS = {
     }
 }
 
-# --- 4. Helper 함수들 (TTS, AI 모델) ---
+# --- 5. Helper 함수들 (TTS, AI 모델) ---
+
+def strip_for_tts(text):
+    """TTS용: [IMAGE: key] 태그와 || 교정 내용을 제거한 순수 대화 텍스트 반환."""
+    if not text:
+        return ""
+    t = re.sub(r"\[IMAGE:\s*\w+\]", "", text).strip()
+    if "||" in t:
+        t = t.split("||", 1)[0].strip()
+    return t or ""
 
 def text_to_speech_autoplay(text):
-    """gTTS를 사용하여 텍스트를 음성으로 변환하고 자동 재생 가능한 오디오 태그를 반환합니다."""
+    """gTTS로 음성 변환 후 자동 재생. 오디오 플레이어는 숨김(display:none)."""
+    clean_text = strip_for_tts(text)
+    if not clean_text:
+        return ""
     try:
-        tts = gTTS(text=text, lang='ko', slow=False)
+        tts = gTTS(text=clean_text, lang='ko', slow=False)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
             tts.save(fp.name)
             with open(fp.name, "rb") as f:
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
                 md = f"""
-                    <audio controls autoplay style="height: 30px; margin-top: 5px;">
+                    <audio controls autoplay style="display: none;">
                     <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
                     </audio>
                     """
@@ -202,6 +223,7 @@ GEMINI_MODEL_NAMES = [
 def get_ai_response(messages, scenario_key):
     """Gemini 모델을 사용하여 답변을 생성합니다 (순수 대화 모델)."""
     current_time_str = "2026년 1월 31일 토요일"
+    image_keys_desc = ", ".join(f"'{k}'" for k in IMAGE_GALLERY.keys())
     system_instruction = f"""
 [기본 설정]
 현재 시각: {current_time_str}
@@ -213,7 +235,9 @@ def get_ai_response(messages, scenario_key):
 상황: {SCENARIOS[scenario_key]['context']}
 
 [대화 지침]
-너는 한국어 튜터로서 사용자의 질문에 친절하게 답하라. 사용자의 한국어 학습을 돕는 튜터로서 자연스럽고 몰입감 있는 대화를 이끌어가고, 답변은 너무 길지 않게 실제 대화처럼 하라.
+1. 너는 한국어 튜터로서 사용자의 질문에 친절하게 답하라. 자연스럽고 몰입감 있는 대화를 이끌어가고, 답변은 너무 길지 않게 실제 대화처럼 하라.
+2. 상황에 맞는 이미지가 필요하면, 해당 문장 끝에 [IMAGE: key] 태그를 붙여라. 사용 가능한 key: {image_keys_desc}. 예: 메뉴판을 건네줄 때는 [IMAGE: menu], 여권을 보여달라고 할 때는 [IMAGE: passport], 계산/돈 이야기 시 [IMAGE: money], 수하물 이야기 시 [IMAGE: baggage].
+3. 사용자의 한국어가 어색하거나 틀렸다면, 답변 끝에 반드시 파이프 두 개(||)를 넣고 그 다음 줄에 교정 내용을 적어라. 예: "네, 알겠습니다.|| '알겠어요'가 더 자연스러워요."
 """
 
     gemini_messages = []
@@ -237,7 +261,19 @@ def get_ai_response(messages, scenario_key):
     return f"(AI 응답 오류가 발생했습니다: {last_error})"
 
 
-# --- 5. 메인 앱 로직 ---
+def parse_ai_message(content):
+    """AI 응답에서 말풍선 텍스트, 이미지 키 목록, 교정 문구를 분리해 반환."""
+    raw = content or ""
+    image_keys = re.findall(r"\[IMAGE:\s*(\w+)\]", raw)
+    display = re.sub(r"\[IMAGE:\s*\w+\]", "", raw).strip()
+    correction = None
+    if "||" in display:
+        parts = display.split("||", 1)
+        display = parts[0].strip()
+        correction = parts[1].strip() if len(parts) > 1 else None
+    return display, image_keys, correction
+
+# --- 6. 메인 앱 로직 ---
 
 def main():
     # 세션 상태 초기화
@@ -298,7 +334,14 @@ def main():
             if message["role"] == "user":
                 st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="chat-bubble ai-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+                bubble_text, image_keys, correction = parse_ai_message(message["content"])
+                if bubble_text:
+                    st.markdown(f'<div class="chat-bubble ai-bubble">{bubble_text}</div>', unsafe_allow_html=True)
+                for key in image_keys:
+                    if key in IMAGE_GALLERY:
+                        st.image(IMAGE_GALLERY[key], use_container_width=True)
+                if correction:
+                    st.caption(f"📝 빨간펜 선생님: {correction}")
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
@@ -315,9 +358,11 @@ def main():
         st.session_state.play_tts = True
         st.rerun()
 
-    # 방금 AI 응답이 추가된 경우에만 TTS 재생 (한 번만)
+    # 방금 AI 응답이 추가된 경우에만 TTS 재생 (한 번만, [IMAGE]/|| 제거된 순수 대화만)
     if st.session_state.get("play_tts") and st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
-        st.markdown(text_to_speech_autoplay(st.session_state.messages[-1]["content"]), unsafe_allow_html=True)
+        tts_html = text_to_speech_autoplay(st.session_state.messages[-1]["content"])
+        if tts_html:
+            st.markdown(tts_html, unsafe_allow_html=True)
         st.session_state.play_tts = False
 
 
