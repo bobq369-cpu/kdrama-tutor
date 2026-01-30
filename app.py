@@ -2,6 +2,7 @@ import streamlit as st
 import google.generativeai as genai
 import os
 import re
+import html
 from gtts import gTTS
 import tempfile
 import base64
@@ -45,27 +46,74 @@ def inject_custom_css():
             }
             header {visibility: hidden;}
             footer {visibility: hidden;}
-            /* iMessage 스타일 말풍선: 둥글게, 간격 좁게 */
-            .chat-bubble {
-                padding: 12px 18px;
-                border-radius: 20px;
-                margin-bottom: 6px;
-                max-width: 80%;
+            /* 모바일 메신저 레이아웃: 행 + flex */
+            .chat-row {
+                display: flex;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .chat-row.user {
+                justify-content: flex-end;
+            }
+            .chat-row.ai {
+                justify-content: flex-start;
+            }
+            .chat-row .bubble {
+                max-width: 70%;
+                width: fit-content;
+                padding: 12px 16px;
+                border-radius: 18px;
                 word-wrap: break-word;
-                font-size: 16px;
+                font-size: 15px;
                 line-height: 1.45;
             }
-            .user-bubble {
+            .chat-row.user .bubble.user-bubble {
                 background-color: #007AFF;
                 color: #FFFFFF;
-                margin-left: auto;
-                border-bottom-right-radius: 6px;
+                border-top-right-radius: 4px;
             }
-            .ai-bubble {
-                background-color: #E9E9EB;
+            .chat-row.ai .bubble.ai-bubble {
+                background-color: #F2F2F7;
                 color: #000000;
-                margin-right: auto;
-                border-bottom-left-radius: 6px;
+                border-top-left-radius: 4px;
+            }
+            .chat-row.ai .msg-content {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                max-width: 70%;
+            }
+            .chat-row.ai .name {
+                font-size: 12px;
+                color: #8E8E93;
+                margin-bottom: 4px;
+                padding-left: 2px;
+            }
+            .chat-row.ai .avatar {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                border-radius: 50%;
+                background: #E9E9EB;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                margin-right: 8px;
+                margin-top: 20px;
+            }
+            .chat-row.ai .chat-img {
+                max-width: 100%;
+                border-radius: 12px;
+                margin-top: 8px;
+            }
+            .chat-row.ai .correction {
+                font-size: 13px;
+                color: #8B0000;
+                margin-top: 6px;
+                padding: 8px 12px;
+                background: #FFF5F5;
+                border-radius: 10px;
             }
             .stTabs [data-baseweb="tab-list"] { gap: 10px; }
             .stTabs [data-baseweb="tab"] {
@@ -372,17 +420,36 @@ def main():
         messages = st.session_state.messages
         for i, message in enumerate(messages):
             if message["role"] == "user":
-                st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+                safe_content = html.escape(message["content"])
+                st.markdown(
+                    f'<div class="chat-row user"><div class="bubble user-bubble">{safe_content}</div></div>',
+                    unsafe_allow_html=True,
+                )
             else:
                 bubble_text, image_keys, correction = parse_ai_message(message["content"])
-                if bubble_text:
-                    st.markdown(f'<div class="chat-bubble ai-bubble">{bubble_text}</div>', unsafe_allow_html=True)
+                safe_bubble = html.escape(bubble_text) if bubble_text else ""
+                img_tags = ""
                 for key in image_keys:
                     if key in IMAGE_GALLERY:
-                        st.image(IMAGE_GALLERY[key], use_container_width=True)
+                        url = html.escape(IMAGE_GALLERY[key])
+                        img_tags += f'<img class="chat-img" src="{url}" alt="">'
+                correction_div = ""
                 if correction:
-                    st.caption(f"📝 빨간펜 선생님: {correction}")
-                # 각 AI 답변마다 오디오바 (새 답변만 자동 재생, 새 답변 나오면 이전 오디오 정지)
+                    safe_correction = html.escape(correction)
+                    correction_div = f'<div class="correction">📝 빨간펜 선생님: {safe_correction}</div>'
+                ai_block = f"""
+                <div class="chat-row ai">
+                    <div class="avatar">👩‍🏫</div>
+                    <div class="msg-content">
+                        <div class="name">AI 튜터</div>
+                        <div class="bubble ai-bubble">{safe_bubble}</div>
+                        {img_tags}
+                        {correction_div}
+                    </div>
+                </div>
+                """
+                st.markdown(ai_block, unsafe_allow_html=True)
+                # 각 AI 답변마다 오디오바 (새 답변만 자동 재생)
                 is_last_message = (i == len(messages) - 1)
                 should_autoplay = is_last_message and st.session_state.get("play_tts")
                 if i not in st.session_state.tts_cache:
