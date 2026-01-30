@@ -205,27 +205,23 @@ def main():
     if "selected_scenario" not in st.session_state:
         st.session_state.selected_scenario = "airport"  # 기본값
 
-    # 사이드바: 테마 선택 (아주 심플하게)
-    with st.sidebar:
-        st.header("🗺️ 테마 선택 (Select Theme)")
-        scenario_options = {k: v["title"] for k, v in SCENARIOS.items()}
-        selected_key = st.selectbox(
-            "어디서 연습할까요?",
-            options=list(scenario_options.keys()),
-            format_func=lambda x: scenario_options[x],
-            key="scenario_selector"
-        )
-        
-        # 테마가 바뀌면 대화 기록 초기화
-        if selected_key != st.session_state.selected_scenario:
-            st.session_state.selected_scenario = selected_key
-            st.session_state.messages = []
-            st.rerun()
+    # 메인 화면 최상단: 테마 선택
+    scenario_options = {k: v["title"] for k, v in SCENARIOS.items()}
+    selected_key = st.selectbox(
+        "오늘 어디서 연습할까요? (Select Scene)",
+        options=list(scenario_options.keys()),
+        format_func=lambda x: scenario_options[x],
+        key="scenario_selector"
+    )
+    if selected_key != st.session_state.selected_scenario:
+        st.session_state.selected_scenario = selected_key
+        st.session_state.messages = []
+        st.rerun()
 
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
 
-    # 메인 화면 헤더
-    st.markdown(f"<h2 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h2>", unsafe_allow_html=True)
+    # 선택된 테마 제목 (h1으로 강조)
+    st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
     # 탭 구성
