@@ -59,7 +59,7 @@ class LineItem:
 
 
 # 마당 식당 전용 데이터 (roman: 로마자, en: 영어, th: 태국어 설명)
-SAMPLE_LINES: List[LineItem] = [
+SAMPLE_LINES_RESTAURANT: List[LineItem] = [
     LineItem(
         show="(마당 식당) 주문하기",
         level="A1",
@@ -69,7 +69,7 @@ SAMPLE_LINES: List[LineItem] = [
         notes="식당에서 음식을 주문할 때 쓰는 가장 기본적인 표현.",
         vocab=[("짜장면", "Jjajangmyeon"), ("탕수육", "Tangsuyuk"), ("주세요", "Please give me")],
         patterns=[("~ 주세요", "무언가를 정중하게 요청할 때")],
-        th=None,  # 예: อยากได้ จาจังมยอน หนึ่ง ที่ กับ ทังซูยุก ขนาดเล็ก
+        th=None,
     ),
     LineItem(
         show="(마당 식당) 맵기 조절",
@@ -106,8 +106,182 @@ SAMPLE_LINES: List[LineItem] = [
     ),
 ]
 
+# 공항 테마: 체크인·보안검색·기내 등
+SAMPLE_LINES_AIRPORT: List[LineItem] = [
+    LineItem(
+        show="(공항) 체크인",
+        level="A1",
+        kr="인천행 비행기 표 하나 예약했는데요, 체크인 해주세요.",
+        roman="Incheon-haeng bihaenggi pyo hana ye-yak-haet-neundeyo, chekeu-in hae juseyo.",
+        en="I have a reservation for a flight to Incheon. I'd like to check in, please.",
+        notes="공항 카운터에서 체크인 요청할 때.",
+        vocab=[("인천행", "To Incheon"), ("예약했는데요", "I made a reservation"), ("체크인", "Check-in")],
+        patterns=[("~ 해주세요", "행동을 정중히 요청할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(공항) 수하물",
+        level="A1",
+        kr="이 가방 기내에 가지고 타도 될까요?",
+        roman="I gabang ginae-e gajigo tado doelkkayo?",
+        en="Can I take this bag on board?",
+        notes="기내 반입 가능 여부를 물을 때.",
+        vocab=[("가방", "Bag"), ("기내", "Cabin"), ("가지고 타다", "Take on board")],
+        patterns=[("~ 될까요?", "가능 여부를 물을 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(공항) 출구/환승",
+        level="A2",
+        kr="환승이에요. 다음 비행기 탑승 게이트가 어디예요?",
+        roman="Hwanseung-ieyo. Da-eum bihaenggi tapseung geiteu-ga eodi-yeyo?",
+        en="I'm in transit. Where is the gate for my next flight?",
+        notes="환승 시 다음 게이트 위치를 물을 때.",
+        vocab=[("환승", "Transit"), ("탑승 게이트", "Boarding gate"), ("어디예요", "Where is")],
+        patterns=[("~ 어디예요?", "위치를 물을 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(공항) 기내 서비스",
+        level="A1",
+        kr="물 한 잔 주실 수 있을까요?",
+        roman="Mul han jan jusil su isseulkkayo?",
+        en="Could I have a glass of water, please?",
+        notes="기내에서 음료 요청할 때.",
+        vocab=[("물", "Water"), ("한 잔", "A glass"), ("주실 수 있을까요", "Could you give me")],
+        patterns=[("~ 주실 수 있을까요?", "정중히 요청할 때")],
+        th=None,
+    ),
+]
+
+# 전통시장 테마: 흥정·가격·맛보기 등
+SAMPLE_LINES_MARKET: List[LineItem] = [
+    LineItem(
+        show="(전통시장) 가격 문의",
+        level="A1",
+        kr="이거 얼마예요?",
+        roman="Igeo eolma-yeyo?",
+        en="How much is this?",
+        notes="시장에서 가격을 물을 때 가장 많이 쓰는 표현.",
+        vocab=[("이거", "This"), ("얼마예요", "How much is it")],
+        patterns=[("이거/그거 얼마예요?", "가격 물어볼 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(전통시장) 흥정",
+        level="A2",
+        kr="조금만 깎아주세요.",
+        roman="Jogeum-man kkakka-juseyo.",
+        en="Could you give me a little discount?",
+        notes="가격을 조금 낮춰 달라고 할 때.",
+        vocab=[("조금만", "Just a little"), ("깎다", "To reduce/discount")],
+        patterns=[("~ 만 깎아주세요", "할인 요청할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(전통시장) 맛보기",
+        level="A1",
+        kr="맛보기 해도 될까요?",
+        roman="Matbogi haedo doelkkayo?",
+        en="May I try a sample?",
+        notes="먹어보기/맛보기 허락을 구할 때.",
+        vocab=[("맛보기", "Tasting/Sample"), ("해도 될까요", "Is it okay to")],
+        patterns=[("~ 해도 될까요?", "허락을 구할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(전통시장) 양/개수",
+        level="A1",
+        kr="이거 한 근이에요? 저한테 한 근만 주세요.",
+        roman="Igeo han geun-ieyo? Jeo-hante han geun-man juseyo.",
+        en="Is this one geun (about 600g)? Please give me just one geun.",
+        notes="전통시장에서 무게 단위(근)로 살 때.",
+        vocab=[("한 근", "One geun (~600g)"), ("~만 주세요", "Just give me ~")],
+        patterns=[("~ 만 주세요", "양을 지정할 때")],
+        th=None,
+    ),
+]
+
+# 테마별 메타: 페르소나, 인사말, 샘플 문장 리스트
+THEMES: Dict[str, Dict] = {
+    "restaurant": {
+        "name": "식당",
+        "name_en": "Restaurant",
+        "persona": "태국 치앙마이의 한식당 '마당(Madang)'에서 일하는 눈치 빠르고 친절한 한국인 점원",
+        "greeting": "어서오세요! 치앙마이 마당(Madang) 식당입니다. 주문하시겠어요? 😊",
+        "lines": SAMPLE_LINES_RESTAURANT,
+    },
+    "airport": {
+        "name": "공항",
+        "name_en": "Airport",
+        "persona": "인천공항에서 근무하는 친절하고 말이 빠른 한국인 지상직 직원",
+        "greeting": "안녕하세요. 인천공항입니다. 체크인하시나요, 아니면 다른 문의가 있으신가요? ✈️",
+        "lines": SAMPLE_LINES_AIRPORT,
+    },
+    "market": {
+        "name": "전통시장",
+        "name_en": "Market",
+        "persona": "전통시장에서 장사를 하는 말주변이 좋고 유머러스한 한국인 상인",
+        "greeting": "어서 오세요~ 오늘 뭐 찾으세요? 맛있는 거 많아요! 🥬",
+        "lines": SAMPLE_LINES_MARKET,
+    },
+}
+
+# 하위 호환: 기존 변수명 유지
+SAMPLE_LINES: List[LineItem] = SAMPLE_LINES_RESTAURANT
+
 
 LEVELS = ["A1", "A2", "B1", "B2", "C1"]
+
+# 오늘의 한 문장: 날짜(일) 기준으로 매일 다른 표현 (실생활 유용 표현)
+DAILY_SENTENCES: List[Dict] = [
+    {"kr": "이거 얼마예요?", "roman": "Igeo eolma-yeyo?", "en": "How much is this?"},
+    {"kr": "조금만 깎아주세요.", "roman": "Jogeum-man kkakka-juseyo.", "en": "Could you give me a little discount?"},
+    {"kr": "여기 하나 주세요.", "roman": "Yeogi hana juseyo.", "en": "One of these, please."},
+    {"kr": "봉지에 담아 주세요.", "roman": "Bongji-e dama juseyo.", "en": "Put it in a bag, please."},
+    {"kr": "맛있게 드세요.", "roman": "Masitge deuseyo.", "en": "Enjoy your meal."},
+    {"kr": "계산해 주세요.", "roman": "Gyesan-hae juseyo.", "en": "Check, please. / I'd like to pay."},
+    {"kr": "카드 돼요?", "roman": "Kadeu dwaeyo?", "en": "Do you take cards?"},
+    {"kr": "영수증 주세요.", "roman": "Yeongsujeung juseyo.", "en": "Receipt, please."},
+    {"kr": "화장실 어디예요?", "roman": "Hwajangsil eodi-yeyo?", "en": "Where is the restroom?"},
+    {"kr": "여기 앉아도 돼요?", "roman": "Yeogi anja-do dwaeyo?", "en": "May I sit here?"},
+    {"kr": "메뉴판 주세요.", "roman": "Menyupan juseyo.", "en": "Menu, please."},
+    {"kr": "이거로 할게요.", "roman": "Igeoro halgeyo.", "en": "I'll have this one."},
+    {"kr": "맵지 않게 해주세요.", "roman": "Maepji anke hae juseyo.", "en": "Make it not spicy, please."},
+    {"kr": "물 한 잔 더 주세요.", "roman": "Mul han jan deo juseyo.", "en": "One more glass of water, please."},
+    {"kr": "포장해 주세요.", "roman": "Pojang-hae juseyo.", "en": "To go, please. / Wrap it up."},
+    {"kr": "따뜻하게 해주세요.", "roman": "Ttatteutage hae juseyo.", "en": "Make it hot/warm, please."},
+    {"kr": "여기서 먹을게요.", "roman": "Yeogiseo meogeulgeyo.", "en": "I'll eat here."},
+    {"kr": "잘 먹었습니다.", "roman": "Jal meogeot-seumnida.", "en": "Thank you for the meal."},
+    {"kr": "맛있어요.", "roman": "Masisseoyo.", "en": "It's delicious."},
+    {"kr": "추천 메뉴 있어요?", "roman": "Chucheon menyu isseoyo?", "en": "Do you have any recommendations?"},
+    {"kr": "조금만 기다려 주세요.", "roman": "Jogeum-man gidaryeo juseyo.", "en": "Please wait a moment."},
+    {"kr": "이거 한 개에 얼마예요?", "roman": "Igeo han gae-e eolma-yeyo?", "en": "How much per piece?"},
+    {"kr": "맛보기 해도 될까요?", "roman": "Matbogi haedo doelkkayo?", "en": "May I try a sample?"},
+    {"kr": "너무 비싸요. 깎아주세요.", "roman": "Neomu bissayo. Kkakka-juseyo.", "en": "It's too expensive. Give me a discount."},
+    {"kr": "여기 있어요?", "roman": "Yeogi isseoyo?", "en": "Is it here? / Are you here?"},
+    {"kr": "네, 여기요.", "roman": "Ne, yeogiyo.", "en": "Yes, over here. / Yes, I'm here."},
+    {"kr": "천 원이에요.", "roman": "Cheon won-ieyo.", "en": "It's 1,000 won."},
+    {"kr": "감사합니다.", "roman": "Gamsa-hamnida.", "en": "Thank you."},
+    {"kr": "괜찮아요.", "roman": "Gwaenchanayo.", "en": "It's okay. / No problem."},
+    {"kr": "다음에 또 올게요.", "roman": "Da-eum-e tto olgeyo.", "en": "I'll come again next time."},
+    {"kr": "편하게 드세요.", "roman": "Pyeonhage deuseyo.", "en": "Make yourself at home. / Help yourself."},
+    {"kr": "뜨거우니까 조심하세요.", "roman": "Tteugeounikka josimhaseyo.", "en": "It's hot, so be careful."},
+]
+
+# K-Slang: 요즘 한국어 표현 (의미·사용법 영어 설명)
+SLANG_ITEMS: List[Dict] = [
+    {"word": "맛점", "meaning_en": "A blend of '맛있는(licious)' + '점심(lunch)'. Means 'enjoy your lunch' or 'have a nice lunch'.", "usage_en": "Say it when someone is about to eat lunch or when you're leaving at lunchtime. e.g. '맛점 하세요!' = 'Enjoy your lunch!'"},
+    {"word": "대박", "meaning_en": "Literally 'big gourd'. Slang for 'awesome', 'amazing', 'daebak', or sometimes 'huge (success/fail)'.", "usage_en": "Use when something is impressive or shocking. e.g. '대박!' = 'Wow!/No way!' '대박이다' = 'It's amazing.'"},
+    {"word": "진짜", "meaning_en": "Really, seriously, for real. Emphasizes that you mean what you say.", "usage_en": "Before a statement: '진짜 맛있어요' = 'It's really good.' Or alone: '진짜?' = 'Really?'"},
+    {"word": "심심이", "meaning_en": "From '심심하다' (to be bored). A cute way to say 'I'm bored' or 'bored person'.", "usage_en": "Say '심심해요' or '나 심심이' when you're bored. Often used playfully."},
+    {"word": "킹받다", "meaning_en": "Slang for 'extremely annoying' or 'makes me so mad'. From '열받다' (to get angry) with '킹(king)' for emphasis.", "usage_en": "Use when something really annoys you. e.g. '진짜 킹받아' = 'I'm so annoyed.'"},
+    {"word": "레알", "meaning_en": "Konglish for 'real'. Used to mean 'for real', 'seriously'.", "usage_en": "Same as '진짜'. e.g. '레알?' = 'For real?' '레알 대박' = 'Seriously amazing.'"},
+    {"word": "ㅋㅋ / ㅎㅎ", "meaning_en": "Korean internet laughter. ㅋㅋ = 'kk' (laughing), ㅎㅎ = 'hh' (softer laugh).", "usage_en": "Add at the end of messages like 'lol' or 'haha'. More ㅋ = more laughter. e.g. '맛있어요 ㅋㅋ'"},
+    {"word": "갓", "meaning_en": "Konglish 'god' used as prefix. Means 'god-tier', 'the best'.", "usage_en": "Put before a word to praise. e.g. '갓 맛집' = 'god-tier restaurant', '갓 스타' = 'god star'."},
+    {"word": "핵", "meaning_en": "Literally 'nuclear'. Slang for 'extremely', 'super'.", "usage_en": "Used like '핵 맛있어' = 'super delicious', '핵 귀여워' = 'super cute'."},
+    {"word": "실화", "meaning_en": "Short for '실제 이야기' (real story). Means 'for real?', 'is this real?'.", "usage_en": "When something is hard to believe. e.g. '실화야?' = 'Is this for real?'"},
+]
 
 
 def normalize_ws(s: str) -> str:
@@ -121,6 +295,7 @@ def now_iso() -> str:
 def init_state() -> None:
     ss = st.session_state
     ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "K-드라마로 자연스러운 회화 익히기"})
+    ss.setdefault("current_theme", "restaurant")  # restaurant | airport | market
     ss.setdefault("gemini_api_key", "")
     ss.setdefault("admin_mode", False)
     ss.setdefault("settings_unlocked", False)  # 설정 팝오버 비밀번호 통과 여부
@@ -256,6 +431,21 @@ def sidebar_profile() -> None:
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
+    # 테마 선택: 식당 / 공항 / 전통시장 (AI 페르소나·추천 문장 자동 변경)
+    st.sidebar.header("테마")
+    theme_options = [(k, f"{v['name']} ({v['name_en']})") for k, v in THEMES.items()]
+    current = st.session_state.get("current_theme", "restaurant")
+    choice = st.sidebar.radio(
+        "장소를 골라 보세요",
+        options=[t[0] for t in theme_options],
+        format_func=lambda k: dict(theme_options)[k],
+        index=list(THEMES.keys()).index(current) if current in THEMES else 0,
+        key="sidebar_theme_radio",
+    )
+    if choice != current:
+        st.session_state["current_theme"] = choice
+        st.rerun()
+
     # 관리자 모드는 상단 헤더 우측 ⚙️ 설정(팝오버)에서만 제어. 여기서는 표시만.
     if not st.session_state.get("admin_mode", False):
         return  # 관리자 모드 꺼져 있으면 사이드바 관리 UI 숨김
@@ -371,16 +561,21 @@ def make_quiz_from_line(item: LineItem) -> None:
 
 
 def tab_menu_learn() -> None:
-    """심플 메뉴판: SAMPLE_LINES만 보여주고, 선택한 표현으로 주문 연습 연결."""
+    """테마별 추천 문장을 보여주고, 선택한 표현으로 롤플레이 연결."""
+    theme_key = st.session_state.get("current_theme", "restaurant")
+    theme = THEMES.get(theme_key, THEMES["restaurant"])
+    lines = theme["lines"]
+    theme_name = theme["name"]
+
     st.header("메뉴 표현 익히기")
-    st.caption("마당 식당에서 쓸 수 있는 표현을 골라 보세요.")
+    st.caption(f"{theme_name}에서 쓸 수 있는 표현을 골라 보세요.")
 
     idx = st.selectbox(
         "표현 고르기",
-        options=list(range(len(SAMPLE_LINES))),
-        format_func=lambda i: SAMPLE_LINES[i].kr,
+        options=list(range(len(lines))),
+        format_func=lambda i: lines[i].kr,
     )
-    item = SAMPLE_LINES[idx]
+    item = lines[idx]
 
     st.markdown(f"**{item.kr}**")
     st.caption(f"로마자: {item.roman}")
@@ -397,7 +592,27 @@ def tab_menu_learn() -> None:
     if st.button("AI 점원과 주문 연습하기", type="primary"):
         st.session_state.roleplay_seed = {"kr": item.kr, "en": item.en}
         add_history("roleplay_start", {"kr": item.kr})
-        st.success("→ 오른쪽 탭 **AI 점원과 주문 연습**에서 연습해 보세요.")
+        st.success(f"→ **{theme_name}** 탭에서 **AI 점원과 주문 연습**으로 이동해 연습해 보세요.")
+
+
+def tab_slang() -> None:
+    """요즘 한국어(K-Slang): 맛점, 대박, 진짜 등 의미·사용법 영어 설명."""
+    st.header("요즘 한국어 (K-Slang)")
+    st.caption("맛점, 대박, 진짜 같은 표현의 의미와 사용법을 영어로 알아보세요.")
+
+    for i, s in enumerate(SLANG_ITEMS):
+        with st.container():
+            st.markdown(
+                f"""
+                <div class="slang-card">
+                    <div class="slang-word">✨ {s["word"]}</div>
+                    <div class="slang-meaning"><strong>Meaning:</strong> {s["meaning_en"]}</div>
+                    <div class="slang-usage"><strong>Usage:</strong> {s["usage_en"]}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            st.write("")  # 간격
 
 
 def generate_support_card(kr: str, profile_level: str) -> LineItem:
@@ -491,12 +706,14 @@ def tab_roleplay() -> None:
         return
 
     seed = st.session_state["roleplay_seed"]
+    theme_key = st.session_state.get("current_theme", "restaurant")
+    theme = THEMES.get(theme_key, THEMES["restaurant"])
+    greeting = theme["greeting"]
+    persona = theme["persona"]
     st.session_state.setdefault("pending_prompt", None)
 
     if "last_seed" not in st.session_state or st.session_state.last_seed != seed["kr"]:
-        st.session_state.roleplay_history = [
-            {"role": "model", "content": "어서오세요! 치앙마이 마당(Madang) 식당입니다. 주문하시겠어요? 😊"}
-        ]
+        st.session_state.roleplay_history = [{"role": "model", "content": greeting}]
         st.session_state.last_seed = seed["kr"]
 
     # ─── 1. 헤더/미션 출력 ───────────────────────────────────────────────
@@ -524,13 +741,13 @@ def tab_roleplay() -> None:
             try:
                 current_time_str = get_current_kst_str()
                 full_prompt = f"""
-                당신은 태국 치앙마이의 한식당 '마당(Madang)'에서 일하는 **눈치 빠르고 친절한 한국인 점원**입니다.
-                상대방은 한국어를 배우는 손님이에요. 미션 수행을 확인하는 선생님이 아니라, 손님과 즐겁게 수다도 떨 줄 아는 점원이에요.
+                당신은 **{persona}**입니다.
+                상대방은 한국어를 배우는 손님이에요. 미션 수행을 확인하는 선생님이 아니라, 손님과 즐겁게 수다도 떨 줄 아는 직원/상인이에요.
                 직원의 태도: 친절함, 정중함, 격려해주는 태도. 대화는 풍부하고 자연스럽게.
 
                 [시점·장소]
                 Current Date: {current_time_str}
-                Current Location: Chiang Mai, Thailand (Korean Restaurant Madang)
+                Current Location: {theme.get('name_en', 'Restaurant')} setting (roleplay)
 
                 [대화 우선순위 (필수)]
                 - 손님이 날씨·안부·추천·질문 등을 하면 **그 질문에 대한 답변을 최우선**으로 해라. 답은 친절하고 풍부하게.
@@ -547,9 +764,9 @@ def tab_roleplay() -> None:
                 - 손님이 "현재 대통령이 누구야?"처럼 짧게만 물을 때만 이 정보로 답하고, 바로 식사·주문 이야기로 넘어가라.
 
                 [역할 고정 및 정치 질문 방어 (필수)]
-                - 너는 식당 점원이지, 정치 전문가나 판사가 아니다.
-                - 손님이 대통령·재판·형량·뉴스 등 정치적인 깊은 이야기를 꺼내면, **"아이고, 저는 뉴스를 잘 안 봐서 그런 어려운 건 잘 모릅니다. 😅 그보다 맛있는 식사 준비해 드릴까요?"** 처럼 짧게 넘기고 자연스럽게 음식·주문으로 화제를 돌려라.
-                - 손님이 "징역 20년 아니냐?"처럼 사실을 우기면, 동의하거나 반박하지 말고 **"손님이 더 잘 아시네요! 저는 주방에 주문이나 넣어야겠습니다."** 하고 넘겨라. 모르는 사실은 지어내지 말라.
+                - 너는 현재 역할(점원/직원/상인)이지, 정치 전문가나 판사가 아니다.
+                - 손님이 대통령·재판·형량·뉴스 등 정치적인 깊은 이야기를 꺼내면, **"아이고, 저는 뉴스를 잘 안 봐서 그런 건 잘 모릅니다. 😅 다른 거 도와드릴까요?"** 처럼 짧게 넘기고 자연스럽게 현재 장소(주문/체크인/쇼핑 등) 이야기로 화제를 돌려라.
+                - 손님이 사실을 우기면, 동의하거나 반박하지 말고 **"손님이 더 잘 아시네요! 저는 일 보러 가야겠어요."** 하고 넘겨라. 모르는 사실은 지어내지 말라.
 
                 너는 현재 {current_time_str} 기준의 상황에 있다. 시간·날짜는 위 정보를 바탕으로 짧게만 답하라.
                 대화 내역 (마지막 말에 자연스럽게 답하세요):
@@ -655,6 +872,61 @@ def _inject_app_styles(is_admin: bool) -> None:
             padding: 20px !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
             margin-bottom: 1rem !important;
+        }}
+
+        /* 오늘의 한 문장 카드: 베이지 헤더와 어울리는 카드 */
+        .daily-sentence-card {{
+            background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%) !important;
+            border: 1px solid #FFE0B2 !important;
+            border-radius: 12px !important;
+            padding: 1rem 1.2rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+            margin-bottom: 0.5rem !important;
+        }}
+        .daily-sentence-title {{
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            color: #5D4037 !important;
+            margin-bottom: 0.5rem !important;
+        }}
+        .daily-sentence-kr {{
+            font-size: 1.25rem !important;
+            font-weight: 700 !important;
+            color: #E65100 !important;
+        }}
+        .daily-sentence-roman {{
+            font-size: 0.9rem !important;
+            color: #795548 !important;
+            margin-top: 0.25rem !important;
+        }}
+        .daily-sentence-en {{
+            font-size: 0.95rem !important;
+            color: #5D4037 !important;
+            margin-top: 0.25rem !important;
+        }}
+
+        /* K-Slang 카드: 깔끔한 카드 스타일 */
+        .slang-card {{
+            background-color: #FFFBF5 !important;
+            border: 1px solid #FFE0B2 !important;
+            border-radius: 12px !important;
+            padding: 1rem 1.2rem !important;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+            margin-bottom: 0.8rem !important;
+        }}
+        .slang-word {{
+            font-size: 1.2rem !important;
+            font-weight: 700 !important;
+            color: #E65100 !important;
+            margin-bottom: 0.4rem !important;
+        }}
+        .slang-meaning, .slang-usage {{
+            font-size: 0.9rem !important;
+            color: #5D4037 !important;
+            line-height: 1.5 !important;
+        }}
+        .slang-usage {{
+            margin-top: 0.3rem !important;
         }}
 
         /* ─── 7. 탭: 파스텔 Coral/Peach, 선택 시 부드러운 강조 ─── */
@@ -791,6 +1063,22 @@ def main() -> None:
             if st.button("잠금", key="settings_lock"):
                 st.session_state["settings_unlocked"] = False
                 st.rerun()
+    # 오늘의 한 문장: 날짜(일) 기준 매일 다른 표현 (카드 스타일)
+    day_idx = datetime.now(KST).timetuple().tm_yday % len(DAILY_SENTENCES)
+    daily = DAILY_SENTENCES[day_idx]
+    st.markdown(
+        f"""
+        <div class="daily-sentence-card">
+            <div class="daily-sentence-title">📅 오늘의 한 문장</div>
+            <div class="daily-sentence-kr">{daily["kr"]}</div>
+            <div class="daily-sentence-roman">{daily["roman"]}</div>
+            <div class="daily-sentence-en">{daily["en"]}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.write("")
+
     st.divider()
 
     sidebar_profile()
@@ -798,10 +1086,12 @@ def main() -> None:
     is_admin = st.session_state.get("admin_mode", False)
     _inject_app_styles(is_admin)
 
-    tabs = st.tabs(["메뉴 표현 익히기", "AI 점원과 주문 연습"])
+    tabs = st.tabs(["메뉴 표현 익히기", "요즘 한국어 (K-Slang)", "AI 점원과 주문 연습"])
     with tabs[0]:
         tab_menu_learn()
     with tabs[1]:
+        tab_slang()
+    with tabs[2]:
         tab_roleplay()
 
 
