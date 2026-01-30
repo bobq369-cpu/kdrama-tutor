@@ -873,168 +873,48 @@ def tab_roleplay() -> None:
 
 
 def _inject_app_styles() -> None:
-    """Minimal & Modern 모바일 앱 스타일: Eggbun처럼 세련된 UI."""
-    st.markdown(
-        """
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <style>
-        /* ─── 0. 전역 폰트 & 글자 간격 ─── */
-        * {
-            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif !important;
-            letter-spacing: -0.01em;
-        }
-
-        /* 1. 본문 여백 */
-        .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 5rem !important;
-        }
-        .main .block-container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
-
-        /* 2. 헤더 투명 */
-        header[data-testid="stHeader"] {
-            background-color: transparent !important;
-            z-index: 1;
-        }
-        [data-testid="stToolbar"] { display: none !important; }
-
-        /* ─── 3. 배경: 부드러운 화이트 (Minimalist) ─── */
-        .main {
-            background-color: #F8F9FA !important;
-        }
-        section[data-testid="stSidebar"] {
-            background-color: #FFFFFF !important;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.04) !important;
-        }
-        .main .block-container { position: relative !important; }
-
-        /* ─── 4. 헤더: 화이트 플로팅 카드 ─── */
-        .header-container {
-            display: flex;
-            align-items: center;
-            background-color: #FFFFFF !important;
-            padding: 0.75rem 1rem !important;
-            border-radius: 16px !important;
-            margin-bottom: 0.5rem !important;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
-        }
-        .header-text {
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            color: #212529 !important;
-            margin-left: 0.75rem !important;
-        }
-
-        /* ─── 5. 테마 뱃지 (아이콘 + 텍스트만) ─── */
-        .scenario-badge {
-            display: inline-flex;
-            align-items: center;
-            background: #FFFFFF;
-            border-radius: 999px;
-            padding: 0.5rem 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #495057;
-        }
-        .scenario-emoji { font-size: 1.2rem; margin-right: 0.35rem; }
-        .scenario-label { font-weight: 500; }
-
-        /* ─── 6. 플로팅 카드 (메인 영역) ─── */
-        .main .block-container > div:not(:first-child) {
-            background-color: #FFFFFF !important;
-            border-radius: 16px !important;
-            padding: 1.25rem !important;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
-            margin-bottom: 1rem !important;
-            animation: fadeIn 0.35s ease-out;
-        }
-
-        .daily-sentence-card {
-            background: #FFFFFF !important;
-            border: 1px solid #E9ECEF !important;
-            border-radius: 16px !important;
-            padding: 1rem 1.25rem !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
-            margin-bottom: 0.5rem !important;
-        }
-        .daily-sentence-title { font-size: 0.85rem !important; font-weight: 600 !important; color: #868E96 !important; margin-bottom: 0.4rem !important; }
-        .daily-sentence-kr { font-size: 1.15rem !important; font-weight: 700 !important; color: #212529 !important; }
-        .daily-sentence-roman { font-size: 0.8rem !important; color: #868E96 !important; margin-top: 0.2rem !important; }
-        .daily-sentence-en { font-size: 0.9rem !important; color: #495057 !important; margin-top: 0.2rem !important; }
-
-        .slang-card {
-            background: #FFFFFF !important;
-            border: 1px solid #E9ECEF !important;
-            border-radius: 14px !important;
-            padding: 1rem 1.2rem !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
-            margin-bottom: 0.75rem !important;
-        }
-        .slang-word { font-size: 1.1rem !important; font-weight: 700 !important; color: #212529 !important; margin-bottom: 0.35rem !important; }
-        .slang-meaning, .slang-usage { font-size: 0.85rem !important; color: #495057 !important; line-height: 1.55 !important; }
-        .slang-usage { margin-top: 0.25rem !important; }
-
-        /* ─── 7. 채팅 말풍선 (카카오톡/아이메시지 스타일: 둥글고 그림자) ─── */
-        [data-testid="stChatMessage"] {
-            border-radius: 18px !important;
-            padding: 0.75rem 1rem !important;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.08) !important;
-            animation: fadeIn 0.25s ease-out;
-        }
-        /* 사용자 말풍선: 파란색 (Streamlit은 user 메시지에 avatar="user" 등 사용) */
-        [data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] {
-            border-radius: 50% !important;
-        }
-        div[data-testid="stChatMessage"] > div:last-child {
-            border-radius: 18px !important;
-            padding: 0.6rem 1rem !important;
-        }
-
-        /* ─── 8. 탭: 네비게이션 바 스타일 ─── */
-        [data-testid="stTabs"] {
-            padding: 0.5rem 0 1rem 0 !important;
-            border-bottom: 1px solid #E9ECEF !important;
-        }
-        [data-testid="stTabs"] button, [data-testid="stTabs"] [role="tab"], [data-testid="stTabs"] [data-baseweb="tab"] {
-            font-size: 0.95rem !important;
-            font-weight: 600 !important;
-            padding: 0.6rem 1rem !important;
-            border-radius: 12px !important;
-            color: #495057 !important;
-        }
-        [data-testid="stTabs"] button:hover, [data-testid="stTabs"] [role="tab"]:hover {
-            color: #212529 !important;
-            background-color: #F1F3F5 !important;
-        }
-        [data-testid="stTabs"] button[aria-selected="true"],
-        [data-testid="stTabs"] [role="tab"][aria-selected="true"],
-        div[data-baseweb="tab-list"] button[aria-selected="true"] {
-            font-weight: 700 !important;
-            background-color: #212529 !important;
-            color: #FFFFFF !important;
-            border-radius: 12px !important;
-            border-bottom: none !important;
-        }
-
-        /* ─── 9. 페이드인 애니메이션 ─── */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ─── 10. 하단 풋터/Manage app 숨김 ─── */
-        footer { display: none !important; visibility: hidden !important; }
-        [data-testid="stManageAppButton"] { display: none !important; visibility: hidden !important; }
-        [data-testid="stDecoration"] { display: none !important; }
-        footer a[href*="manage"] { display: none !important; }
-        </style>
-        """,
-        unsafe_allow_html=True,
+    """프리미엄 모바일 앱 스타일. CSS는 모두 <style> 내부에 넣어 화면에 텍스트로 노출되지 않음."""
+    css = (
+        "<link href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap' rel='stylesheet'>"
+        "<style>"
+        "*{font-family:'Noto Sans KR',sans-serif !important;letter-spacing:-0.02em;}"
+        ".block-container{padding-top:1rem !important;padding-bottom:5rem !important;}"
+        ".main .block-container{max-width:700px !important;margin:0 auto !important;position:relative !important;}"
+        "header[data-testid='stHeader']{background:transparent !important;z-index:1;}"
+        "[data-testid='stToolbar']{display:none !important;}"
+        ".main{background-color:#F9FAFB !important;}"
+        "section[data-testid='stSidebar']{background:#FFF !important;box-shadow:2px 0 16px rgba(0,0,0,0.04) !important;}"
+        ".header-container{display:flex;align-items:center;background:#FFF !important;padding:0.85rem 1.2rem !important;border-radius:16px !important;margin-bottom:0.6rem !important;box-shadow:0 2px 16px rgba(0,0,0,0.06) !important;}"
+        ".header-text{font-size:1.05rem !important;font-weight:600 !important;color:#111 !important;margin-left:0.75rem !important;line-height:1.5 !important;}"
+        ".scenario-badge{display:inline-flex;align-items:center;background:#FFF;border-radius:999px;padding:0.5rem 1rem;box-shadow:0 2px 10px rgba(0,0,0,0.06);margin-bottom:0.5rem;font-size:0.9rem;color:#374151;}"
+        ".scenario-emoji{font-size:1.2rem;margin-right:0.4rem;}"
+        ".scenario-label{font-weight:500;line-height:1.5;}"
+        ".main .block-container > div:not(:first-child){background:#FFF !important;border-radius:16px !important;padding:1.35rem !important;box-shadow:0 2px 16px rgba(0,0,0,0.06) !important;margin-bottom:1rem !important;}"
+        ".daily-sentence-card{background:#FFF !important;border:1px solid #E5E7EB !important;border-radius:16px !important;padding:1rem 1.25rem !important;box-shadow:0 2px 10px rgba(0,0,0,0.04) !important;margin-bottom:0.5rem !important;}"
+        ".daily-sentence-title{font-size:0.85rem !important;font-weight:600 !important;color:#6B7280 !important;margin-bottom:0.4rem !important;line-height:1.5 !important;}"
+        ".daily-sentence-kr{font-size:1.2rem !important;font-weight:700 !important;color:#111 !important;line-height:1.6 !important;}"
+        ".daily-sentence-roman{font-size:0.85rem !important;color:#6B7280 !important;margin-top:0.25rem !important;line-height:1.5 !important;}"
+        ".daily-sentence-en{font-size:0.95rem !important;color:#374151 !important;margin-top:0.25rem !important;line-height:1.5 !important;}"
+        ".slang-card{background:#FFF !important;border:1px solid #E5E7EB !important;border-radius:14px !important;padding:1rem 1.2rem !important;box-shadow:0 2px 10px rgba(0,0,0,0.04) !important;margin-bottom:0.75rem !important;}"
+        ".slang-word{font-size:1.1rem !important;font-weight:700 !important;color:#111 !important;margin-bottom:0.35rem !important;line-height:1.5 !important;}"
+        ".slang-meaning,.slang-usage{font-size:0.9rem !important;color:#374151 !important;line-height:1.65 !important;}"
+        ".slang-usage{margin-top:0.25rem !important;}"
+        "[data-testid='stChatMessage']{border-radius:20px !important;padding:0.75rem 1rem !important;box-shadow:0 1px 6px rgba(0,0,0,0.06) !important;}"
+        "[data-testid='stChatMessage'] > div:last-child{border-radius:20px !important;padding:0.65rem 1rem !important;}"
+        "div[data-testid='stChatMessage']{background:#F0F0F0 !important;color:#111 !important;}"
+        "div[data-testid='stChatMessage']:nth-of-type(even){background:#007AFF !important;color:#FFF !important;}"
+        "div[data-testid='stChatMessage']:nth-of-type(even) p,div[data-testid='stChatMessage']:nth-of-type(even) .stMarkdown{color:#FFF !important;}"
+        "[data-testid='stTabs']{padding:0.5rem 0 1rem 0 !important;border-bottom:none !important;}"
+        "[data-testid='stTabs'] button,[data-testid='stTabs'] [role='tab']{font-size:0.95rem !important;font-weight:600 !important;padding:0.65rem 1.1rem !important;border-radius:12px !important;color:#6B7280 !important;transition:all 0.2s ease !important;}"
+        "[data-testid='stTabs'] button:hover,[data-testid='stTabs'] [role='tab']:hover{color:#111 !important;background:#F3F4F6 !important;}"
+        "[data-testid='stTabs'] button[aria-selected='true'],[data-testid='stTabs'] [role='tab'][aria-selected='true'],div[data-baseweb='tab-list'] button[aria-selected='true']{font-weight:700 !important;background:#111 !important;color:#FFF !important;border-radius:12px !important;border:none !important;}"
+        "button[kind='primary'],.stButton > button{border-radius:12px !important;transition:transform 0.15s ease,box-shadow 0.15s ease !important;}"
+        "button[kind='primary']:hover,.stButton > button:hover{transform:scale(1.02);}"
+        "footer,[data-testid='stManageAppButton'],[data-testid='stDecoration']{display:none !important;visibility:hidden !important;}"
+        "footer a[href*='manage']{display:none !important;}"
+        "</style>"
     )
+    st.markdown(css, unsafe_allow_html=True)
 
 
 def _inject_hide_footer_early() -> None:
