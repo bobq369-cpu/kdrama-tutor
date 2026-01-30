@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 import os
+import html
 from gtts import gTTS
 import tempfile
 import base64
@@ -86,6 +87,36 @@ def inject_custom_css():
             .stTabs [aria-selected="true"] {
                 background-color: #007AFF !important;
                 color: white !important;
+            }
+            /* 홈 화면 카드 그리드 */
+            .scene-card {
+                background: #FFFFFF;
+                border-radius: 16px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                padding: 1.5rem;
+                margin-bottom: 1.25rem;
+                border: 1px solid rgba(0,0,0,0.04);
+                transition: box-shadow 0.2s ease, transform 0.2s ease;
+            }
+            .scene-card:hover {
+                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+                transform: translateY(-2px);
+            }
+            .scene-card-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .scene-card-title {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #1a1a1a;
+                margin-bottom: 0.5rem;
+                line-height: 1.3;
+            }
+            .scene-card-desc {
+                font-size: 0.9rem;
+                color: #6b7280;
+                line-height: 1.45;
             }
         </style>
         """,
@@ -203,22 +234,44 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
     if "selected_scenario" not in st.session_state:
-        st.session_state.selected_scenario = "airport"  # 기본값
+        st.session_state.selected_scenario = "airport"
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "HOME"
 
-    # 메인 화면 최상단: 테마 선택
-    scenario_options = {k: v["title"] for k, v in SCENARIOS.items()}
-    selected_key = st.selectbox(
-        "오늘 어디서 연습할까요? (Select Scene)",
-        options=list(scenario_options.keys()),
-        format_func=lambda x: scenario_options[x],
-        key="scenario_selector"
-    )
-    if selected_key != st.session_state.selected_scenario:
-        st.session_state.selected_scenario = selected_key
-        st.session_state.messages = []
+    # ----- 홈 화면 (카드형 그리드) -----
+    if st.session_state.current_page == "HOME":
+        st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'>오늘 어디서 연습할까요?</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #6b7280; margin-bottom: 2rem;'>Select a scene to start learning</p>", unsafe_allow_html=True)
+
+        items = list(SCENARIOS.items())
+        col0, col1 = st.columns(2)
+        for j, (key, sc) in enumerate(items):
+            col = col0 if j % 2 == 0 else col1
+            with col:
+                card_html = f"""
+                <div class="scene-card">
+                    <div class="scene-card-icon">{sc['icon']}</div>
+                    <div class="scene-card-title">{html.escape(sc['title'])}</div>
+                    <div class="scene-card-desc">{html.escape(sc['context'])}</div>
+                </div>
+                """
+                st.markdown(card_html, unsafe_allow_html=True)
+                if st.button("시작하기 (Start)", key=f"start_{key}"):
+                    st.session_state.current_page = "LEARNING"
+                    st.session_state.selected_scenario = key
+                    st.session_state.messages = []
+                    st.rerun()
+        return
+
+    # ----- 학습 화면 (LEARNING) -----
+    current_scenario = SCENARIOS[st.session_state.selected_scenario]
+
+    # 뒤로 가기 버튼
+    if st.button("⬅️ 뒤로 가기 (Back to Home)", key="back_to_home"):
+        st.session_state.current_page = "HOME"
         st.rerun()
 
-    current_scenario = SCENARIOS[st.session_state.selected_scenario]
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # 선택된 테마 제목 (h1으로 강조)
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
@@ -237,7 +290,6 @@ def main():
                     st.markdown(f"**{kor}**")
                     st.caption(eng)
                 with col2:
-                    # TTS 버튼 (간단한 구현)
                     if st.button("🔊 듣기", key=f"tts_{kor}"):
                         st.markdown(text_to_speech_autoplay(kor), unsafe_allow_html=True)
                 st.divider()
@@ -245,38 +297,30 @@ def main():
     # 탭 2: 실전 대화 (채팅 인터페이스)
     with tab2:
         chat_container = st.container()
-        
-        # 대화 기록 표시
+
         with chat_container:
             if not st.session_state.messages:
-                 st.info("👋 대화를 시작해보세요! (예: '안녕하세요')")
+                st.info("👋 대화를 시작해보세요! (예: '안녕하세요')")
 
             for message in st.session_state.messages:
                 if message["role"] == "user":
                     st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
                 else:
-                    # AI 메시지와 TTS 버튼
                     st.markdown(f'<div class="chat-bubble ai-bubble">{message["content"]}</div>', unsafe_allow_html=True)
-                    # 이전 메시지에 대한 TTS 재생 버튼 (선택 사항)
-                    # st.markdown(text_to_speech_autoplay(message["content"]), unsafe_allow_html=True)
-        
-        # 사용자 입력 처리
+
         if prompt := st.chat_input("한국어로 대화해보세요..."):
-            # 사용자 메시지 추가 및 표시
             st.session_state.messages.append({"role": "user", "content": prompt})
             with chat_container:
-                 st.markdown(f'<div class="chat-bubble user-bubble">{prompt}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="chat-bubble user-bubble">{prompt}</div>', unsafe_allow_html=True)
 
-            # AI 응답 생성
             with st.spinner(f"{current_scenario['icon']} AI가 답변을 생각 중입니다..."):
                 ai_response_text = get_ai_response(st.session_state.messages, st.session_state.selected_scenario)
-            
-            # AI 응답 추가, 표시 및 TTS 자동 재생
+
             st.session_state.messages.append({"role": "assistant", "content": ai_response_text})
             with chat_container:
                 st.markdown(f'<div class="chat-bubble ai-bubble">{ai_response_text}</div>', unsafe_allow_html=True)
-                # 답변 자동 재생 (선택 사항, 너무 시끄러우면 주석 처리)
                 st.markdown(text_to_speech_autoplay(ai_response_text), unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
