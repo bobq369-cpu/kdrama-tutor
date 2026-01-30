@@ -539,7 +539,7 @@ def sidebar_scenario() -> None:
     st.sidebar.header("학습 장소 선택")
     st.sidebar.caption("Select a Scenario")
     scenario_options = list(SCENARIOS.keys())
-    scenario_labels = [f"{SCENARIOS[k]['name']} — {SCENARIOS[k]['situation']}" for k in scenario_options]
+    scenario_labels = [f"{SCENARIOS[k].get('emoji', '')} {SCENARIOS[k]['name']} — {SCENARIOS[k]['situation']}" for k in scenario_options]
     current = st.session_state.get("current_scenario", "restaurant")
     choice_idx = scenario_options.index(current) if current in scenario_options else 0
     choice = st.sidebar.selectbox(
@@ -780,6 +780,16 @@ def tab_roleplay() -> None:
     st.header("AI와 역할놀이")
     st.success(f"🎯 **{situation}** — 연습 문장: **{seed['kr']}** (상대 역할: {role})")
 
+    # 퀵 답장: 채팅창 내 표현 고르기 버튼
+    st.caption("💬 빠른 표현 (클릭하면 입력창에 넣어짐)")
+    quick_lines = scenario["lines"][:5]
+    cols = st.columns(min(len(quick_lines), 5))
+    for i, line in enumerate(quick_lines):
+        with cols[i % len(cols)]:
+            if st.button(line.kr[:20] + ("…" if len(line.kr) > 20 else ""), key=f"quick_reply_{scenario_key}_{i}", use_container_width=True):
+                st.session_state.pending_prompt = line.kr
+                st.rerun()
+
     # ─── 2. st.chat_input 호출 전에 과거 대화(history) 전부 출력 + AI 답변에 TTS 플레이어 ─────────
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
@@ -863,107 +873,160 @@ def tab_roleplay() -> None:
 
 
 def _inject_app_styles() -> None:
-    """파스텔 톤 + 슬림 헤더: 툴바 숨김, 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
+    """Minimal & Modern 모바일 앱 스타일: Eggbun처럼 세련된 UI."""
     st.markdown(
         """
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
-        /* 1. 본문 상단 여백 */
+        /* ─── 0. 전역 폰트 & 글자 간격 ─── */
+        * {
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            letter-spacing: -0.01em;
+        }
+
+        /* 1. 본문 여백 */
         .block-container {
             padding-top: 1rem !important;
             padding-bottom: 5rem !important;
         }
         .main .block-container {
-            max-width: 900px;
+            max-width: 480px;
+            margin: 0 auto;
         }
 
-        /* 2. 헤더 바 배경 투명화 */
+        /* 2. 헤더 투명 */
         header[data-testid="stHeader"] {
             background-color: transparent !important;
             z-index: 1;
         }
-
-        /* 3. 우측 상단 툴바 숨김 (전체 공개 앱) */
         [data-testid="stToolbar"] { display: none !important; }
 
-        /* ─── 4. 앱 배경: 파스텔 톤 ─── */
+        /* ─── 3. 배경: 부드러운 화이트 (Minimalist) ─── */
         .main {
-            background-color: #FFF8E1 !important;
+            background-color: #F8F9FA !important;
         }
         section[data-testid="stSidebar"] {
-            background-color: #FFF3E0 !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.04) !important;
         }
+        .main .block-container { position: relative !important; }
 
-        .main .block-container {
-            position: relative !important;
-        }
-
-        /* ─── 5. 슬림 헤더 (Flexbox) ─── */
+        /* ─── 4. 헤더: 화이트 플로팅 카드 ─── */
         .header-container {
             display: flex;
             align-items: center;
-            background-color: #FFF3E0 !important;
-            padding: 0.6rem 1.2rem !important;
-            border-radius: 12px !important;
-            margin-bottom: 0 !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+            background-color: #FFFFFF !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: 16px !important;
+            margin-bottom: 0.5rem !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
         }
         .header-text {
-            font-size: 1.1rem !important;
-            font-weight: bold !important;
-            color: #5D4037 !important;
-            margin-left: 1rem !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            color: #212529 !important;
+            margin-left: 0.75rem !important;
         }
 
-        /* ─── 6. 카드 스타일 ─── */
+        /* ─── 5. 테마 뱃지 (아이콘 + 텍스트만) ─── */
+        .scenario-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #FFFFFF;
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        .scenario-emoji { font-size: 1.2rem; margin-right: 0.35rem; }
+        .scenario-label { font-weight: 500; }
+
+        /* ─── 6. 플로팅 카드 (메인 영역) ─── */
         .main .block-container > div:not(:first-child) {
-            background-color: white !important;
-            border-radius: 15px !important;
-            padding: 20px !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
+            background-color: #FFFFFF !important;
+            border-radius: 16px !important;
+            padding: 1.25rem !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
             margin-bottom: 1rem !important;
+            animation: fadeIn 0.35s ease-out;
         }
 
         .daily-sentence-card {
-            background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%) !important;
-            border: 1px solid #FFE0B2 !important;
-            border-radius: 12px !important;
-            padding: 1rem 1.2rem !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+            background: #FFFFFF !important;
+            border: 1px solid #E9ECEF !important;
+            border-radius: 16px !important;
+            padding: 1rem 1.25rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
             margin-bottom: 0.5rem !important;
         }
-        .daily-sentence-title { font-size: 0.95rem !important; font-weight: 700 !important; color: #5D4037 !important; margin-bottom: 0.5rem !important; }
-        .daily-sentence-kr { font-size: 1.25rem !important; font-weight: 700 !important; color: #E65100 !important; }
-        .daily-sentence-roman { font-size: 0.9rem !important; color: #795548 !important; margin-top: 0.25rem !important; }
-        .daily-sentence-en { font-size: 0.95rem !important; color: #5D4037 !important; margin-top: 0.25rem !important; }
+        .daily-sentence-title { font-size: 0.85rem !important; font-weight: 600 !important; color: #868E96 !important; margin-bottom: 0.4rem !important; }
+        .daily-sentence-kr { font-size: 1.15rem !important; font-weight: 700 !important; color: #212529 !important; }
+        .daily-sentence-roman { font-size: 0.8rem !important; color: #868E96 !important; margin-top: 0.2rem !important; }
+        .daily-sentence-en { font-size: 0.9rem !important; color: #495057 !important; margin-top: 0.2rem !important; }
 
         .slang-card {
-            background-color: #FFFBF5 !important;
-            border: 1px solid #FFE0B2 !important;
-            border-radius: 12px !important;
+            background: #FFFFFF !important;
+            border: 1px solid #E9ECEF !important;
+            border-radius: 14px !important;
             padding: 1rem 1.2rem !important;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
-            margin-bottom: 0.8rem !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+            margin-bottom: 0.75rem !important;
         }
-        .slang-word { font-size: 1.2rem !important; font-weight: 700 !important; color: #E65100 !important; margin-bottom: 0.4rem !important; }
-        .slang-meaning, .slang-usage { font-size: 0.9rem !important; color: #5D4037 !important; line-height: 1.5 !important; }
-        .slang-usage { margin-top: 0.3rem !important; }
+        .slang-word { font-size: 1.1rem !important; font-weight: 700 !important; color: #212529 !important; margin-bottom: 0.35rem !important; }
+        .slang-meaning, .slang-usage { font-size: 0.85rem !important; color: #495057 !important; line-height: 1.55 !important; }
+        .slang-usage { margin-top: 0.25rem !important; }
 
-        /* ─── 7. 탭 스타일 ─── */
-        [data-testid="stTabs"] { padding: 0.5rem 0 1rem 0 !important; border-bottom: 2px solid #FFCCBC !important; }
+        /* ─── 7. 채팅 말풍선 (카카오톡/아이메시지 스타일: 둥글고 그림자) ─── */
+        [data-testid="stChatMessage"] {
+            border-radius: 18px !important;
+            padding: 0.75rem 1rem !important;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.08) !important;
+            animation: fadeIn 0.25s ease-out;
+        }
+        /* 사용자 말풍선: 파란색 (Streamlit은 user 메시지에 avatar="user" 등 사용) */
+        [data-testid="stChatMessage"] [data-testid="stChatMessageAvatar"] {
+            border-radius: 50% !important;
+        }
+        div[data-testid="stChatMessage"] > div:last-child {
+            border-radius: 18px !important;
+            padding: 0.6rem 1rem !important;
+        }
+
+        /* ─── 8. 탭: 네비게이션 바 스타일 ─── */
+        [data-testid="stTabs"] {
+            padding: 0.5rem 0 1rem 0 !important;
+            border-bottom: 1px solid #E9ECEF !important;
+        }
         [data-testid="stTabs"] button, [data-testid="stTabs"] [role="tab"], [data-testid="stTabs"] [data-baseweb="tab"] {
-            font-size: 1.1rem !important; font-weight: 600 !important; padding: 0.6rem 1.2rem !important; border-radius: 10px !important; color: #5D4037 !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            padding: 0.6rem 1rem !important;
+            border-radius: 12px !important;
+            color: #495057 !important;
         }
         [data-testid="stTabs"] button:hover, [data-testid="stTabs"] [role="tab"]:hover {
-            color: #3E2723 !important; background-color: #FFE0B2 !important;
+            color: #212529 !important;
+            background-color: #F1F3F5 !important;
         }
         [data-testid="stTabs"] button[aria-selected="true"],
         [data-testid="stTabs"] [role="tab"][aria-selected="true"],
-        [data-testid="stTabs"] [aria-selected="true"],
         div[data-baseweb="tab-list"] button[aria-selected="true"] {
-            font-weight: 700 !important; background-color: #FFF3E0 !important; color: #E65100 !important; border-radius: 10px !important; border-bottom: none !important;
+            font-weight: 700 !important;
+            background-color: #212529 !important;
+            color: #FFFFFF !important;
+            border-radius: 12px !important;
+            border-bottom: none !important;
         }
 
-        /* ─── 8. 하단 풋터/Manage app 숨김 ─── */
+        /* ─── 9. 페이드인 애니메이션 ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── 10. 하단 풋터/Manage app 숨김 ─── */
         footer { display: none !important; visibility: hidden !important; }
         [data-testid="stManageAppButton"] { display: none !important; visibility: hidden !important; }
         [data-testid="stDecoration"] { display: none !important; }
@@ -997,18 +1060,18 @@ def main() -> None:
     _inject_hide_footer_early()
     # 상단 헤더: 선택된 시나리오에 따라 제목·설명이 동적으로 바뀜
     render_header(st.session_state.get("current_scenario", "restaurant"))
-    # 시나리오 이미지 + 상황 설명 (헤더 바로 아래, 넓게)
+    # 테마 뱃지 (사진 없이 아이콘 + 상황 설명만)
     scenario_key = st.session_state.get("current_scenario", "restaurant")
     scenario = SCENARIOS.get(scenario_key, SCENARIOS["restaurant"])
-    image_url = scenario.get("image_url")
-    if image_url:
-        st.image(image_url, use_container_width=True)
-        st.markdown(
-            f'<p style="text-align:center; color:#5D4037; font-size:1.05rem; margin-top:0.5rem;">'
-            f'지금 당신은 <strong>{scenario["name"]}</strong> — {scenario["situation"]}에 있습니다.</p>',
-            unsafe_allow_html=True,
-        )
-        st.write("")
+    emo = scenario.get("emoji", "🇰🇷")
+    st.markdown(
+        f'<div class="scenario-badge">'
+        f'<span class="scenario-emoji">{emo}</span> '
+        f'<span class="scenario-label">지금 당신은 <strong>{scenario["name"]}</strong> — {scenario["situation"]}에 있습니다.</span>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+    st.write("")
     # 오늘의 한 문장: 날짜(일) 기준 매일 다른 표현 (카드 스타일)
     day_idx = datetime.now(KST).timetuple().tm_yday % len(DAILY_SENTENCES)
     daily = DAILY_SENTENCES[day_idx]
