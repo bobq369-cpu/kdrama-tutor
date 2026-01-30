@@ -37,13 +37,6 @@ except ImportError:
 APP_TITLE = "K-Tutor · 글로벌 한국어 학습 앱"
 APP_SUBTITLE = "상황별 역할놀이로 실전 한국어를 익혀 보세요"
 
-# 설정 버튼(⚙️) 위치(px). 값을 바꾸면 버튼이 이동합니다.
-SETTINGS_BUTTON_TOP_PX = 42
-SETTINGS_BUTTON_RIGHT_PX = 100  # 오른쪽에서의 거리. 크게 하면 버튼이 왼쪽으로 이동
-
-# 설정(관리자 모드) 진입용 4자리 비밀번호. 원하는 값으로 변경하세요.
-ADMIN_PIN = "1920"
-
 
 @dataclass
 class LineItem:
@@ -362,8 +355,6 @@ def init_state() -> None:
     ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "글로벌 한국어 학습 (K-Tutor)"})
     ss.setdefault("current_scenario", "restaurant")  # airport | restaurant | convenience_store | kdrama
     ss.setdefault("gemini_api_key", "")
-    ss.setdefault("admin_mode", False)
-    ss.setdefault("settings_unlocked", False)  # 설정 팝오버 비밀번호 통과 여부
     ss.setdefault("history", [])
     ss.setdefault("saved_lines", [])
     ss.setdefault("deck", [])
@@ -492,16 +483,15 @@ def render_header(scenario_key: str = "restaurant") -> None:
     )
 
 
-def sidebar_profile() -> None:
-    # [항상 실행] API 키 연결 로직은 백그라운드에서 항상 적용 (AI 기능 유지)
+def sidebar_scenario() -> None:
+    """사이드바 최상단: 학습 장소 선택(시나리오). API 키는 st.secrets에서 자동 로드."""
     if "GEMINI_API_KEY" in st.secrets:
         st.session_state.gemini_api_key = st.secrets["GEMINI_API_KEY"]
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
-    # 학습할 상황 선택 (Choose a Scenario): 선택 시 제목·설명·AI 역할이 전부 해당 시나리오로 바뀜
-    st.sidebar.header("학습할 상황을 선택하세요")
-    st.sidebar.caption("Choose a Scenario")
+    st.sidebar.header("학습 장소 선택")
+    st.sidebar.caption("Select a Scenario")
     scenario_options = list(SCENARIOS.keys())
     scenario_labels = [f"{SCENARIOS[k]['name']} — {SCENARIOS[k]['situation']}" for k in scenario_options]
     current = st.session_state.get("current_scenario", "restaurant")
@@ -516,7 +506,6 @@ def sidebar_profile() -> None:
     selected_key = scenario_options[choice]
     if selected_key != current:
         st.session_state["current_scenario"] = selected_key
-        # 시나리오를 바꾸면 역할놀이는 새로 시작 — 분위기가 완전히 바뀌도록
         if "roleplay_seed" in st.session_state:
             del st.session_state["roleplay_seed"]
         if "last_seed" in st.session_state:
@@ -524,63 +513,6 @@ def sidebar_profile() -> None:
         if "roleplay_history" in st.session_state:
             del st.session_state["roleplay_history"]
         st.rerun()
-
-    # 관리자 모드는 상단 헤더 우측 ⚙️ 설정(팝오버)에서만 제어. 여기서는 표시만.
-    if not st.session_state.get("admin_mode", False):
-        return  # 관리자 모드 꺼져 있으면 사이드바 관리 UI 숨김
-
-    # --- 아래는 admin_mode 일 때만 표시 (API 키, 학습 설정, 데이터) ---
-    st.sidebar.divider()
-    st.sidebar.header("Gemini API Key")
-
-    if "GEMINI_API_KEY" in st.secrets:
-        st.sidebar.success("✅ 주인님, 자동으로 로그인했습니다! (Secrets)")
-    else:
-        api_key = st.sidebar.text_input(
-            "API 키를 입력하세요",
-            value=st.session_state.get("gemini_api_key", ""),
-            type="password",
-            help="Gemini API 키를 입력하면 AI 기능을 사용할 수 있습니다.",
-            key="gemini_api_key_input"
-        )
-        if api_key != st.session_state.get("gemini_api_key", ""):
-            st.session_state.gemini_api_key = api_key.strip()
-            if api_key.strip():
-                try:
-                    if GEMINI_AVAILABLE:
-                        genai.configure(api_key=api_key.strip())
-                        st.sidebar.success("API 키가 설정되었습니다.")
-                        add_history("api_key_set", {"status": "success"})
-                    else:
-                        st.sidebar.warning("google-generativeai 패키지가 설치되지 않았습니다.")
-                except Exception as e:
-                    st.sidebar.error(f"API 키 설정 오류: {str(e)}")
-            else:
-                st.sidebar.info("API 키가 제거되었습니다.")
-
-    if st.session_state.get("gemini_api_key", ""):
-        st.sidebar.success("✅ AI 기능 활성화됨")
-    else:
-        st.sidebar.info("ℹ 기본 모드 (규칙 기반)")
-
-    st.sidebar.divider()
-    st.sidebar.header("학습 설정")
-    name = st.sidebar.text_input("이름", value=st.session_state.profile["name"])
-    level = st.sidebar.selectbox("레벨", options=LEVELS, index=LEVELS.index(st.session_state.profile["level"]))
-    goal = st.sidebar.text_area("목표", value=st.session_state.profile["goal"], height=80)
-    if st.sidebar.button("설정 저장"):
-        st.session_state.profile.update({"name": normalize_ws(name) or "학습자", "level": level, "goal": normalize_ws(goal)})
-        add_history("profile_saved", dict(st.session_state.profile))
-        st.sidebar.success("저장했어요.")
-
-    st.sidebar.divider()
-    st.sidebar.header("데이터")
-    if st.sidebar.button("학습 기록 초기화"):
-        st.session_state.history = []
-        st.session_state.saved_lines = []
-        st.session_state.deck = []
-        st.session_state.deck_stats = {"correct": 0, "wrong": 0}
-        st.sidebar.warning("기록/저장/덱을 초기화했어요.")
 
 
 def line_picker(lines: List[LineItem], preferred_level: str) -> List[LineItem]:
@@ -861,14 +793,14 @@ def tab_roleplay() -> None:
                 except Exception as api_err:
                     err_str = str(api_err)
                     st.error(f"AI 연결 오류: {err_str}")
-                    response_text = f"⚠️ **연결 오류:** {err_str}\n\n위 오류가 반복되면 ⚙️ 설정 → 관리자 모드에서 **Gemini API 키**를 확인해 주세요."
+                    response_text = f"⚠️ **연결 오류:** {err_str}\n\n배포 시 **st.secrets**에 **GEMINI_API_KEY**를 설정해 주세요."
                 if not (response_text and response_text.strip()):
                     response_text = fallback_msg
                 placeholder.markdown(response_text)
                 st.session_state.roleplay_history.append({"role": "model", "content": response_text})
             except Exception as e:
                 st.error(f"오류가 발생했습니다: {e}")
-                err_hint = " (⚙️ 설정 → 관리자 모드에서 Gemini API 키를 확인해 주세요.)"
+                err_hint = " (배포 시 st.secrets에 GEMINI_API_KEY를 설정해 주세요.)"
                 placeholder.markdown(fallback_msg + err_hint)
                 st.session_state.roleplay_history.append({"role": "model", "content": fallback_msg + err_hint})
 
@@ -880,49 +812,43 @@ def tab_roleplay() -> None:
         st.rerun()
 
 
-def _inject_app_styles(is_admin: bool) -> None:
-    """파스텔 톤 + 슬림 헤더: 툴바 공간 제거(display:none), 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
-    toolbar_rule = (
-        '[data-testid="stToolbar"] { display: block !important; }'
-        if is_admin
-        else '[data-testid="stToolbar"] { display: none !important; }'
-    )
+def _inject_app_styles() -> None:
+    """파스텔 톤 + 슬림 헤더: 툴바 숨김, 헤더 Flexbox, 탭 파스텔 Coral/Peach."""
     st.markdown(
-        f"""
+        """
         <style>
-        /* 1. 본문 상단 여백 강제 삭제 (가장 중요) */
-        .block-container {{
+        /* 1. 본문 상단 여백 */
+        .block-container {
             padding-top: 1rem !important;
             padding-bottom: 5rem !important;
-        }}
-        .main .block-container {{
+        }
+        .main .block-container {
             max-width: 900px;
-        }}
+        }
 
         /* 2. 헤더 바 배경 투명화 */
-        header[data-testid="stHeader"] {{
+        header[data-testid="stHeader"] {
             background-color: transparent !important;
             z-index: 1;
-        }}
+        }
 
-        /* 3. 우측 상단 툴바: 관리자일 때만 표시, 아니면 공간까지 제거 */
-        {toolbar_rule}
+        /* 3. 우측 상단 툴바 숨김 (전체 공개 앱) */
+        [data-testid="stToolbar"] { display: none !important; }
 
         /* ─── 4. 앱 배경: 파스텔 톤 ─── */
-        .main {{
+        .main {
             background-color: #FFF8E1 !important;
-        }}
-        section[data-testid="stSidebar"] {{
+        }
+        section[data-testid="stSidebar"] {
             background-color: #FFF3E0 !important;
-        }}
+        }
 
-        /* 본문 컨테이너: 설정 버튼 absolute 위치의 기준 */
-        .main .block-container {{
+        .main .block-container {
             position: relative !important;
-        }}
+        }
 
-        /* ─── 5. 슬림 헤더 (Flexbox): 로고 + 텍스트 한 줄, 파스텔 오렌지/베이지 ─── */
-        .header-container {{
+        /* ─── 5. 슬림 헤더 (Flexbox) ─── */
+        .header-container {
             display: flex;
             align-items: center;
             background-color: #FFF3E0 !important;
@@ -930,159 +856,68 @@ def _inject_app_styles(is_admin: bool) -> None:
             border-radius: 12px !important;
             margin-bottom: 0 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
-        }}
-        .header-logo {{
-            height: 2.2rem !important;
-            width: auto !important;
-            object-fit: contain;
-        }}
-        .header-text {{
+        }
+        .header-text {
             font-size: 1.1rem !important;
             font-weight: bold !important;
             color: #5D4037 !important;
             margin-left: 1rem !important;
-        }}
+        }
 
-        /* ─── 6. 카드 스타일 (헤더 행 제외) ─── */
-        .main .block-container > div:not(:first-child) {{
+        /* ─── 6. 카드 스타일 ─── */
+        .main .block-container > div:not(:first-child) {
             background-color: white !important;
             border-radius: 15px !important;
             padding: 20px !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
             margin-bottom: 1rem !important;
-        }}
+        }
 
-        /* 오늘의 한 문장 카드: 베이지 헤더와 어울리는 카드 */
-        .daily-sentence-card {{
+        .daily-sentence-card {
             background: linear-gradient(135deg, #FFF8E1 0%, #FFF3E0 100%) !important;
             border: 1px solid #FFE0B2 !important;
             border-radius: 12px !important;
             padding: 1rem 1.2rem !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
             margin-bottom: 0.5rem !important;
-        }}
-        .daily-sentence-title {{
-            font-size: 0.95rem !important;
-            font-weight: 700 !important;
-            color: #5D4037 !important;
-            margin-bottom: 0.5rem !important;
-        }}
-        .daily-sentence-kr {{
-            font-size: 1.25rem !important;
-            font-weight: 700 !important;
-            color: #E65100 !important;
-        }}
-        .daily-sentence-roman {{
-            font-size: 0.9rem !important;
-            color: #795548 !important;
-            margin-top: 0.25rem !important;
-        }}
-        .daily-sentence-en {{
-            font-size: 0.95rem !important;
-            color: #5D4037 !important;
-            margin-top: 0.25rem !important;
-        }}
+        }
+        .daily-sentence-title { font-size: 0.95rem !important; font-weight: 700 !important; color: #5D4037 !important; margin-bottom: 0.5rem !important; }
+        .daily-sentence-kr { font-size: 1.25rem !important; font-weight: 700 !important; color: #E65100 !important; }
+        .daily-sentence-roman { font-size: 0.9rem !important; color: #795548 !important; margin-top: 0.25rem !important; }
+        .daily-sentence-en { font-size: 0.95rem !important; color: #5D4037 !important; margin-top: 0.25rem !important; }
 
-        /* K-Slang 카드: 깔끔한 카드 스타일 */
-        .slang-card {{
+        .slang-card {
             background-color: #FFFBF5 !important;
             border: 1px solid #FFE0B2 !important;
             border-radius: 12px !important;
             padding: 1rem 1.2rem !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
             margin-bottom: 0.8rem !important;
-        }}
-        .slang-word {{
-            font-size: 1.2rem !important;
-            font-weight: 700 !important;
-            color: #E65100 !important;
-            margin-bottom: 0.4rem !important;
-        }}
-        .slang-meaning, .slang-usage {{
-            font-size: 0.9rem !important;
-            color: #5D4037 !important;
-            line-height: 1.5 !important;
-        }}
-        .slang-usage {{
-            margin-top: 0.3rem !important;
-        }}
+        }
+        .slang-word { font-size: 1.2rem !important; font-weight: 700 !important; color: #E65100 !important; margin-bottom: 0.4rem !important; }
+        .slang-meaning, .slang-usage { font-size: 0.9rem !important; color: #5D4037 !important; line-height: 1.5 !important; }
+        .slang-usage { margin-top: 0.3rem !important; }
 
-        /* ─── 7. 탭: 파스텔 Coral/Peach, 선택 시 부드러운 강조 ─── */
-        [data-testid="stTabs"] {{
-            padding: 0.5rem 0 1rem 0 !important;
-            border-bottom: 2px solid #FFCCBC !important;
-        }}
-        [data-testid="stTabs"] button,
-        [data-testid="stTabs"] [role="tab"],
-        [data-testid="stTabs"] [data-baseweb="tab"] {{
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            padding: 0.6rem 1.2rem !important;
-            border-radius: 10px !important;
-            color: #5D4037 !important;
-        }}
-        [data-testid="stTabs"] button:hover,
-        [data-testid="stTabs"] [role="tab"]:hover {{
-            color: #3E2723 !important;
-            background-color: #FFE0B2 !important;
-        }}
+        /* ─── 7. 탭 스타일 ─── */
+        [data-testid="stTabs"] { padding: 0.5rem 0 1rem 0 !important; border-bottom: 2px solid #FFCCBC !important; }
+        [data-testid="stTabs"] button, [data-testid="stTabs"] [role="tab"], [data-testid="stTabs"] [data-baseweb="tab"] {
+            font-size: 1.1rem !important; font-weight: 600 !important; padding: 0.6rem 1.2rem !important; border-radius: 10px !important; color: #5D4037 !important;
+        }
+        [data-testid="stTabs"] button:hover, [data-testid="stTabs"] [role="tab"]:hover {
+            color: #3E2723 !important; background-color: #FFE0B2 !important;
+        }
         [data-testid="stTabs"] button[aria-selected="true"],
         [data-testid="stTabs"] [role="tab"][aria-selected="true"],
         [data-testid="stTabs"] [aria-selected="true"],
-        div[data-baseweb="tab-list"] button[aria-selected="true"] {{
-            font-weight: 700 !important;
-            background-color: #FFF3E0 !important;
-            color: #E65100 !important;
-            border-radius: 10px !important;
-            border-bottom: none !important;
-        }}
+        div[data-baseweb="tab-list"] button[aria-selected="true"] {
+            font-weight: 700 !important; background-color: #FFF3E0 !important; color: #E65100 !important; border-radius: 10px !important; border-bottom: none !important;
+        }
 
-        /* ─── 8. 하단 풋터 및 Manage app 버튼 완전 숨김 ─── */
-        footer {{
-            display: none !important;
-            visibility: hidden !important;
-        }}
-        [data-testid="stManageAppButton"] {{
-            display: none !important;
-            visibility: hidden !important;
-        }}
-        /* 하단 데코레이션 영역(Manage app 포함) 숨김 */
-        [data-testid="stDecoration"] {{
-            display: none !important;
-        }}
-        /* 하단 Manage app 링크(풋터 내부) */
-        footer a[href*="manage"] {{
-            display: none !important;
-        }}
-
-        /* ─── 9. 설정 버튼: 가장 작은 크기의 깔끔한 흰색 버튼, 우측 상단 고정 ─── */
-        div[data-testid="stPopover"] {{
-            position: fixed !important;
-            top: {SETTINGS_BUTTON_TOP_PX}px !important;
-            right: {SETTINGS_BUTTON_RIGHT_PX}px !important;
-            z-index: 999999 !important;
-            width: auto !important;
-        }}
-        div[data-testid="stPopover"] > button {{
-            background-color: white !important;
-            border: 1px solid #e0e0e0 !important;
-            border-radius: 8px !important;
-            width: 10px !important;
-            height: 10px !important;
-            min-width: 10px !important;
-            min-height: 10px !important;
-            padding: 0 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
-            color: #5D4037 !important;
-        }}
-        div[data-testid="stPopover"] > button:hover {{
-            background-color: #f5f5f5 !important;
-            border-color: #d0d0d0 !important;
-            color: #E65100 !important;
-        }}
+        /* ─── 8. 하단 풋터/Manage app 숨김 ─── */
+        footer { display: none !important; visibility: hidden !important; }
+        [data-testid="stManageAppButton"] { display: none !important; visibility: hidden !important; }
+        [data-testid="stDecoration"] { display: none !important; }
+        footer a[href*="manage"] { display: none !important; }
         </style>
         """,
         unsafe_allow_html=True,
@@ -1109,38 +944,9 @@ def _inject_hide_footer_early() -> None:
 def main() -> None:
     st.set_page_config(page_title=APP_TITLE, page_icon="🇰🇷", layout="wide")
     init_state()
-    # 팝업을 닫거나 다른 곳을 클릭하면 자동으로 다시 잠금 (방금 비밀번호 통과한 경우만 유지)
-    if not st.session_state.get("just_unlocked", False):
-        st.session_state["settings_unlocked"] = False
-    st.session_state["just_unlocked"] = False
     _inject_hide_footer_early()
     # 상단 헤더: 선택된 시나리오에 따라 제목·설명이 동적으로 바뀜
     render_header(st.session_state.get("current_scenario", "restaurant"))
-    with st.popover("⚙️", help="설정"):
-        if not st.session_state.get("settings_unlocked", False):
-            pin = st.text_input(
-                "4자리 비밀번호",
-                type="password",
-                max_chars=4,
-                key="settings_pin_input",
-                placeholder="****",
-            )
-            if st.button("확인", key="settings_pin_confirm"):
-                if pin == ADMIN_PIN:
-                    st.session_state["settings_unlocked"] = True
-                    st.session_state["just_unlocked"] = True  # 이번 실행에서만 잠금 해제 유지
-                    st.rerun()
-                else:
-                    st.error("비밀번호가 올바르지 않습니다.")
-        else:
-            st.toggle(
-                "관리자 모드 (Admin Mode)",
-                value=st.session_state.get("admin_mode", False),
-                key="admin_mode",
-            )
-            if st.button("잠금", key="settings_lock"):
-                st.session_state["settings_unlocked"] = False
-                st.rerun()
     # 오늘의 한 문장: 날짜(일) 기준 매일 다른 표현 (카드 스타일)
     day_idx = datetime.now(KST).timetuple().tm_yday % len(DAILY_SENTENCES)
     daily = DAILY_SENTENCES[day_idx]
@@ -1159,10 +965,9 @@ def main() -> None:
 
     st.divider()
 
-    sidebar_profile()
+    sidebar_scenario()
 
-    is_admin = st.session_state.get("admin_mode", False)
-    _inject_app_styles(is_admin)
+    _inject_app_styles()
 
     tabs = st.tabs(["표현 익히기", "요즘 한국어 (K-Slang)", "AI와 역할놀이"])
     with tabs[0]:
