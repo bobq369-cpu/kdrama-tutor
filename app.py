@@ -22,63 +22,56 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. 프리미엄 UI를 위한 커스텀 CSS ---
+# --- 2. iMessage 스타일 화이트 테마 CSS ---
 def inject_custom_css():
     st.markdown(
         """
         <style>
-            /* 전체 배경 및 폰트 설정 */
+            /* 전체 배경: 완전 흰색 */
             .stApp {
-                background-color: #F8F9FA; /* 아주 연한 회색 배경 */
-                font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+                background-color: #FFFFFF;
+                font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             }
-            /* 메인 컨테이너 스타일링 (모바일 카드뷰 느낌) */
+            /* 채팅 영역만 연한 그림자로 떠 있는 느낌 */
             .main .block-container {
                 max-width: 700px;
                 padding-top: 2rem;
                 padding-bottom: 5rem;
                 background-color: #FFFFFF;
-                border-radius: 20px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+                border-radius: 24px;
+                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
                 margin-top: 20px;
                 margin-bottom: 20px;
             }
-            /* 헤더, 푸터 숨기기 */
             header {visibility: hidden;}
             footer {visibility: hidden;}
-            
-            /* 채팅 말풍선 스타일 */
+            /* iMessage 스타일 말풍선: 둥글게, 간격 좁게 */
             .chat-bubble {
-                padding: 15px 20px;
-                border-radius: 25px;
-                margin-bottom: 10px;
+                padding: 12px 18px;
+                border-radius: 20px;
+                margin-bottom: 6px;
                 max-width: 80%;
                 word-wrap: break-word;
                 font-size: 16px;
-                line-height: 1.5;
+                line-height: 1.45;
             }
-            /* 사용자 말풍선 (오른쪽, 파란색) */
             .user-bubble {
                 background-color: #007AFF;
-                color: white;
+                color: #FFFFFF;
                 margin-left: auto;
-                border-bottom-right-radius: 5px;
+                border-bottom-right-radius: 6px;
             }
-            /* AI 말풍선 (왼쪽, 회색) */
             .ai-bubble {
-                background-color: #F2F2F7;
-                color: black;
+                background-color: #E9E9EB;
+                color: #000000;
                 margin-right: auto;
-                border-bottom-left-radius: 5px;
+                border-bottom-left-radius: 6px;
             }
-            /* 탭 스타일 변경 */
-            .stTabs [data-baseweb="tab-list"] {
-                gap: 10px;
-            }
+            .stTabs [data-baseweb="tab-list"] { gap: 10px; }
             .stTabs [data-baseweb="tab"] {
                 height: 50px;
                 white-space: pre-wrap;
-                background-color: #F2F2F7;
+                background-color: #E9E9EB;
                 border-radius: 15px;
                 color: #8E8E93;
                 font-weight: 600;
@@ -88,23 +81,41 @@ def inject_custom_css():
                 background-color: #007AFF !important;
                 color: white !important;
             }
-            /* TTS 오디오 플레이어: 세련된 미니 플레이바 */
             .tts-player-wrap {
-                margin-top: 8px;
-                margin-bottom: 12px;
+                margin-top: 6px;
+                margin-bottom: 10px;
                 padding: 10px 14px;
-                background: linear-gradient(135deg, #F8F9FA 0%, #F2F2F7 100%);
+                background: #F2F2F7;
                 border-radius: 14px;
-                box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-                border: 1px solid rgba(0,122,255,0.08);
+                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
             }
-            .tts-player-wrap audio {
-                width: 100%;
-                height: 36px;
-                outline: none;
+            .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
+            .tts-player-wrap audio::-webkit-media-controls-panel { background: transparent; }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+def inject_back_button_css():
+    """학습 화면에서만: 좌측 상단 뒤로가기 버튼을 작은 원형으로 스타일링"""
+    st.markdown(
+        """
+        <style>
+            .main .block-container .stButton:first-of-type button {
+                width: 40px !important;
+                height: 40px !important;
+                min-height: 40px !important;
+                padding: 0 !important;
+                border-radius: 50% !important;
+                background: transparent !important;
+                border: none !important;
+                font-size: 1.25rem !important;
+                color: #333 !important;
+                box-shadow: none !important;
+                transition: background 0.2s ease !important;
             }
-            .tts-player-wrap audio::-webkit-media-controls-panel {
-                background: transparent;
+            .main .block-container .stButton:first-of-type button:hover {
+                background: rgba(0,0,0,0.06) !important;
             }
         </style>
         """,
@@ -329,9 +340,10 @@ def main():
 
     # ----- 학습 화면 (LEARNING) -----
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
+    inject_back_button_css()
 
-    # 뒤로 가기 버튼
-    if st.button("⬅️ 뒤로 가기 (Back to Home)", key="back_to_home"):
+    # 뒤로 가기: 좌측 상단 작은 원형 버튼
+    if st.button("✕", key="back_btn"):
         st.session_state.current_page = "HOME"
         st.rerun()
 
