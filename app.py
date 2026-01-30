@@ -208,8 +208,8 @@ def strip_for_tts(text):
         t = t.split("||", 1)[0].strip()
     return t or ""
 
-def text_to_speech_autoplay(text):
-    """gTTS로 음성 변환 후 자동 재생. 오디오 플레이어는 숨김(display:none)."""
+def text_to_speech_html(text, autoplay=False):
+    """gTTS로 음성 변환 후 오디오 HTML 반환. autoplay=True면 자동 재생."""
     clean_text = strip_for_tts(text)
     if not clean_text:
         return ""
@@ -220,9 +220,10 @@ def text_to_speech_autoplay(text):
             with open(fp.name, "rb") as f:
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
+                autoplay_attr = " autoplay" if autoplay else ""
                 md = f"""
                     <div class="tts-player-wrap">
-                    <audio controls autoplay>
+                    <audio controls{autoplay_attr}>
                     <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
                     </audio>
                     </div>
@@ -320,6 +321,7 @@ def main():
                     st.session_state.current_page = "LEARNING"
                     st.session_state.selected_scenario = key
                     st.session_state.messages = []
+                    st.session_state.tts_cache = {}
                     st.rerun()
         return
 
@@ -350,7 +352,11 @@ def main():
         if not st.session_state.messages:
             st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
 
-        for message in st.session_state.messages:
+        if "tts_cache" not in st.session_state:
+            st.session_state.tts_cache = {}
+
+        messages = st.session_state.messages
+        for i, message in enumerate(messages):
             if message["role"] == "user":
                 st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
             else:
@@ -362,6 +368,16 @@ def main():
                         st.image(IMAGE_GALLERY[key], use_container_width=True)
                 if correction:
                     st.caption(f"📝 빨간펜 선생님: {correction}")
+                # 각 AI 답변마다 오디오바 (마지막 답변만 자동 재생)
+                is_last_assistant = (i == len(messages) - 1)
+                should_autoplay = is_last_assistant and st.session_state.get("play_tts")
+                if i not in st.session_state.tts_cache:
+                    st.session_state.tts_cache[i] = text_to_speech_html(message["content"], autoplay=should_autoplay)
+                if st.session_state.tts_cache[i]:
+                    st.markdown(st.session_state.tts_cache[i], unsafe_allow_html=True)
+
+        if st.session_state.get("play_tts"):
+            st.session_state.play_tts = False
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
@@ -377,13 +393,6 @@ def main():
             st.session_state.play_tts = False
         st.session_state.play_tts = True
         st.rerun()
-
-    # 방금 AI 응답이 추가된 경우에만 TTS 재생 (한 번만, [IMAGE]/|| 제거된 순수 대화만)
-    if st.session_state.get("play_tts") and st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
-        tts_html = text_to_speech_autoplay(st.session_state.messages[-1]["content"])
-        if tts_html:
-            st.markdown(tts_html, unsafe_allow_html=True)
-        st.session_state.play_tts = False
 
 
 if __name__ == "__main__":
