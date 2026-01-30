@@ -191,37 +191,50 @@ def text_to_speech_autoplay(text):
     except Exception as e:
         return f"<span>(오디오 오류: {e})</span>"
 
+# API에서 사용 가능한 모델 우선순위 (404 시 다음 모델 시도)
+GEMINI_MODEL_NAMES = [
+    "gemini-2.5-flash",   # 2025년 공식 Stable
+    "gemini-2.0-flash",   # 2세대 안정
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash-lite",
+]
+
 def get_ai_response(messages, scenario_key):
-    """Gemini 1.5 Flash 모델을 사용하여 답변을 생성합니다 (순수 대화 모델)."""
-    try:
-        current_time_str = "2026년 1월 31일 토요일"
+    """Gemini 모델을 사용하여 답변을 생성합니다 (순수 대화 모델)."""
+    current_time_str = "2026년 1월 31일 토요일"
+    system_instruction = f"""
+[기본 설정]
+현재 시각: {current_time_str}
+장소: 대한민국
+중요 사실: 현재 대한민국 대통령은 이재명입니다. (2025년 취임)
 
-        system_instruction = f"""
-        [기본 설정]
-        현재 시각: {current_time_str}
-        장소: 대한민국
-        중요 사실: 현재 대한민국 대통령은 이재명입니다. (2025년 취임)
+[역할 및 상황]
+당신의 역할은 '{SCENARIOS[scenario_key]['role']}'입니다.
+상황: {SCENARIOS[scenario_key]['context']}
 
-        [역할 및 상황]
-        당신의 역할은 '{SCENARIOS[scenario_key]['role']}'입니다.
-        상황: {SCENARIOS[scenario_key]['context']}
+[대화 지침]
+너는 한국어 튜터로서 사용자의 질문에 친절하게 답하라. 사용자의 한국어 학습을 돕는 튜터로서 자연스럽고 몰입감 있는 대화를 이끌어가고, 답변은 너무 길지 않게 실제 대화처럼 하라.
+"""
 
-        [대화 지침]
-        너는 한국어 튜터로서 사용자의 질문에 친절하게 답하라. 사용자의 한국어 학습을 돕는 튜터로서 자연스럽고 몰입감 있는 대화를 이끌어가고, 답변은 너무 길지 않게 실제 대화처럼 하라.
-        """
+    gemini_messages = []
+    for m in messages:
+        role = "user" if m["role"] == "user" else "model"
+        gemini_messages.append({"role": role, "parts": [m["content"]]})
 
-        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
+    last_error = None
+    for model_name in GEMINI_MODEL_NAMES:
+        try:
+            model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
+            response = model.generate_content(gemini_messages)
+            return response.text
+        except Exception as e:
+            last_error = e
+            err_str = str(e).lower()
+            if "404" in err_str or "not found" in err_str:
+                continue
+            return f"(AI 응답 오류가 발생했습니다: {e})"
 
-        # 메시지 기록 변환
-        gemini_messages = []
-        for m in messages:
-            role = "user" if m["role"] == "user" else "model"
-            gemini_messages.append({"role": role, "parts": [m["content"]]})
-
-        response = model.generate_content(gemini_messages)
-        return response.text
-    except Exception as e:
-        return f"(AI 응답 오류가 발생했습니다: {e})"
+    return f"(AI 응답 오류가 발생했습니다: {last_error})"
 
 
 # --- 5. 메인 앱 로직 ---
