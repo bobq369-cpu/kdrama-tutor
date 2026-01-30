@@ -273,49 +273,44 @@ def main():
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
-    # 탭 구성
-    tab1, tab2 = st.tabs(["📖 표현 익히기 (Learn)", "🗣️ 실전 대화 (Roleplay)"])
+    # 핵심 표현 보기 (클릭하면 채팅에 전송)
+    with st.expander("💡 핵심 표현 보기 (클릭하면 전송됩니다)", expanded=True):
+        for idx, (kor, eng) in enumerate(current_scenario["key_phrases"].items()):
+            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}"):
+                st.session_state.messages.append({"role": "user", "content": kor})
+                st.rerun()
 
-    # 탭 1: 표현 익히기
-    with tab1:
-        st.markdown("### 핵심 표현을 배워보세요!")
-        for kor, eng in current_scenario['key_phrases'].items():
-            with st.container():
-                col1, col2 = st.columns([4, 1])
-                with col1:
-                    st.markdown(f"**{kor}**")
-                    st.caption(eng)
-                with col2:
-                    if st.button("🔊 듣기", key=f"tts_{kor}"):
-                        st.markdown(text_to_speech_autoplay(kor), unsafe_allow_html=True)
-                st.divider()
+    # 단일 채팅 인터페이스
+    chat_container = st.container()
+    with chat_container:
+        if not st.session_state.messages:
+            st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
 
-    # 탭 2: 실전 대화 (채팅 인터페이스)
-    with tab2:
-        chat_container = st.container()
+        for message in st.session_state.messages:
+            if message["role"] == "user":
+                st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="chat-bubble ai-bubble">{message["content"]}</div>', unsafe_allow_html=True)
 
-        with chat_container:
-            if not st.session_state.messages:
-                st.info("👋 대화를 시작해보세요! (예: '안녕하세요')")
+    # 채팅 입력: 입력 시 메시지 추가 후 rerun
+    if prompt := st.chat_input("한국어로 대화해보세요..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.rerun()
 
-            for message in st.session_state.messages:
-                if message["role"] == "user":
-                    st.markdown(f'<div class="chat-bubble user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="chat-bubble ai-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+    # 마지막 메시지가 사용자 것이면 AI 응답 생성 후 추가하고 rerun
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+        with st.spinner(f"{current_scenario['icon']} AI가 답변을 생각 중입니다..."):
+            ai_response_text = get_ai_response(st.session_state.messages, st.session_state.selected_scenario)
+        st.session_state.messages.append({"role": "assistant", "content": ai_response_text})
+        if "play_tts" not in st.session_state:
+            st.session_state.play_tts = False
+        st.session_state.play_tts = True
+        st.rerun()
 
-        if prompt := st.chat_input("한국어로 대화해보세요..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with chat_container:
-                st.markdown(f'<div class="chat-bubble user-bubble">{prompt}</div>', unsafe_allow_html=True)
-
-            with st.spinner(f"{current_scenario['icon']} AI가 답변을 생각 중입니다..."):
-                ai_response_text = get_ai_response(st.session_state.messages, st.session_state.selected_scenario)
-
-            st.session_state.messages.append({"role": "assistant", "content": ai_response_text})
-            with chat_container:
-                st.markdown(f'<div class="chat-bubble ai-bubble">{ai_response_text}</div>', unsafe_allow_html=True)
-                st.markdown(text_to_speech_autoplay(ai_response_text), unsafe_allow_html=True)
+    # 방금 AI 응답이 추가된 경우에만 TTS 재생 (한 번만)
+    if st.session_state.get("play_tts") and st.session_state.messages and st.session_state.messages[-1]["role"] == "assistant":
+        st.markdown(text_to_speech_autoplay(st.session_state.messages[-1]["content"]), unsafe_allow_html=True)
+        st.session_state.play_tts = False
 
 
 if __name__ == "__main__":
