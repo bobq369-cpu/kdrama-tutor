@@ -335,9 +335,20 @@ def get_ai_response(messages, scenario_key):
             return response.text
         except Exception as e:
             last_error = e
-            err_str = str(e).lower()
-            if "404" in err_str or "not found" in err_str:
+            err_str = str(e)
+            err_lower = err_str.lower()
+            if "404" in err_lower or "not found" in err_lower:
                 continue
+            if "429" in err_str or "quota" in err_lower or "exceeded" in err_lower:
+                retry_sec = 60
+                match = re.search(r"retry in (\d+(?:\.\d+)?)\s*s", err_lower)
+                if match:
+                    retry_sec = max(1, int(float(match.group(1))))
+                return (
+                    f"⚠️ 무료 사용량이 소진되었습니다.\n\n"
+                    f"잠시 후(약 {retry_sec}초) 다시 시도해주세요. "
+                    f"할당량·결제는 Google AI Studio에서 확인할 수 있습니다."
+                )
             return f"(AI 응답 오류가 발생했습니다: {e})"
 
     return f"(AI 응답 오류가 발생했습니다: {last_error})"
