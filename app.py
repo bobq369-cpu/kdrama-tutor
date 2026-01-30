@@ -192,7 +192,7 @@ def text_to_speech_autoplay(text):
         return f"<span>(오디오 오류: {e})</span>"
 
 def get_ai_response(messages, scenario_key):
-    """Gemini Pro 모델을 사용하여 답변을 생성합니다 (검색 기능 포함)."""
+    """Gemini 1.5 Flash 모델을 사용하여 답변을 생성합니다 (검색 기능 포함)."""
     try:
         # 2026년 세계관 고정 프롬프트
         current_time_str = "2026년 1월 31일 토요일"
@@ -215,7 +215,7 @@ def get_ai_response(messages, scenario_key):
 
         # 실시간 검색 툴 설정
         tools = [{'google_search_retrieval': {}}]
-        model = genai.GenerativeModel('gemini-pro', system_instruction=system_instruction, tools=tools)
+        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction, tools=tools)
 
         # 메시지 기록 변환
         gemini_messages = []
