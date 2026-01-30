@@ -77,25 +77,6 @@ def inject_custom_css():
             }
             .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
             .tts-player-wrap audio::-webkit-media-controls-panel { background: transparent; }
-            /* 가로 스크롤 스마트 답장 바 (입력창 바로 위에 고정) */
-            .suggestion-bar-fixed {
-                position: fixed; bottom: 80px; left: 0; right: 0; z-index: 999;
-                background: white; padding: 10px;
-            }
-            .suggestion-container {
-                display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px;
-                white-space: nowrap; align-items: center;
-                scrollbar-width: none; -ms-overflow-style: none;
-            }
-            .suggestion-container::-webkit-scrollbar { display: none; }
-            .suggestion-chip {
-                display: inline-block; flex-shrink: 0;
-                padding: 8px 15px; font-size: 14px; border-radius: 20px;
-                background: #E3F2FD; color: #1565C0; border: none;
-                text-decoration: none; white-space: nowrap;
-                transition: background 0.2s ease;
-            }
-            .suggestion-chip:hover { background: #BBDEFB; color: #0D47A1; }
         </style>
         """,
         unsafe_allow_html=True
@@ -356,24 +337,6 @@ def main():
 
     # ----- 학습 화면 (LEARNING) -----
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
-    phrases_list = list(current_scenario["key_phrases"].items())
-
-    # 스마트 답장 링크 클릭 시: ?phrase=0 등으로 들어오면 메시지 추가 후 rerun
-    if "phrase" in st.query_params:
-        try:
-            idx = int(st.query_params.get("phrase", 0))
-            if 0 <= idx < len(phrases_list):
-                kor = phrases_list[idx][0]
-                st.session_state.messages.append({"role": "user", "content": kor})
-        except (ValueError, TypeError):
-            pass
-        try:
-            rest = {k: v for k, v in st.query_params.items() if k != "phrase"}
-            st.experimental_set_query_params(**rest)
-        except Exception:
-            pass
-        st.rerun()
-
     inject_back_button_css()
 
     # 뒤로 가기: 좌측 상단 작은 원형 버튼
@@ -448,19 +411,15 @@ def main():
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
 
-    # 스마트 답장 바: 입력창 바로 위, 가로 스크롤 (HTML 링크로 클릭 처리)
-    chip_links = "".join(
-        f'<a href="?phrase={idx}" class="suggestion-chip">{html.escape(kor)} ({html.escape(eng)})</a>'
-        for idx, (kor, eng) in enumerate(phrases_list)
-    )
-    suggestion_html = (
-        '<div class="suggestion-bar-fixed">'
-        '<div style="font-size: 11px; color: #888; margin-bottom: 6px;">💡 추천 표현</div>'
-        f'<div class="suggestion-container">{chip_links}</div>'
-        "</div>"
-    )
-    st.markdown(suggestion_html, unsafe_allow_html=True)
-    st.markdown("<div style='height: 72px;'></div>", unsafe_allow_html=True)
+    # 추천 표현: 2열 버튼 그리드 (채팅 기록 직후, 입력창 직전)
+    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+    phrases = list(current_scenario["key_phrases"].items())
+    col_a, col_b = st.columns(2)
+    for idx, (kor, eng) in enumerate(phrases):
+        with col_a if idx % 2 == 0 else col_b:
+            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": kor})
+                st.rerun()
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
