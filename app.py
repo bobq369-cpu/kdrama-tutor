@@ -221,9 +221,11 @@ def text_to_speech_html(text, autoplay=False):
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
                 autoplay_attr = " autoplay" if autoplay else ""
+                # 한 개만 재생: 이 오디오가 재생될 때 나머지 모든 오디오는 정지
+                onplay_js = 'onplay="var s=this;document.querySelectorAll(\'audio\').forEach(function(a){if(a!==s)a.pause();});"'
                 md = f"""
                     <div class="tts-player-wrap">
-                    <audio controls{autoplay_attr}>
+                    <audio controls{autoplay_attr} {onplay_js}>
                     <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
                     </audio>
                     </div>
