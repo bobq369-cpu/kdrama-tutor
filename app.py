@@ -34,8 +34,8 @@ except ImportError:
     GEMINI_AVAILABLE = False
 
 
-APP_TITLE = "K-드라마 튜터 (마당 식당 에디션)"
-APP_SUBTITLE = "치앙마이 마당(Madang) 식당 — 실전 한국어 주문/응대 연습"
+APP_TITLE = "K-Tutor · 글로벌 한국어 학습 앱"
+APP_SUBTITLE = "상황별 역할놀이로 실전 한국어를 익혀 보세요"
 
 # 설정 버튼(⚙️) 위치(px). 값을 바꾸면 버튼이 이동합니다.
 SETTINGS_BUTTON_TOP_PX = 42
@@ -58,64 +58,86 @@ class LineItem:
     th: Optional[str] = None  # 태국어 뜻/발음 (예: อยากได้ จาจังมยอน)
 
 
-# 마당 식당 전용 데이터 (roman: 로마자, en: 영어, th: 태국어 설명)
+# 식당 시나리오: 삼겹살 주문 (역할: 식당 이모님)
 SAMPLE_LINES_RESTAURANT: List[LineItem] = [
     LineItem(
-        show="(마당 식당) 주문하기",
+        show="(식당) 삼겹살 주문",
         level="A1",
-        kr="여기 짜장면 하나랑 탕수육 소(小)자 주세요.",
-        roman="Yeogi Jjajangmyeon hana-rang Tangsuyuk so-ja juseyo.",
-        en="I'd like one Jjajangmyeon and a small Tangsuyuk, please.",
-        notes="식당에서 음식을 주문할 때 쓰는 가장 기본적인 표현.",
-        vocab=[("짜장면", "Jjajangmyeon"), ("탕수육", "Tangsuyuk"), ("주세요", "Please give me")],
+        kr="삼겹살 2인분이랑 된장찌개 하나 주세요.",
+        roman="Samgyeopsal i-inbun-irang doenjang-jjigae hana juseyo.",
+        en="I'd like two orders of samgyeopsal and one doenjang jjigae, please.",
+        notes="고기집에서 삼겹살·찌개 주문할 때 쓰는 표현.",
+        vocab=[("삼겹살", "Samgyeopsal (pork belly)"), ("인분", "Serving"), ("된장찌개", "Doenjang stew")],
         patterns=[("~ 주세요", "무언가를 정중하게 요청할 때")],
         th=None,
     ),
     LineItem(
-        show="(마당 식당) 맵기 조절",
+        show="(식당) 반찬/추가",
         level="A1",
-        kr="짬뽕은 덜 맵게 해주실 수 있나요?",
-        roman="Jjamppong-eun deol maep-ge hae-jusil su innayo?",
-        en="Can you make the Jjamppong less spicy?",
-        notes="매운 음식을 잘 못 먹을 때 요청하는 표현.",
-        vocab=[("짬뽕", "Jjamppong"), ("덜 맵게", "Less spicy")],
-        patterns=[("~ 해주실 수 있나요?", "가능한지 물어볼 때")],
+        kr="상추랑 쌈장 더 주실 수 있나요?",
+        roman="Sangchu-rang ssamjang deo jusil su innayo?",
+        en="Could I have more lettuce and ssamjang?",
+        notes="쌈 채소·쌈장 추가 요청.",
+        vocab=[("상추", "Lettuce"), ("쌈장", "Ssamjang (dipping sauce)")],
+        patterns=[("~ 더 주실 수 있나요?", "추가 요청할 때")],
         th=None,
     ),
     LineItem(
-        show="(마당 식당) 추천 메뉴",
+        show="(식당) 추천 메뉴",
         level="A2",
-        kr="사장님, 여기 태국 분들이 제일 좋아하는 메뉴가 뭐예요?",
-        roman="Sajang-nim, yeogi Taeguk bun-deuri jeil joa-haneun menu-ga mwo-yeyo?",
-        en="Boss, what is the most popular menu item for Thai people here?",
-        notes="현지인에게 인기 있는 메뉴를 물어볼 때.",
-        vocab=[("사장님", "Boss/Owner"), ("제일", "Most/Best"), ("좋아하는", "Favorite")],
+        kr="이모님, 여기 제일 잘 나가는 메뉴가 뭐예요?",
+        roman="Imo-nim, yeogi jeil jal na-ga-neun menu-ga mwo-yeyo?",
+        en="What's the most popular menu here?",
+        notes="이모님께 인기 메뉴 물어볼 때.",
+        vocab=[("이모님", "Auntie / friendly term for server"), ("잘 나가다", "To sell well")],
         patterns=[("~가 뭐예요?", "정보를 물어볼 때")],
         th=None,
     ),
     LineItem(
-        show="(마당 식당) 계산하기",
+        show="(식당) 계산하기",
         level="A1",
         kr="잘 먹었습니다! 계산해 주세요.",
         roman="Jal meogeot-seumnida! Gyesan-hae juseyo.",
         en="It was delicious! Check, please.",
-        notes="식사를 마치고 나갈 때 쓰는 인사와 요청.",
+        notes="식사 마치고 계산할 때.",
         vocab=[("잘 먹었습니다", "Thank you for the meal"), ("계산", "Bill/Check")],
         patterns=[("~해 주세요", "행동을 부탁할 때")],
         th=None,
     ),
 ]
 
-# 공항 테마: 체크인·보안검색·기내 등
+# 공항 시나리오: 입국 심사 (역할: 입국 심사관)
 SAMPLE_LINES_AIRPORT: List[LineItem] = [
+    LineItem(
+        show="(공항) 입국 목적",
+        level="A1",
+        kr="관광으로 왔어요. 일주일 있을 예정이에요.",
+        roman="Gwangwang-euro wasseoyo. Ilju-il isseul yejeong-ieyo.",
+        en="I came for tourism. I'm planning to stay for a week.",
+        notes="입국 심사관이 목적·체류 기간을 물을 때 답하는 표현.",
+        vocab=[("관광", "Tourism"), ("일주일", "One week"), ("예정", "Plan")],
+        patterns=[("~으로 왔어요", "목적을 말할 때"), ("~ 있을 예정이에요", "계획을 말할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(공항) 숙소",
+        level="A1",
+        kr="호텔에 묵을 거예요. 주소 적어 왔어요.",
+        roman="Hotel-e mug-eul geoyeyo. Juso jeogeo wasseoyo.",
+        en="I'll be staying at a hotel. I wrote down the address.",
+        notes="숙소 질문에 답할 때.",
+        vocab=[("묵다", "To stay"), ("주소", "Address"), ("적다", "To write down")],
+        patterns=[("~에 묵을 거예요", "숙소를 말할 때")],
+        th=None,
+    ),
     LineItem(
         show="(공항) 체크인",
         level="A1",
-        kr="인천행 비행기 표 하나 예약했는데요, 체크인 해주세요.",
-        roman="Incheon-haeng bihaenggi pyo hana ye-yak-haet-neundeyo, chekeu-in hae juseyo.",
+        kr="인천행 비행기 표 예약했는데요, 체크인 해주세요.",
+        roman="Incheon-haeng bihaenggi pyo ye-yak-haet-neundeyo, chekeu-in hae juseyo.",
         en="I have a reservation for a flight to Incheon. I'd like to check in, please.",
-        notes="공항 카운터에서 체크인 요청할 때.",
-        vocab=[("인천행", "To Incheon"), ("예약했는데요", "I made a reservation"), ("체크인", "Check-in")],
+        notes="공항 카운터에서 체크인 요청.",
+        vocab=[("인천행", "To Incheon"), ("예약", "Reservation"), ("체크인", "Check-in")],
         patterns=[("~ 해주세요", "행동을 정중히 요청할 때")],
         th=None,
     ),
@@ -130,105 +152,148 @@ SAMPLE_LINES_AIRPORT: List[LineItem] = [
         patterns=[("~ 될까요?", "가능 여부를 물을 때")],
         th=None,
     ),
+]
+
+# 편의점 시나리오: 라면·교통카드 (역할: 알바생)
+SAMPLE_LINES_CONVENIENCE_STORE: List[LineItem] = [
     LineItem(
-        show="(공항) 출구/환승",
-        level="A2",
-        kr="환승이에요. 다음 비행기 탑승 게이트가 어디예요?",
-        roman="Hwanseung-ieyo. Da-eum bihaenggi tapseung geiteu-ga eodi-yeyo?",
-        en="I'm in transit. Where is the gate for my next flight?",
-        notes="환승 시 다음 게이트 위치를 물을 때.",
-        vocab=[("환승", "Transit"), ("탑승 게이트", "Boarding gate"), ("어디예요", "Where is")],
-        patterns=[("~ 어디예요?", "위치를 물을 때")],
+        show="(편의점) 라면",
+        level="A1",
+        kr="라면 하나 먹고 갈게요. 뜨거운 물 부어 주세요.",
+        roman="Ramen hana meokgo galgeyo. Tteugeoun mul bu-eo juseyo.",
+        en="I'll have one ramen to eat here. Please add hot water.",
+        notes="편의점에서 라면 먹고 갈 때.",
+        vocab=[("라면", "Ramen"), ("먹고 가다", "Eat and go"), ("뜨거운 물", "Hot water")],
+        patterns=[("~ 먹고 갈게요", "여기서 먹을 때")],
         th=None,
     ),
     LineItem(
-        show="(공항) 기내 서비스",
+        show="(편의점) 교통카드",
         level="A1",
-        kr="물 한 잔 주실 수 있을까요?",
-        roman="Mul han jan jusil su isseulkkayo?",
-        en="Could I have a glass of water, please?",
-        notes="기내에서 음료 요청할 때.",
-        vocab=[("물", "Water"), ("한 잔", "A glass"), ("주실 수 있을까요", "Could you give me")],
-        patterns=[("~ 주실 수 있을까요?", "정중히 요청할 때")],
+        kr="교통카드 하나 새로 사고, 만 원 충전해 주세요.",
+        roman="Gyotong-kadeu hana saero sago, man won chungjeon-hae juseyo.",
+        en="I'd like to buy a new transit card and charge 10,000 won, please.",
+        notes="교통카드 구매·충전 요청.",
+        vocab=[("교통카드", "Transit card"), ("충전", "Recharge")],
+        patterns=[("~ 해 주세요", "행동을 부탁할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(편의점) 계산",
+        level="A1",
+        kr="이거랑 이거 같이 계산해 주세요.",
+        roman="Igeo-rang igeo gachi gyesan-hae juseyo.",
+        en="I'd like to pay for these together, please.",
+        notes="여러 품목 한꺼번에 계산.",
+        vocab=[("같이", "Together"), ("계산", "Check out")],
+        patterns=[("~ 같이 계산해 주세요", "함께 결제할 때")],
+        th=None,
+    ),
+    LineItem(
+        show="(편의점) 영수증",
+        level="A1",
+        kr="영수증 주세요.",
+        roman="Yeongsujeung juseyo.",
+        en="Receipt, please.",
+        notes="영수증 요청.",
+        vocab=[("영수증", "Receipt")],
+        patterns=[("~ 주세요", "요청할 때")],
         th=None,
     ),
 ]
 
-# 전통시장 테마: 흥정·가격·맛보기 등
-SAMPLE_LINES_MARKET: List[LineItem] = [
+# K-드라마 시나리오: 카페에서 이별 통보 (역할: 재벌 2세 남주)
+SAMPLE_LINES_KDRAMA: List[LineItem] = [
     LineItem(
-        show="(전통시장) 가격 문의",
-        level="A1",
-        kr="이거 얼마예요?",
-        roman="Igeo eolma-yeyo?",
-        en="How much is this?",
-        notes="시장에서 가격을 물을 때 가장 많이 쓰는 표현.",
-        vocab=[("이거", "This"), ("얼마예요", "How much is it")],
-        patterns=[("이거/그거 얼마예요?", "가격 물어볼 때")],
+        show="(K-드라마) 이별 통보",
+        level="B1",
+        kr="우리 이대로는 안 될 것 같아. 헤어지자.",
+        roman="Uri idaero-neun an doel geot gata. Heeoji-ja.",
+        en="I don't think we can go on like this. Let's break up.",
+        notes="이별을 통보하는 드라마 같은 표현.",
+        vocab=[("이대로", "Like this"), ("헤어지다", "To break up")],
+        patterns=[("~ 것 같아", "추측/결정을 말할 때"), ("~자", "제안할 때")],
         th=None,
     ),
     LineItem(
-        show="(전통시장) 흥정",
-        level="A2",
-        kr="조금만 깎아주세요.",
-        roman="Jogeum-man kkakka-juseyo.",
-        en="Could you give me a little discount?",
-        notes="가격을 조금 낮춰 달라고 할 때.",
-        vocab=[("조금만", "Just a little"), ("깎다", "To reduce/discount")],
-        patterns=[("~ 만 깎아주세요", "할인 요청할 때")],
+        show="(K-드라마) 이유",
+        level="B1",
+        kr="네가 잘못한 게 아니라, 내가 더 이상 널 행복하게 해줄 수 없을 것 같아서.",
+        roman="Ne-ga jalmoshan ge anira, nae-ga deo isang neol haengbok-hage hae-jul su eopseul geot gataseo.",
+        en="It's not that you did something wrong. I just don't think I can make you happy anymore.",
+        notes="이별 이유를 말할 때 (드라마 톤).",
+        vocab=[("잘못", "Wrong"), ("행복하게 하다", "To make happy")],
+        patterns=[("~ 게 아니라", "부정·대조"), ("~ 수 없을 것 같아서", "이유를 말할 때")],
         th=None,
     ),
     LineItem(
-        show="(전통시장) 맛보기",
-        level="A1",
-        kr="맛보기 해도 될까요?",
-        roman="Matbogi haedo doelkkayo?",
-        en="May I try a sample?",
-        notes="먹어보기/맛보기 허락을 구할 때.",
-        vocab=[("맛보기", "Tasting/Sample"), ("해도 될까요", "Is it okay to")],
-        patterns=[("~ 해도 될까요?", "허락을 구할 때")],
+        show="(K-드라마) 마무리",
+        level="B1",
+        kr="지금까지 고마웠어. 앞으로 잘 지내.",
+        roman="Jigeum-kkaji gomawoosseo. Apeuro jal jinae.",
+        en="Thank you for everything until now. Take care.",
+        notes="이별 인사.",
+        vocab=[("지금까지", "Until now"), ("잘 지내다", "To get along / take care")],
+        patterns=[("~ 고마웠어", "감사 인사"), ("앞으로 잘 지내", "작별 인사")],
         th=None,
     ),
     LineItem(
-        show="(전통시장) 양/개수",
+        show="(K-드라마) 카페 주문",
         level="A1",
-        kr="이거 한 근이에요? 저한테 한 근만 주세요.",
-        roman="Igeo han geun-ieyo? Jeo-hante han geun-man juseyo.",
-        en="Is this one geun (about 600g)? Please give me just one geun.",
-        notes="전통시장에서 무게 단위(근)로 살 때.",
-        vocab=[("한 근", "One geun (~600g)"), ("~만 주세요", "Just give me ~")],
-        patterns=[("~ 만 주세요", "양을 지정할 때")],
+        kr="아메리카노 두 잔 주세요.",
+        roman="Americano du jan juseyo.",
+        en="Two Americanos, please.",
+        notes="카페에서 주문.",
+        vocab=[("아메리카노", "Americano"), ("잔", "Cup")],
+        patterns=[("~ 주세요", "요청할 때")],
         th=None,
     ),
 ]
 
-# 테마별 메타: 페르소나, 인사말, 샘플 문장 리스트
-THEMES: Dict[str, Dict] = {
-    "restaurant": {
-        "name": "식당",
-        "name_en": "Restaurant",
-        "persona": "태국 치앙마이의 한식당 '마당(Madang)'에서 일하는 눈치 빠르고 친절한 한국인 점원",
-        "greeting": "어서오세요! 치앙마이 마당(Madang) 식당입니다. 주문하시겠어요? 😊",
-        "lines": SAMPLE_LINES_RESTAURANT,
-    },
+# 글로벌 한국어 학습 앱(K-Tutor) 시나리오: 역할·상황·페르소나·인사말·추천 문장
+# 선택한 시나리오에 따라 화면 제목·설명·AI 역할이 전부 바뀜
+SCENARIOS: Dict[str, Dict] = {
     "airport": {
         "name": "공항",
         "name_en": "Airport",
-        "persona": "인천공항에서 근무하는 친절하고 말이 빠른 한국인 지상직 직원",
-        "greeting": "안녕하세요. 인천공항입니다. 체크인하시나요, 아니면 다른 문의가 있으신가요? ✈️",
+        "role": "입국 심사관",
+        "situation": "입국 심사 받기",
+        "persona": "인천공항에서 근무하는 **깐깐하고 절차에 충실한 입국 심사관**. 표정은 무뚝뚝하고 질문은 짧고 명확하게. 규칙을 중요시하며 불필요한 수다를 하지 않음.",
+        "greeting": "여권 주세요. 입국 목적이 뭐예요?",
         "lines": SAMPLE_LINES_AIRPORT,
+        "emoji": "✈️",
     },
-    "market": {
-        "name": "전통시장",
-        "name_en": "Market",
-        "persona": "전통시장에서 장사를 하는 말주변이 좋고 유머러스한 한국인 상인",
-        "greeting": "어서 오세요~ 오늘 뭐 찾으세요? 맛있는 거 많아요! 🥬",
-        "lines": SAMPLE_LINES_MARKET,
+    "restaurant": {
+        "name": "식당",
+        "name_en": "Restaurant",
+        "role": "식당 이모님",
+        "situation": "삼겹살 주문하기",
+        "persona": "한식당에서 일하는 **친절하고 말걸기 좋은 식당 이모님**. 손님한테 반말 섞인 존댓말로 편하게 말하고, 추천도 잘해 줌.",
+        "greeting": "어서 오세요~ 몇 분이에요? 삼겹살 드실 거예요? 🥩",
+        "lines": SAMPLE_LINES_RESTAURANT,
+        "emoji": "🥩",
+    },
+    "convenience_store": {
+        "name": "편의점",
+        "name_en": "Convenience Store",
+        "role": "알바생",
+        "situation": "라면과 교통카드 사기",
+        "persona": "편의점에서 일하는 **말이 짧고 무난한 알바생**. 바쁜 느낌으로 최소한의 말만 하고, 필요한 질문만 함.",
+        "greeting": "어서 오세요. 찾는 거 있으세요?",
+        "lines": SAMPLE_LINES_CONVENIENCE_STORE,
+        "emoji": "🏪",
+    },
+    "kdrama": {
+        "name": "K-드라마",
+        "name_en": "K-Drama",
+        "role": "재벌 2세 남주인공",
+        "situation": "카페에서 이별 통보하기",
+        "persona": "드라마에 나오는 **재벌 2세 남주인공**. 카페에서 상대에게 이별을 통보하는 장면. 말투는 차갑고 단호하지만, 내면은 복잡하고 감정이 격함. 짧은 문장과 묵직한 침묵을 사용.",
+        "greeting": "… 앉아. 할 말이 있어.",
+        "lines": SAMPLE_LINES_KDRAMA,
+        "emoji": "🎬",
     },
 }
-
-# 하위 호환: 기존 변수명 유지
-SAMPLE_LINES: List[LineItem] = SAMPLE_LINES_RESTAURANT
 
 
 LEVELS = ["A1", "A2", "B1", "B2", "C1"]
@@ -294,8 +359,8 @@ def now_iso() -> str:
 
 def init_state() -> None:
     ss = st.session_state
-    ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "K-드라마로 자연스러운 회화 익히기"})
-    ss.setdefault("current_theme", "restaurant")  # restaurant | airport | market
+    ss.setdefault("profile", {"name": "학습자", "level": "A2", "goal": "글로벌 한국어 학습 (K-Tutor)"})
+    ss.setdefault("current_scenario", "restaurant")  # airport | restaurant | convenience_store | kdrama
     ss.setdefault("gemini_api_key", "")
     ss.setdefault("admin_mode", False)
     ss.setdefault("settings_unlocked", False)  # 설정 팝오버 비밀번호 통과 여부
@@ -411,13 +476,16 @@ def _logo_transparent_png_bytes(logo_path: str):
 HEADER_LOGO_URL = "https://raw.githubusercontent.com/bobq369-cpu/kdrama-tutor/main/assets/madang_logo.png"
 
 
-def render_header() -> None:
-    """슬림 헤더: 로고 + 텍스트 한 줄 Flexbox, 파스텔 톤. (divider는 호출부에서 처리)"""
+def render_header(scenario_key: str = "restaurant") -> None:
+    """슬림 헤더: K-Tutor + 선택된 시나리오에 맞는 제목·설명. (divider는 호출부에서 처리)"""
+    scenario = SCENARIOS.get(scenario_key, SCENARIOS["restaurant"])
+    emoji = scenario.get("emoji", "🇰🇷")
+    title = f"K-Tutor · {scenario['name']} — {scenario['situation']}"
     st.markdown(
-        """
+        f"""
         <div class="header-container">
-            <span style="font-size: 1.5rem; margin-right: 0.5rem;">🍲</span>
-            <div class="header-text">마당 Madang · 치앙마이 한식당 · 한국어 주문 연습</div>
+            <span style="font-size: 1.5rem; margin-right: 0.5rem;">{emoji}</span>
+            <div class="header-text">{title}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -431,19 +499,30 @@ def sidebar_profile() -> None:
         if GEMINI_AVAILABLE:
             genai.configure(api_key=st.session_state.gemini_api_key)
 
-    # 테마 선택: 식당 / 공항 / 전통시장 (AI 페르소나·추천 문장 자동 변경)
-    st.sidebar.header("테마")
-    theme_options = [(k, f"{v['name']} ({v['name_en']})") for k, v in THEMES.items()]
-    current = st.session_state.get("current_theme", "restaurant")
-    choice = st.sidebar.radio(
-        "장소를 골라 보세요",
-        options=[t[0] for t in theme_options],
-        format_func=lambda k: dict(theme_options)[k],
-        index=list(THEMES.keys()).index(current) if current in THEMES else 0,
-        key="sidebar_theme_radio",
+    # 학습할 상황 선택 (Choose a Scenario): 선택 시 제목·설명·AI 역할이 전부 해당 시나리오로 바뀜
+    st.sidebar.header("학습할 상황을 선택하세요")
+    st.sidebar.caption("Choose a Scenario")
+    scenario_options = list(SCENARIOS.keys())
+    scenario_labels = [f"{SCENARIOS[k]['name']} — {SCENARIOS[k]['situation']}" for k in scenario_options]
+    current = st.session_state.get("current_scenario", "restaurant")
+    choice_idx = scenario_options.index(current) if current in scenario_options else 0
+    choice = st.sidebar.selectbox(
+        "시나리오",
+        options=range(len(scenario_options)),
+        format_func=lambda i: scenario_labels[i],
+        index=choice_idx,
+        key="sidebar_scenario_select",
     )
-    if choice != current:
-        st.session_state["current_theme"] = choice
+    selected_key = scenario_options[choice]
+    if selected_key != current:
+        st.session_state["current_scenario"] = selected_key
+        # 시나리오를 바꾸면 역할놀이는 새로 시작 — 분위기가 완전히 바뀌도록
+        if "roleplay_seed" in st.session_state:
+            del st.session_state["roleplay_seed"]
+        if "last_seed" in st.session_state:
+            del st.session_state["last_seed"]
+        if "roleplay_history" in st.session_state:
+            del st.session_state["roleplay_history"]
         st.rerun()
 
     # 관리자 모드는 상단 헤더 우측 ⚙️ 설정(팝오버)에서만 제어. 여기서는 표시만.
@@ -561,14 +640,15 @@ def make_quiz_from_line(item: LineItem) -> None:
 
 
 def tab_menu_learn() -> None:
-    """테마별 추천 문장을 보여주고, 선택한 표현으로 롤플레이 연결."""
-    theme_key = st.session_state.get("current_theme", "restaurant")
-    theme = THEMES.get(theme_key, THEMES["restaurant"])
-    lines = theme["lines"]
-    theme_name = theme["name"]
+    """선택된 시나리오의 추천 문장을 보여주고, 선택한 표현으로 AI 역할놀이 연결."""
+    scenario_key = st.session_state.get("current_scenario", "restaurant")
+    scenario = SCENARIOS.get(scenario_key, SCENARIOS["restaurant"])
+    lines = scenario["lines"]
+    situation = scenario["situation"]
+    role = scenario["role"]
 
-    st.header("메뉴 표현 익히기")
-    st.caption(f"{theme_name}에서 쓸 수 있는 표현을 골라 보세요.")
+    st.header("표현 익히기")
+    st.caption(f"**{situation}** — {role}와(과) 쓸 수 있는 표현을 골라 보세요.")
 
     idx = st.selectbox(
         "표현 고르기",
@@ -589,10 +669,10 @@ def tab_menu_learn() -> None:
         for p, e in item.patterns:
             st.write(f"- **{p}**: {e}")
 
-    if st.button("AI 점원과 주문 연습하기", type="primary"):
+    if st.button("AI와 역할놀이 시작", type="primary"):
         st.session_state.roleplay_seed = {"kr": item.kr, "en": item.en}
         add_history("roleplay_start", {"kr": item.kr})
-        st.success(f"→ **{theme_name}** 탭에서 **AI 점원과 주문 연습**으로 이동해 연습해 보세요.")
+        st.success("→ **AI와 역할놀이** 탭에서 선택한 시나리오의 역할로 대화해 보세요.")
 
 
 def tab_slang() -> None:
@@ -700,16 +780,18 @@ def extract_pattern_hints(kr: str) -> List[Tuple[str, str]]:
 
 
 def tab_roleplay() -> None:
-    """Chat Pattern: 헤더 → 과거 대화 전부 출력 → (대기 중 입력이면 처리) → st.chat_input 맨 마지막 → 입력창 하단 고정."""
+    """Chat Pattern: 선택된 시나리오의 역할로 AI가 대화. 헤더 → 과거 대화 → 입력 처리 → chat_input 하단 고정."""
     if "roleplay_seed" not in st.session_state:
-        st.info("👋 먼저 **메뉴 표현 익히기** 탭에서 표현을 골라 **AI 점원과 주문 연습하기** 버튼을 눌러 주세요.")
+        st.info("👋 먼저 **표현 익히기** 탭에서 표현을 골라 **AI와 역할놀이 시작** 버튼을 눌러 주세요.")
         return
 
     seed = st.session_state["roleplay_seed"]
-    theme_key = st.session_state.get("current_theme", "restaurant")
-    theme = THEMES.get(theme_key, THEMES["restaurant"])
-    greeting = theme["greeting"]
-    persona = theme["persona"]
+    scenario_key = st.session_state.get("current_scenario", "restaurant")
+    scenario = SCENARIOS.get(scenario_key, SCENARIOS["restaurant"])
+    greeting = scenario["greeting"]
+    persona = scenario["persona"]
+    role = scenario["role"]
+    situation = scenario["situation"]
     st.session_state.setdefault("pending_prompt", None)
 
     if "last_seed" not in st.session_state or st.session_state.last_seed != seed["kr"]:
@@ -717,8 +799,8 @@ def tab_roleplay() -> None:
         st.session_state.last_seed = seed["kr"]
 
     # ─── 1. 헤더/미션 출력 ───────────────────────────────────────────────
-    st.header("AI 점원과 주문 연습")
-    st.success(f"🎯 오늘의 미션: **{seed['kr']}**")
+    st.header("AI와 역할놀이")
+    st.success(f"🎯 **{situation}** — 연습 문장: **{seed['kr']}** (상대 역할: {role})")
 
     # ─── 2. st.chat_input 호출 전에 과거 대화(history) 전부 출력 ─────────
     for msg in st.session_state.roleplay_history:
@@ -737,47 +819,43 @@ def tab_roleplay() -> None:
         with st.chat_message("model"):
             placeholder = st.empty()
             placeholder.markdown("Thinking...")
-            fallback_msg = "잠시 답변이 어려워요. 주문이든 메뉴든 다시 말씀해 주세요! 😅"
+            fallback_msg = "잠시 답변이 어려워요. 다시 한 번 말씀해 주세요."
             try:
                 current_time_str = get_current_kst_str()
+                role_label = role  # 입국 심사관, 식당 이모님 등
                 full_prompt = f"""
-                당신은 **{persona}**입니다.
-                상대방은 한국어를 배우는 손님이에요. 미션 수행을 확인하는 선생님이 아니라, 손님과 즐겁게 수다도 떨 줄 아는 직원/상인이에요.
-                직원의 태도: 친절함, 정중함, 격려해주는 태도. 대화는 풍부하고 자연스럽게.
+                당신은 **{persona}**
+                상대방은 한국어를 배우는 학습자이며, 지금 '{situation}' 상황을 연습 중이다. 당신은 이 상황에서의 **{role_label}** 역할만 수행한다. 다른 앱/상황의 캐릭터가 아니라, **선택된 이 시나리오의 역할에 완전히 충실**하라.
 
                 [시점·장소]
                 Current Date: {current_time_str}
-                Current Location: {theme.get('name_en', 'Restaurant')} setting (roleplay)
+                Current Scenario: {scenario.get('name_en', scenario.get('name', 'Roleplay'))} — {situation}
 
-                [대화 우선순위 (필수)]
-                - 손님이 날씨·안부·추천·질문 등을 하면 **그 질문에 대한 답변을 최우선**으로 해라. 답은 친절하고 풍부하게.
-                - **매 답변 끝에 미션 문장을 똑같이 반복하지 마라.** 미션에만 집착하면 대화가 부자연스러워진다.
-                - 오늘의 연습 문장(미션)은 "{seed['kr']}"이지만, 손님이 다른 이야기를 꺼내면 그 내용에 우선 집중해라.
+                [역할 유지 (필수)]
+                - **공항(입국 심사관)**이면: 깐깐하고 무뚝뚝하며, 질문은 짧고 명확하게. 불필요한 친절이나 수다 금지.
+                - **식당(이모님)**이면: 친절하고 말걸기 좋게, 반말 섞인 존댓말로 편하게.
+                - **편의점(알바생)**이면: 말 짧고 무난하게, 필요한 말만.
+                - **K-드라마(재벌 2세)**이면: 차갑고 단호한 말투, 감정은 묵직하게. 짧은 문장과 침묵 활용.
+                - 매 답변 끝에 미션 문장을 똑같이 반복하지 마라. 대화 흐름상 적절할 때만 가볍게 "아까 연습하시던 '…' 한 번 써보세요" 정도로 언급.
+                - 연습 문장(미션)은 "{seed['kr']}"이지만, 상대가 다른 말을 꺼내면 그에 맞춰 **역할에 맞게** 답하라.
 
-                [미션 상기 (가볍게만)]
-                - 미션은 **대화 흐름상 적절할 때만** 가볍게 언급해라. 예: 메뉴 추천을 마친 후, 혹은 대화가 마무리될 즈음에 "아 참, 아까 연습하시던 '여기 짜장면 하나랑...' 문장도 한 번 써보시겠어요?" 정도로만.
-                - **이미 손님이 미션 문장을 한 번이라도 사용했다면**, 그 이후에는 미션을 더 강조하지 말고 일반적인 손님·점원 수다에만 집중해라.
-                - 목표: 손님이 미션에 얽매이지 않고 편안하게 한국어 대화를 즐길 수 있게 해라.
+                [대화 우선순위]
+                - 상대의 질문·말에 **역할에 맞는 태도로** 최우선 답변. 이미 상대가 미션 문장을 썼으면 미션을 반복하지 말고 자연스럽게 대화만 이어가라.
 
-                [2026년 한국 기본 정보 (간단 질문에만 사용)]
-                - 대한민국 현 대통령은 이재명(Lee Jae-myung)입니다. 2025년 6월 취임.
-                - 손님이 "현재 대통령이 누구야?"처럼 짧게만 물을 때만 이 정보로 답하고, 바로 식사·주문 이야기로 넘어가라.
+                [역할 고정 및 정치/일반 방어]
+                - 너는 오직 **{role_label}**이지, 정치·뉴스 전문가가 아니다. 정치/재판 등 깊은 이야기가 나오면 "그런 건 잘 모르겠어요. (현재 상황으로) 돌아가자." 식으로 짧게 넘기고, 현재 시나리오(입국/주문/편의점/이별 등)로 화제를 돌려라.
+                - 모르는 사실은 지어내지 말고, "그건 잘 모르겠어요." 하고 넘겨라.
 
-                [역할 고정 및 정치 질문 방어 (필수)]
-                - 너는 현재 역할(점원/직원/상인)이지, 정치 전문가나 판사가 아니다.
-                - 손님이 대통령·재판·형량·뉴스 등 정치적인 깊은 이야기를 꺼내면, **"아이고, 저는 뉴스를 잘 안 봐서 그런 건 잘 모릅니다. 😅 다른 거 도와드릴까요?"** 처럼 짧게 넘기고 자연스럽게 현재 장소(주문/체크인/쇼핑 등) 이야기로 화제를 돌려라.
-                - 손님이 사실을 우기면, 동의하거나 반박하지 말고 **"손님이 더 잘 아시네요! 저는 일 보러 가야겠어요."** 하고 넘겨라. 모르는 사실은 지어내지 말라.
-
-                너는 현재 {current_time_str} 기준의 상황에 있다. 시간·날짜는 위 정보를 바탕으로 짧게만 답하라.
-                대화 내역 (마지막 말에 자연스럽게 답하세요):
+                현재 시각: {current_time_str}. 시간·날짜 질문은 위 정보 기준으로 짧게만 답하라.
+                대화 내역 (마지막 말에 **역할에 맞게** 한국어로 한 번만 답하세요):
                 """
                 history_lines = []
-                recent = st.session_state.roleplay_history[-8:]  # 최근 8턴만 (토큰/오류 방지)
+                recent = st.session_state.roleplay_history[-8:]
                 for m in recent:
-                    role = "손님" if m["role"] == "user" else "점원"
-                    history_lines.append(f"{role}: {m['content']}")
+                    speaker = "상대(학습자)" if m["role"] == "user" else role_label
+                    history_lines.append(f"{speaker}: {m['content']}")
                 full_prompt += "\n".join(history_lines)
-                full_prompt += "\n위 맥락에 맞춰 손님의 마지막 말에 자연스럽게 한국어로 답변하세요. 점원으로서 한 번만 답하세요."
+                full_prompt += f"\n위 맥락에 맞춰 상대의 마지막 말에 **{role_label}** 역할로 자연스럽게 한국어로 한 번만 답하세요."
                 try:
                     response_text = try_generate_content(full_prompt, use_grounding=False)
                 except Exception as api_err:
@@ -1029,15 +1107,15 @@ def _inject_hide_footer_early() -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title=APP_TITLE, page_icon="🍲", layout="wide")
+    st.set_page_config(page_title=APP_TITLE, page_icon="🇰🇷", layout="wide")
     init_state()
     # 팝업을 닫거나 다른 곳을 클릭하면 자동으로 다시 잠금 (방금 비밀번호 통과한 경우만 유지)
     if not st.session_state.get("just_unlocked", False):
         st.session_state["settings_unlocked"] = False
     st.session_state["just_unlocked"] = False
     _inject_hide_footer_early()
-    # 상단 헤더 (HTML) → 바로 아래 설정 버튼(popover), CSS로 헤더 박스 위에 겹쳐 표시
-    render_header()
+    # 상단 헤더: 선택된 시나리오에 따라 제목·설명이 동적으로 바뀜
+    render_header(st.session_state.get("current_scenario", "restaurant"))
     with st.popover("⚙️", help="설정"):
         if not st.session_state.get("settings_unlocked", False):
             pin = st.text_input(
@@ -1086,7 +1164,7 @@ def main() -> None:
     is_admin = st.session_state.get("admin_mode", False)
     _inject_app_styles(is_admin)
 
-    tabs = st.tabs(["메뉴 표현 익히기", "요즘 한국어 (K-Slang)", "AI 점원과 주문 연습"])
+    tabs = st.tabs(["표현 익히기", "요즘 한국어 (K-Slang)", "AI와 역할놀이"])
     with tabs[0]:
         tab_menu_learn()
     with tabs[1]:
