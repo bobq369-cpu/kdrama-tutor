@@ -1,7 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
 import os
-import html
 from gtts import gTTS
 import tempfile
 import base64
@@ -88,35 +87,38 @@ def inject_custom_css():
                 background-color: #007AFF !important;
                 color: white !important;
             }
-            /* 홈 화면 카드 그리드 */
-            .scene-card {
-                background: #FFFFFF;
-                border-radius: 16px;
-                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-                padding: 1.5rem;
-                margin-bottom: 1.25rem;
-                border: 1px solid rgba(0,0,0,0.04);
-                transition: box-shadow 0.2s ease, transform 0.2s ease;
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+def inject_home_card_css():
+    """홈 화면에서만 적용: 버튼을 큰 카드처럼 스타일링 (div.stButton > button)"""
+    st.markdown(
+        """
+        <style>
+            div.stButton > button {
+                background-color: #FFFFFF !important;
+                height: 180px !important;
+                min-height: 180px !important;
+                border-radius: 20px !important;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+                border: 1px solid rgba(0,0,0,0.06) !important;
+                text-align: left !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                padding: 1.25rem 1.5rem !important;
+                font-family: 'Pretendard', 'Noto Sans KR', sans-serif !important;
+                color: #1a1a1a !important;
+                white-space: pre-wrap !important;
+                line-height: 1.45 !important;
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
             }
-            .scene-card:hover {
-                box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-                transform: translateY(-2px);
-            }
-            .scene-card-icon {
-                font-size: 2.5rem;
-                margin-bottom: 0.5rem;
-            }
-            .scene-card-title {
-                font-size: 1.1rem;
-                font-weight: 700;
-                color: #1a1a1a;
-                margin-bottom: 0.5rem;
-                line-height: 1.3;
-            }
-            .scene-card-desc {
-                font-size: 0.9rem;
-                color: #6b7280;
-                line-height: 1.45;
+            div.stButton > button:hover {
+                transform: translateY(-5px) !important;
+                border-color: #007AFF !important;
+                box-shadow: 0 8px 24px rgba(0,122,255,0.15) !important;
             }
         </style>
         """,
@@ -240,6 +242,7 @@ def main():
 
     # ----- 홈 화면 (카드형 그리드) -----
     if st.session_state.current_page == "HOME":
+        inject_home_card_css()
         st.markdown("<h1 style='text-align: center; margin-bottom: 2rem;'>오늘 어디서 연습할까요?</h1>", unsafe_allow_html=True)
         st.markdown("<p style='text-align: center; color: #6b7280; margin-bottom: 2rem;'>Select a scene to start learning</p>", unsafe_allow_html=True)
 
@@ -248,15 +251,8 @@ def main():
         for j, (key, sc) in enumerate(items):
             col = col0 if j % 2 == 0 else col1
             with col:
-                card_html = f"""
-                <div class="scene-card">
-                    <div class="scene-card-icon">{sc['icon']}</div>
-                    <div class="scene-card-title">{html.escape(sc['title'])}</div>
-                    <div class="scene-card-desc">{html.escape(sc['context'])}</div>
-                </div>
-                """
-                st.markdown(card_html, unsafe_allow_html=True)
-                if st.button("시작하기 (Start)", key=f"start_{key}"):
+                label = f"{sc['icon']} {sc['title']}\n\n{sc['context']}"
+                if st.button(label, key=f"start_{key}", use_container_width=True):
                     st.session_state.current_page = "LEARNING"
                     st.session_state.selected_scenario = key
                     st.session_state.messages = []
