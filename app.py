@@ -370,13 +370,16 @@ def main():
                         st.image(IMAGE_GALLERY[key], use_container_width=True)
                 if correction:
                     st.caption(f"📝 빨간펜 선생님: {correction}")
-                # 각 AI 답변마다 오디오바 (마지막 답변만 자동 재생)
-                is_last_assistant = (i == len(messages) - 1)
-                should_autoplay = is_last_assistant and st.session_state.get("play_tts")
+                # 각 AI 답변마다 오디오바 (새 답변만 자동 재생, 새 답변 나오면 이전 오디오 정지)
+                is_last_message = (i == len(messages) - 1)
+                should_autoplay = is_last_message and st.session_state.get("play_tts")
                 if i not in st.session_state.tts_cache:
-                    st.session_state.tts_cache[i] = text_to_speech_html(message["content"], autoplay=should_autoplay)
-                if st.session_state.tts_cache[i]:
-                    st.markdown(st.session_state.tts_cache[i], unsafe_allow_html=True)
+                    st.session_state.tts_cache[i] = text_to_speech_html(message["content"], autoplay=False)
+                tts_html = st.session_state.tts_cache[i]
+                if tts_html and should_autoplay:
+                    tts_html = tts_html.replace("<audio controls ", "<audio controls autoplay ", 1)
+                if tts_html:
+                    st.markdown(tts_html, unsafe_allow_html=True)
 
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
