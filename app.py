@@ -33,6 +33,13 @@ try:
 except ImportError:
     GEMINI_AVAILABLE = False
 
+try:
+    from gtts import gTTS
+    import io
+    GTTS_AVAILABLE = True
+except ImportError:
+    GTTS_AVAILABLE = False
+
 
 APP_TITLE = "K-Tutor · 글로벌 한국어 학습 앱"
 APP_SUBTITLE = "상황별 역할놀이로 실전 한국어를 익혀 보세요"
@@ -245,6 +252,7 @@ SAMPLE_LINES_KDRAMA: List[LineItem] = [
 
 # 글로벌 한국어 학습 앱(K-Tutor) 시나리오: 역할·상황·페르소나·인사말·추천 문장
 # 선택한 시나리오에 따라 화면 제목·설명·AI 역할이 전부 바뀜
+# 시나리오별 이미지: Unsplash 무료 이미지 URL (테마 비주얼 강화)
 SCENARIOS: Dict[str, Dict] = {
     "airport": {
         "name": "공항",
@@ -255,6 +263,7 @@ SCENARIOS: Dict[str, Dict] = {
         "greeting": "여권 주세요. 입국 목적이 뭐예요?",
         "lines": SAMPLE_LINES_AIRPORT,
         "emoji": "✈️",
+        "image_url": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&q=80",
     },
     "restaurant": {
         "name": "식당",
@@ -265,6 +274,7 @@ SCENARIOS: Dict[str, Dict] = {
         "greeting": "어서 오세요~ 몇 분이에요? 삼겹살 드실 거예요? 🥩",
         "lines": SAMPLE_LINES_RESTAURANT,
         "emoji": "🥩",
+        "image_url": "https://images.unsplash.com/photo-1544025162-d76694265947?w=1200&q=80",
     },
     "convenience_store": {
         "name": "편의점",
@@ -275,6 +285,7 @@ SCENARIOS: Dict[str, Dict] = {
         "greeting": "어서 오세요. 찾는 거 있으세요?",
         "lines": SAMPLE_LINES_CONVENIENCE_STORE,
         "emoji": "🏪",
+        "image_url": "https://images.unsplash.com/photo-1604719314656-89142e770061?w=1200&q=80",
     },
     "kdrama": {
         "name": "K-드라마",
@@ -285,6 +296,7 @@ SCENARIOS: Dict[str, Dict] = {
         "greeting": "… 앉아. 할 말이 있어.",
         "lines": SAMPLE_LINES_KDRAMA,
         "emoji": "🎬",
+        "image_url": "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=1200&q=80",
     },
 }
 
@@ -363,6 +375,40 @@ def init_state() -> None:
 
 def add_history(event_type: str, payload: Dict) -> None:
     st.session_state.history.append({"ts": now_iso(), "type": event_type, "payload": payload})
+
+
+# TTS 캐시: 동일 텍스트 재생성 방지 (속도·API 절약)
+def _tts_cache() -> Dict[str, bytes]:
+    if "tts_cache" not in st.session_state:
+        st.session_state["tts_cache"] = {}
+    return st.session_state["tts_cache"]
+
+
+def text_to_speech_korean(text: str, max_chars: int = 500) -> Optional[bytes]:
+    """한국어 텍스트를 gTTS로 mp3 바이트로 변환. 에러 시 None, 필요 시 최대 max_chars만 변환."""
+    if not text or not text.strip():
+        return None
+    if not GTTS_AVAILABLE:
+        return None
+    # 마크다운·특수문자 제거, 앞부분만 사용 (속도·품질)
+    clean = re.sub(r"[*_#\[\]()`]", " ", text).strip()
+    clean = re.sub(r"\s+", " ", clean)[:max_chars]
+    if not clean:
+        return None
+    cache = _tts_cache()
+    key = hashlib.md5(clean.encode("utf-8")).hexdigest()
+    if key in cache:
+        return cache[key]
+    try:
+        tts = gTTS(text=clean, lang="ko", slow=False)
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        data = buf.read()
+        cache[key] = data
+        return data
+    except Exception:
+        return None
 
 
 # Google Search Grounding: 실시간 검색 결과를 답변에 반영 (REST API 형식)
@@ -734,10 +780,14 @@ def tab_roleplay() -> None:
     st.header("AI와 역할놀이")
     st.success(f"🎯 **{situation}** — 연습 문장: **{seed['kr']}** (상대 역할: {role})")
 
-    # ─── 2. st.chat_input 호출 전에 과거 대화(history) 전부 출력 ─────────
+    # ─── 2. st.chat_input 호출 전에 과거 대화(history) 전부 출력 + AI 답변에 TTS 플레이어 ─────────
     for msg in st.session_state.roleplay_history:
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
+            if msg["role"] == "model" and msg.get("content"):
+                audio_bytes = text_to_speech_korean(msg["content"])
+                if audio_bytes:
+                    st.audio(audio_bytes, format="audio/mp3")
 
     # ─── 3. 이전 제출분(pending) 처리: 사용자 말 → AI 말풍선(Thinking... → 응답) → history 추가 ───
     if st.session_state.get("pending_prompt") is not None:
@@ -947,6 +997,18 @@ def main() -> None:
     _inject_hide_footer_early()
     # 상단 헤더: 선택된 시나리오에 따라 제목·설명이 동적으로 바뀜
     render_header(st.session_state.get("current_scenario", "restaurant"))
+    # 시나리오 이미지 + 상황 설명 (헤더 바로 아래, 넓게)
+    scenario_key = st.session_state.get("current_scenario", "restaurant")
+    scenario = SCENARIOS.get(scenario_key, SCENARIOS["restaurant"])
+    image_url = scenario.get("image_url")
+    if image_url:
+        st.image(image_url, use_container_width=True)
+        st.markdown(
+            f'<p style="text-align:center; color:#5D4037; font-size:1.05rem; margin-top:0.5rem;">'
+            f'지금 당신은 <strong>{scenario["name"]}</strong> — {scenario["situation"]}에 있습니다.</p>',
+            unsafe_allow_html=True,
+        )
+        st.write("")
     # 오늘의 한 문장: 날짜(일) 기준 매일 다른 표현 (카드 스타일)
     day_idx = datetime.now(KST).timetuple().tm_yday % len(DAILY_SENTENCES)
     daily = DAILY_SENTENCES[day_idx]
