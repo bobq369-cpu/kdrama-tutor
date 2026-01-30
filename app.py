@@ -350,14 +350,7 @@ def main():
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
-    # 핵심 표현 보기 (클릭하면 채팅에 전송)
-    with st.expander("💡 핵심 표현 보기 (클릭하면 전송됩니다)", expanded=True):
-        for idx, (kor, eng) in enumerate(current_scenario["key_phrases"].items()):
-            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}"):
-                st.session_state.messages.append({"role": "user", "content": kor})
-                st.rerun()
-
-    # 단일 채팅 인터페이스
+    # 단일 채팅 인터페이스 (대화 기록)
     chat_container = st.container()
     with chat_container:
         if not st.session_state.messages:
@@ -417,6 +410,16 @@ def main():
 
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
+
+    # 추천 표현 (채팅 입력창 바로 위, Quick Reply 스타일)
+    st.caption("💡 추천 표현 (클릭해서 보내기)")
+    phrases = list(current_scenario["key_phrases"].items())
+    col_a, col_b = st.columns(2)
+    for idx, (kor, eng) in enumerate(phrases):
+        with col_a if idx % 2 == 0 else col_b:
+            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": kor})
+                st.rerun()
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
