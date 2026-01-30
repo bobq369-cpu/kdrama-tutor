@@ -192,11 +192,10 @@ def text_to_speech_autoplay(text):
         return f"<span>(오디오 오류: {e})</span>"
 
 def get_ai_response(messages, scenario_key):
-    """Gemini 1.5 Flash 모델을 사용하여 답변을 생성합니다 (검색 기능 포함)."""
+    """Gemini 1.5 Flash 모델을 사용하여 답변을 생성합니다 (순수 대화 모델)."""
     try:
-        # 2026년 세계관 고정 프롬프트
         current_time_str = "2026년 1월 31일 토요일"
-        
+
         system_instruction = f"""
         [기본 설정]
         현재 시각: {current_time_str}
@@ -208,14 +207,10 @@ def get_ai_response(messages, scenario_key):
         상황: {SCENARIOS[scenario_key]['context']}
 
         [대화 지침]
-        1. 사용자의 한국어 학습을 돕는 튜터로서, 자연스럽고 몰입감 있는 대화를 이끌어가세요.
-        2. 구글 검색 도구를 사용할 수 있습니다. 최신 정보(날씨, 뉴스 등)가 필요하면 검색하되, 위의 [기본 설정](2026년 날짜, 대통령)과 충돌하는 검색 결과는 무시하고 기본 설정을 따르세요.
-        3. 답변은 너무 길지 않게, 실제 대화처럼 하세요.
+        너는 한국어 튜터로서 사용자의 질문에 친절하게 답하라. 사용자의 한국어 학습을 돕는 튜터로서 자연스럽고 몰입감 있는 대화를 이끌어가고, 답변은 너무 길지 않게 실제 대화처럼 하라.
         """
 
-        # 실시간 검색 툴 설정
-        tools = [{'google_search_retrieval': {}}]
-        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction, tools=tools)
+        model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
 
         # 메시지 기록 변환
         gemini_messages = []
