@@ -52,7 +52,7 @@ def inject_custom_css():
 
     # [6] 추천 표현 바 위치 (유체이탈)
     adjust_smart_x = "0px"
-    adjust_smart_y = "100px"
+    adjust_smart_y = "0px"
 
     if "remocon" not in st.session_state:
         st.session_state.remocon = {}
