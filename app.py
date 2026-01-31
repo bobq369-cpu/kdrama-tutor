@@ -143,7 +143,7 @@ def inject_home_card_css():
 
 inject_custom_css()
 
-# --- 3. 동적 이미지 갤러리 (AI가 [IMAGE: key]로 요청 시 사용) ---
+# --- 3. 동적 이미지 갤러리 (모듈 로드 시 한 번만, 캐싱 불필요) ---
 IMAGE_GALLERY = {
     "menu": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
     "passport": "https://images.unsplash.com/photo-1544015759-42b786315268",
@@ -151,7 +151,7 @@ IMAGE_GALLERY = {
     "baggage": "https://images.unsplash.com/photo-1553531384-cc64ac80f931",
 }
 
-# --- 4. 시나리오 데이터 정의 (확장 가능) ---
+# --- 4. 시나리오 데이터 정의 (모듈 로드 시 한 번만, 확장 가능) ---
 SCENARIOS = {
     "airport": {
         "title": "공항 입국 심사 (Airport Immigration)",
@@ -205,9 +205,10 @@ def strip_for_tts(text):
         t = t.split("||", 1)[0].strip()
     return t or ""
 
-def text_to_speech_html(text, autoplay=False):
-    """gTTS로 음성 변환 후 오디오 HTML 반환. autoplay=True면 자동 재생."""
-    clean_text = strip_for_tts(text)
+
+@st.cache_data(show_spinner=False)
+def _generate_tts_html_cached(clean_text):
+    """동일 문장은 캐시에서 반환 (gTTS 재호출 없음)."""
     if not clean_text:
         return ""
     try:
@@ -217,12 +218,10 @@ def text_to_speech_html(text, autoplay=False):
             with open(fp.name, "rb") as f:
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
-                autoplay_attr = " autoplay" if autoplay else ""
-                # 한 개만 재생: 이 오디오가 재생될 때 나머지 모든 오디오는 정지
                 onplay_js = 'onplay="var s=this;document.querySelectorAll(\'audio\').forEach(function(a){if(a!==s)a.pause();});"'
                 md = f"""
                     <div class="tts-player-wrap">
-                    <audio controls{autoplay_attr} {onplay_js}>
+                    <audio controls {onplay_js}>
                     <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
                     </audio>
                     </div>
@@ -231,6 +230,17 @@ def text_to_speech_html(text, autoplay=False):
             return md
     except Exception as e:
         return f"<span>(오디오 오류: {e})</span>"
+
+
+def text_to_speech_html(text, autoplay=False):
+    """gTTS로 음성 변환 후 오디오 HTML 반환. autoplay=True면 자동 재생. (캐시 사용)"""
+    clean_text = strip_for_tts(text)
+    html = _generate_tts_html_cached(clean_text)
+    if not html:
+        return ""
+    if autoplay:
+        html = html.replace("<audio controls ", "<audio controls autoplay ", 1)
+    return html
 
 # API에서 사용 가능한 모델 우선순위 (404 시 다음 모델 시도)
 GEMINI_MODEL_NAMES = [
