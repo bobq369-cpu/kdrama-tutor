@@ -38,7 +38,7 @@ def inject_custom_css():
 
     # [3] 제목(h1) 위치 (테마 선택 후 큰 제목만 이동)
     title_margin_top = "-100px"      # 제목 위쪽 여백 (키우면 제목만 아래로)
-    title_padding_top = "100px"
+    title_padding_top = "-100px"
     title_margin_bottom = "0px"
     # [4] 추천 표현 위치 → render_smart_reply_bar() 안 adjust_y, adjust_x
     # ============================================================
