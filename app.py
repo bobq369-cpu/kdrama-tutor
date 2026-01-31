@@ -11,8 +11,8 @@ import base64
 st.set_page_config(
     page_title="K-Tutor Global",
     page_icon="🇰🇷",
-    layout="centered",  # 모바일 느낌을 위해 중앙 정렬
-    initial_sidebar_state="collapsed"  # 사이드바 기본 숨김
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
 try:
@@ -23,51 +23,31 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. iMessage 스타일 화이트 테마 CSS ---
+# --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기 버튼 안전 격리) ---
 def inject_custom_css():
     st.markdown(
         """
         <style>
-            /* [핵심] 상단 헤더 공간 완전 삭제 (이게 범인입니다) */
+            /* 1. 상단 헤더 숨기기 */
             header[data-testid="stHeader"] {
                 display: none !important;
             }
 
-            /* [핵심] 메인 화면 여백 강제 제거 (천장에 붙이기) */
+            /* 2. 메인 화면 여백 제거 (천장 뚫기) */
             .main .block-container {
-                padding-top: 10px !important; /* 60px -> 10px로 강제 축소 */
+                padding-top: 10px !important;
                 margin-top: 0px !important;
                 max-width: 700px;
             }
 
-            /* 전체 배경 및 폰트 */
+            /* 3. 전체 폰트 및 배경 */
             .stApp {
                 background-color: #FFFFFF;
-                font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+                font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
             }
 
-            /* (나머지 기존 스타일 유지) */
-            .kakao-user-wrap { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-            .kakao-ai-wrap { display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start; }
-            .kakao-user-bubble { width: fit-content; max-width: 70%; word-wrap: break-word; }
-            .kakao-ai-bubble { width: fit-content; max-width: 100%; word-wrap: break-word; }
-            .kakao-ai-avatar { flex-shrink: 0; }
-            .kakao-chat-img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
-            .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
-            .tts-player-wrap { margin-top: 8px; padding: 8px 12px; background: #F8F8F8; border-radius: 12px; }
-            .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
-            .tts-player-wrap audio::-webkit-media-controls-panel { background: transparent; }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-def inject_back_button_css():
-    """뒤로가기 버튼 전용 스타일 (추천 버튼과 충돌 방지됨)"""
-    st.markdown(
-        """
-        <style>
-            /* [수정] 마커가 있는 컨테이너 안의 버튼만 타겟팅 */
+            /* [안전장치] 뒤로가기 버튼 스타일 (마커가 있는 곳만 적용) */
+            /* 추천 표현 버튼이 이 스타일을 먹지 않도록 'div#back-btn-marker'가 있는 곳만 타겟팅합니다. */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-marker) .stButton button {
                 position: fixed !important;
                 top: 15px !important;
@@ -80,13 +60,16 @@ def inject_back_button_css():
                 border: 1px solid #eee !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
             }
+
+            /* 기존 말풍선 스타일 유지 */
+            .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
+            .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
         </style>
         """,
         unsafe_allow_html=True
     )
 
 def inject_home_card_css():
-    """홈 화면에서만 적용: 버튼을 큰 카드처럼 스타일링 (div.stButton > button)"""
     st.markdown(
         """
         <style>
@@ -106,12 +89,6 @@ def inject_home_card_css():
                 color: #1a1a1a !important;
                 white-space: pre-wrap !important;
                 line-height: 1.45 !important;
-                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
-            }
-            div.stButton > button:hover {
-                transform: translateY(-5px) !important;
-                border-color: #007AFF !important;
-                box-shadow: 0 8px 24px rgba(0,122,255,0.15) !important;
             }
         </style>
         """,
@@ -383,9 +360,8 @@ def main():
 
     # ----- 학습 화면 (LEARNING) -----
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
-    inject_back_button_css()
 
-    # [수정] 뒤로가기 버튼을 별도 컨테이너로 격리 + 마커 부착
+    # 뒤로가기 버튼 (별도 컨테이너 + 마커 → inject_custom_css에서 스타일 적용)
     with st.container():
         st.markdown('<div id="back-btn-marker"></div>', unsafe_allow_html=True)
         if st.button("✕", key="back_btn"):
