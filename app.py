@@ -297,10 +297,10 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (Transform 방식 미세 조정) ---
+# --- 6. 스마트 답장 바 (버튼 min-width + Transform) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [무결점 버전] 너비 깨짐(Squash) 방지 + 안전한 위치 이동 (Transform 사용)
+    [최종 수정] 버튼 찌그러짐 방지 (min-width 강제 적용) + Transform 위치 이동
     """
     # ==========================================
     # 🎛️ 사장님 전용 미세 조정 패널
@@ -308,8 +308,8 @@ def render_smart_reply_bar(current_scenario):
 
     # 1. Y축 (위/아래 이동)
     # - "0px" : 가만히 둠 (기본값)
-    # - "-10px" : 위로 살짝 띄우기 (공중부양)
-    # - "10px" : 아래로 살짝 내리기
+    # - "-20px" : 위로 올리기
+    # - "20px" : 아래로 내리기
     adjust_y = "0px"
 
     # 2. X축 (좌/우 이동)
@@ -317,18 +317,24 @@ def render_smart_reply_bar(current_scenario):
 
     # ==========================================
 
-    # CSS 적용 (Transform 사용 -> 레이아웃 절대 안 깨짐)
+    # CSS 적용
     st.markdown(f"""
     <style>
-    /* 1. id='safe-reply-container'를 가진 구역을 찾아서 안전하게 이동 */
+    /* 1. 추천 표현 바 컨테이너 위치 잡기 (Transform 사용) */
     div[data-testid="stVerticalBlock"]:has(#safe-reply-container) {{
-        width: 100% !important;      /* 가로 꽉 채우기 (강제) */
-        min-width: 100% !important;  /* 최소 너비 보장 (찌그러짐 방지) */
-
-        /* [핵심] 좌표계 대신 Transform을 사용하여 시각적으로만 이동 */
-        transform: translate({adjust_x}, {adjust_y}) !important;
-
+        width: 100% !important;
+        transform: translate({adjust_x}, {adjust_y});
         z-index: 1;
+    }}
+
+    /* 2. [핵심] 버튼이 절대 찌그러지지 않게 강제 설정 */
+    div[data-testid="stVerticalBlock"]:has(#safe-reply-container) .stButton button {{
+        width: 100% !important;        /* 가로 꽉 채우기 */
+        min-width: 150px !important;   /* 👈 최소 이만큼은 무조건 확보해라 (찌그러짐 방지) */
+        height: auto !important;       /* 높이는 글자 양에 맞춰 자동 조절 */
+        white-space: pre-wrap !important; /* 글자가 길면 줄바꿈 해라 (세로로 떨어짐 방지) */
+        word-break: keep-all !important;  /* 단어 중간에 끊지 마라 */
+        padding: 12px !important;
     }}
     </style>
     """, unsafe_allow_html=True)
