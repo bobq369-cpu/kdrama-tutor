@@ -32,9 +32,9 @@ def inject_custom_css():
     main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움, 40px=더 띄움
     main_top_margin = "0px"    # 마진으로도 조절 가능
 
-    # 뒤로가기 버튼 위치
-    back_x = "15px"   # 왼쪽 간격
-    back_y = "-300px"   # 위쪽 간격
+    # 뒤로가기 버튼 위치 (음수면 화면 밖으로 나가서 안 보일 수 있음)
+    back_x = "15px"   # 왼쪽 간격 (left)
+    back_y = "15px"   # 위쪽 간격 (top) — 15px 정도가 보기 좋음
 
     # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
     title_margin_top = "-350px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
@@ -70,8 +70,8 @@ def inject_custom_css():
                 font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
             }}
 
-            /* [안전장치 1] 뒤로가기 버튼 (리모컨 적용) */
-            div:has(div#back-btn-area) .stButton button {{
+            /* [안전장치 1] 뒤로가기 버튼 (리모컨 적용) — 첫 번째 버튼만 타겟 */
+            div:has(div#back-btn-area) .stButton:first-of-type button {{
                 position: fixed !important;
                 left: {back_x} !important;
                 top: {back_y} !important;
@@ -263,7 +263,7 @@ def render_smart_reply_bar(current_scenario):
     # - "0px" : 기본
     # - "20px" : 추천 표현을 아래로 띄움
     # - "-10px" : 추천 표현을 위로 당김
-    adjust_y = "10px"
+    adjust_y = "0px"
 
     # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
