@@ -43,7 +43,7 @@ def inject_custom_css():
     title_left = "0px"
 
     # [4] 역할 설명 — 절대 위치
-    role_top = "110px"
+    role_top = "50px"
     role_left = "0px"
 
     # [5] 안내 박스 — 절대 위치
