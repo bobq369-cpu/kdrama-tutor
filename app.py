@@ -315,17 +315,64 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (입력창 바로 위 버튼 그리드) ---
+# --- 6. 스마트 답장 바 (DIY 좌표 고정) ---
 def render_smart_reply_bar(current_scenario):
-    """추천 표현을 일반적인 버튼 그리드로 렌더링 (CSS 고정 없음)"""
-    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
-    phrases = list(current_scenario["key_phrases"].items())
-    col_a, col_b = st.columns(2)
-    for idx, (kor, eng) in enumerate(phrases):
-        with col_a if idx % 2 == 0 else col_b:
-            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
-                st.session_state.messages.append({"role": "user", "content": kor})
-                st.rerun()
+    """
+    [DIY 모드] 사장님이 직접 좌표(X, Y)를 수정하여 위치를 고정하는 함수
+    """
+    # ==========================================
+    # 👇 [여기 숫자만 바꾸세요] 사장님 전용 컨트롤 패널
+    # ==========================================
+
+    # 1. Y축 (높이 조절): 바닥에서 얼마나 띄울까요?
+    # - 입력창을 가린다면? -> "120px"로 올리세요.
+    # - 너무 높으면? -> "80px"로 내리세요.
+    y_pos = "100px"
+
+    # 2. X축 (좌우 조절): 왼쪽 벽에서 얼마나 떨어질까요?
+    # - "50%" : 화면 정중앙 (가장 추천!)
+    # - "10px": 왼쪽 벽에 붙이기
+    x_pos = "50%"
+
+    # 3. 중앙 정렬 보정 (중앙에 둘 때만 True, 한쪽 구석에 둘거면 False)
+    use_center_align = True
+    # ==========================================
+
+    # CSS 생성 로직
+    transform_css = "transform: translateX(-50%);" if use_center_align else ""
+
+    st.markdown(f"""
+    <style>
+    div[data-testid="stVerticalBlock"]:has(#fixed-reply-container) {{
+        position: fixed;
+        bottom: {y_pos};
+        left: {x_pos};
+        {transform_css}
+
+        width: 100%;
+        max-width: 700px;
+        z-index: 9999;
+
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 10px 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: 1px solid #f0f0f0;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # 위치 고정용 앵커 + 버튼을 같은 컨테이너에 (고정 시 버튼이 함께 이동하도록)
+    with st.container():
+        st.markdown('<div id="fixed-reply-container"></div>', unsafe_allow_html=True)
+        st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+        phrases = list(current_scenario["key_phrases"].items())
+        col_a, col_b = st.columns(2)
+        for idx, (kor, eng) in enumerate(phrases):
+            with col_a if idx % 2 == 0 else col_b:
+                if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": kor})
+                    st.rerun()
 
 
 # --- 7. 메인 앱 로직 ---
