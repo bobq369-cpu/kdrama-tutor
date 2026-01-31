@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import google.generativeai as genai
 import os
 import re
@@ -42,9 +43,13 @@ def inject_custom_css():
     title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
     title_y = "0px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
-    # [4] 추천 표현 바 위치
-    adjust_smart_y = "50px"
+    # [4] 추천 표현 바 위치 (세션에 저장 → render_smart_reply_bar + 스크립트에서 사용)
+    adjust_smart_y = "-20px"
     adjust_smart_x = "0px"
+    if "remocon" not in st.session_state:
+        st.session_state.remocon = {}
+    st.session_state.remocon["adjust_smart_x"] = adjust_smart_x
+    st.session_state.remocon["adjust_smart_y"] = adjust_smart_y
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "0px"
@@ -328,10 +333,45 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 4. 스마트 답장 바 ---
+# --- 4. 추천 표현 바 위치 적용 (부모 문서 DOM 조작) ---
+def _apply_smart_reply_position_script():
+    """리모컨 값으로 추천 표현 바가 들어 있는 블록에 transform 적용. CSS 선택자가 Streamlit DOM에서 안 먹힐 때 사용."""
+    components.html(
+        """
+        <script>
+        (function() {
+            var doc = window.parent.document;
+            var el = doc.getElementById("smart-reply-area");
+            if (!el) return;
+            var x = el.getAttribute("data-x") || "0px";
+            var y = el.getAttribute("data-y") || "0px";
+            var blocks = doc.querySelectorAll("[data-testid='stVerticalBlock']");
+            var target = null;
+            for (var i = 0; i < blocks.length; i++) {
+                if (blocks[i].querySelector("#smart-reply-area")) target = blocks[i];
+            }
+            if (target) {
+                target.style.setProperty("position", "relative", "important");
+                target.style.setProperty("z-index", "1", "important");
+                target.style.setProperty("transform", "translate(" + x + ", " + y + ")", "important");
+                target.style.setProperty("width", "100%", "important");
+            }
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
+# --- 5. 스마트 답장 바 ---
 def render_smart_reply_bar(current_scenario):
+    remocon = st.session_state.get("remocon", {})
+    sx = remocon.get("adjust_smart_x", "0px")
+    sy = remocon.get("adjust_smart_y", "0px")
     with st.container():
-        st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div id="smart-reply-area" data-x="{sx}" data-y="{sy}"></div>',
+            unsafe_allow_html=True
+        )
         st.divider()
         st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
         phrases = list(current_scenario["key_phrases"].items())
@@ -343,7 +383,7 @@ def render_smart_reply_bar(current_scenario):
                     st.rerun()
 
 
-# --- 5. 메인 앱 로직 ---
+# --- 6. 메인 앱 로직 ---
 def main():
     if "messages" not in st.session_state: st.session_state.messages = []
     if "selected_scenario" not in st.session_state: st.session_state.selected_scenario = "airport"
@@ -401,6 +441,9 @@ def main():
         st.markdown('<div id="chat-area-end"></div>', unsafe_allow_html=True)
 
     render_smart_reply_bar(current_scenario)
+
+    # 추천 표현 바 위치: iframe 스크립트로 부모 문서의 블록에 transform 적용 (CSS 선택자 미동작 대응)
+    _apply_smart_reply_position_script()
 
     if prompt := st.chat_input("한국어로 대화해보세요..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
