@@ -263,7 +263,7 @@ def render_smart_reply_bar(current_scenario):
     # - "0px" : 기본
     # - "20px" : 추천 표현을 아래로 띄움 (채팅과 간격 생김)
     # - "40px" : 더 아래로
-    adjust_y = "0px"
+    adjust_y = "100px"
 
     # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
