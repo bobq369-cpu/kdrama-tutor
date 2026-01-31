@@ -23,7 +23,7 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기 버튼 안전 격리) ---
+# --- 2. CSS 설정 (철저한 격리 적용) ---
 def inject_custom_css():
     st.markdown(
         """
@@ -46,9 +46,9 @@ def inject_custom_css():
                 font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
             }
 
-            /* [안전장치] 뒤로가기 버튼 스타일 (마커가 있는 곳만 적용) */
-            /* 추천 표현 버튼이 이 스타일을 먹지 않도록 'div#back-btn-marker'가 있는 곳만 타겟팅합니다. */
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-marker) .stButton button {
+            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 */
+            /* id="back-btn-area"가 있는 곳의 버튼만 동그라미로 만듦 */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
                 top: 15px !important;
                 left: 15px !important;
@@ -59,9 +59,21 @@ def inject_custom_css():
                 background-color: white !important;
                 border: 1px solid #eee !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+                padding: 0 !important;
+            }
+            
+            /* [안전장치 2] 추천 표현 버튼 전용 스타일 (위의 동그라미 스타일 영향 차단) */
+            /* id="smart-reply-area"가 있는 곳의 버튼은 네모난 모양 유지 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {
+                position: static !important; /* 고정 해제 */
+                width: 100% !important;
+                height: auto !important;
+                border-radius: 8px !important;
+                box-shadow: none !important;
+                min-width: 150px !important; /* 찌그러짐 방지 */
             }
 
-            /* 기존 말풍선 스타일 유지 */
+            /* 기타 말풍선 스타일 */
             .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
             .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
         </style>
@@ -200,14 +212,14 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 4. [복구 완료] 스마트 답장 바 (Relative 방식) ---
+# --- 4. [복구 완료] 스마트 답장 바 (Relative 방식 + 격리) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [복구됨] 사장님이 직접 좌표를 조정하던 '그 버전'입니다.
-    복잡한 Transform이나 min-width 없이, 가장 단순하고 확실한 Relative 방식을 사용합니다.
+    사장님이 원하셨던 '그 버전'입니다.
+    안전한 Relative 방식을 사용하며, 뒤로가기 버튼의 스타일 간섭을 받지 않도록 격리(Marker)했습니다.
     """
     # ==========================================
-    # 🎛️ 사장님 전용 미세 조정 패널 (여기 숫자만 바꾸세요!)
+    # 🎛️ 사장님 전용 미세 조정 패널 (숫자만 바꾸세요)
     # ==========================================
     
     # 1. Y축 (위/아래 이동)
@@ -224,7 +236,8 @@ def render_smart_reply_bar(current_scenario):
     # CSS 적용 (안전한 Relative 사용)
     st.markdown(f"""
     <style>
-    div[data-testid="stVerticalBlock"]:has(#safe-reply-container) {{
+    /* id='smart-reply-area'가 있는 구역만 이동 */
+    div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
         position: relative; 
         top: {adjust_y};
         left: {adjust_x};
@@ -235,7 +248,9 @@ def render_smart_reply_bar(current_scenario):
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown('<div id="safe-reply-container"></div>', unsafe_allow_html=True)
+        # [핵심] 이 마커가 있어야 스타일이 충돌하지 않습니다!
+        st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
+        
         st.divider()
         st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
         
@@ -272,9 +287,9 @@ def main():
     # [LEARNING PAGE]
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
     
-    # [수정] 뒤로가기 버튼 격리 (Marker 사용) -> 추천 버튼에 영향 안 줌
+    # [수정] 뒤로가기 버튼 격리 (Marker 사용) -> 추천 버튼에 절대 영향 안 줌
     with st.container():
-        st.markdown('<div id="back-btn-marker"></div>', unsafe_allow_html=True)
+        st.markdown('<div id="back-btn-area"></div>', unsafe_allow_html=True)
         if st.button("✕", key="back_btn"):
             st.session_state.current_page = "HOME"
             st.rerun()
@@ -307,7 +322,7 @@ def main():
 
         if st.session_state.get("play_tts"): st.session_state.play_tts = False
 
-    # 추천 표현 (Relative 좌표 방식 복구됨)
+    # 추천 표현 (사장님이 원하셨던 '그 버전' + 찌그러짐 방지 포함)
     render_smart_reply_bar(current_scenario)
 
     if prompt := st.chat_input("한국어로 대화해보세요..."):
