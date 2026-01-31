@@ -51,9 +51,9 @@ def inject_custom_css():
             div:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
 
-                /* 👇 위치는 여기서 조절하세요 (현재: 위 20px, 왼쪽 20px) */
-                top: -20px !important;
-                left: -20px !important;
+                /* 👇 위치는 여기서 조절하세요 (현재: 위 -100px, 왼쪽 -100px) */
+                top: -100px !important;
+                left: -100px !important;
 
                 z-index: 99999 !important;
                 width: 40px !important;
