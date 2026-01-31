@@ -52,7 +52,7 @@ def inject_custom_css():
     st.session_state.remocon["adjust_smart_y"] = adjust_smart_y
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
-    subtitle_x = "-200px"
+    subtitle_x = "200px"
     subtitle_y = "-200px"
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
