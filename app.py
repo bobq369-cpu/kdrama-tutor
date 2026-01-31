@@ -98,12 +98,11 @@ def inject_custom_css():
                 position: relative !important; z-index: 8 !important;
                 transform: translate({prompt_x}, {prompt_y}) !important;
             }}
-            div:has(> #smart-reply-area),
-            div:has(> #smart-reply-area) ~ div,
-            div:has(#smart-reply-area):has(> div:nth-child(2)):not(:has(div:has(#smart-reply-area):has(> div:nth-child(2)))),
+            /* 추천 표현: 섹션 전체를 담는 블록 하나만 이동 (형제 선택자 제거 → 버튼 2열 레이아웃 유지) */
             [data-testid="stVerticalBlock"]:has(#smart-reply-area):not(:has([data-testid="stVerticalBlock"]:has(#smart-reply-area))) {{
                 position: relative !important; z-index: 1 !important;
                 transform: translate({adjust_smart_x}, {adjust_smart_y}) !important;
+                width: 100% !important;
             }}
             div:has(div#smart-reply-area) .stButton button {{
                 position: static !important;
