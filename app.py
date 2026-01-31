@@ -64,36 +64,39 @@ def inject_custom_css():
     )
 
 def inject_back_button_css():
-    """학습 화면에서만: 뒤로가기 버튼을 화면 상단에 고정 + 작은 원형 스타일"""
+    """학습 화면에서만: 뒤로가기 버튼을 화면 좌측 상단에 강제 고정(Fixed)"""
     st.markdown(
         """
         <style>
-            /* 뒤로가기 버튼을 맨 위에서 20px만 띄워 고정 */
+            /* 1. 버튼 위치를 화면 왼쪽 위(Top-Left)에 강제 고정 */
             .main .block-container .stButton:first-of-type {
                 position: fixed !important;
-                top: 20px !important;
-                left: 10px !important;
-                z-index: 999 !important;
+                top: 10px !important;   /* 맨 위에서 10px 띄움 */
+                left: 10px !important;  /* 왼쪽에서 10px 띄움 */
+                z-index: 99999 !important; /* 다른 것보다 무조건 위에 */
+                width: auto !important;
             }
+
+            /* 2. 버튼 모양 (원형 디자인 + 그림자) */
             .main .block-container .stButton:first-of-type button {
-                width: 40px !important;
-                height: 40px !important;
-                min-height: 40px !important;
+                width: 45px !important;
+                height: 45px !important;
                 padding: 0 !important;
                 border-radius: 50% !important;
-                background: transparent !important;
-                border: none !important;
-                font-size: 1.25rem !important;
+                background-color: #FFFFFF !important; /* 배경 흰색 */
+                border: 1px solid #E5E5E5 !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; /* 잘 보이게 그림자 추가 */
+                font-size: 1.2rem !important;
                 color: #333 !important;
-                box-shadow: none !important;
-                transition: background 0.2s ease !important;
+                transition: transform 0.2s ease !important;
             }
+
+            /* 3. 호버 효과 */
             .main .block-container .stButton:first-of-type button:hover {
-                background: rgba(0,0,0,0.06) !important;
-            }
-            /* 버튼 아래 콘텐츠가 가려지지 않도록 상단 여백 확보 (20px + 버튼 40px) */
-            .main .block-container {
-                padding-top: 66px !important;
+                transform: scale(1.1) !important;
+                background-color: #F8F9FA !important;
+                border-color: #007AFF !important;
+                color: #007AFF !important;
             }
         </style>
         """,
