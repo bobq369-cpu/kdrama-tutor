@@ -34,55 +34,55 @@ def inject_custom_css():
     main_top_padding = "0px"
     main_top_margin = "0px"
 
-    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정, 다른 요소와 무관
-    back_x = "0px"
-    back_y = "0px"
+    # [2] 뒤로가기 버튼 (✕) 위치
+    # 왼쪽 끝에 딱 붙입니다!
+    back_x = "0px"    # 왼쪽 벽에서 20px (너무 붙지 않게 여유 줌)
+    back_y = "0px"    # 천장에서 20px
 
-    # [3] 제목 — 절대 위치 (top/left), 다른 요소 움직임 없음
-    title_top = "50px"
-    title_left = "0px"
+    # [3] 제목 (Title) 위치
+    title_x = "0px"
+    title_y = "0px"
 
-    # [4] 역할 설명 — 절대 위치
-    role_top = "110px"
-    role_left = "0px"
+    # [4] 역할 설명 (💡 역할: ...) 위치
+    role_x = "0px"
+    role_y = "0px"
 
-    # [5] 안내 박스 — 절대 위치
-    prompt_top = "160px"
-    prompt_left = "0px"
+    # [5] 안내 박스 (👋 대화를 시작해보세요...) 위치
+    prompt_x = "0px"
+    prompt_y = "50px"  # 50px 아래로
 
-    # [6] 추천 표현 바 — 절대 위치
-    smart_top = "230px"
-    smart_left = "0px"
-
-    # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
-    chat_area_top = "320px"
-
+    # [6] 추천 표현 바 위치
+    smart_x = "0px"
+    smart_y = "200px"    
+    
     # ============================================================
 
     st.markdown(
         f"""
         <style>
-            /* 1. 기본 헤더 숨김 & 메인 컨테이너 */
+            /* 1. 기본 헤더 숨김 & 메인 컨테이너 여백 제거 */
             header[data-testid="stHeader"] {{ display: none !important; }}
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
                 max-width: 700px;
-                position: relative !important;  /* 절대 위치 기준점 */
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* [2] 뒤로가기 버튼: 화면 고정, 다른 요소와 완전 독립 */
+            /* ====================================================================
+               [수정 1] 뒤로가기 버튼: 왼쪽 상단 고정 (작은 원형)
+               ==================================================================== */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
                 position: fixed !important;
                 top: {back_y} !important;
                 left: {back_x} !important;
-                width: auto !important;
+                width: auto !important;  /* 내용물만큼만 크기 차지 */
                 height: auto !important;
                 z-index: 999999 !important;
             }}
+            
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
-                width: 32px !important;
+                width: 32px !important;   /* 버튼 크기 작게 */
                 height: 32px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
@@ -93,91 +93,85 @@ def inject_custom_css():
                 font-size: 14px !important;
             }}
 
-            /* [3] 제목: 절대 위치 — 이 값만 바꿔도 다른 요소는 그대로 */
-            div[data-testid="stVerticalBlock"]:has(#learning-title-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#learning-title-wrap))) {{
-                position: absolute !important;
-                top: {title_top} !important;
-                left: {title_left} !important;
-                width: 100% !important;
-                max-width: 700px !important;
-                margin: 0 !important;
-                z-index: 10 !important;
+            /* 3. 제목 래퍼 */
+            #learning-title-wrap {{
+                transform: translate({title_x}, {title_y}) !important;
+                position: relative; z-index: 10;
+                margin-bottom: 10px;
             }}
-            #learning-title-wrap {{ margin: 0 !important; }}
 
-            /* [4] 역할 설명: 절대 위치 */
-            div[data-testid="stVerticalBlock"]:has(#role-caption-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#role-caption-wrap))) {{
-                position: absolute !important;
-                top: {role_top} !important;
-                left: {role_left} !important;
-                width: 100% !important;
-                max-width: 700px !important;
-                margin: 0 !important;
-                z-index: 9 !important;
-            }}
+            /* 4. 역할 설명 래퍼 */
             #role-caption-wrap {{
-                font-size: 0.875rem !important;
-                color: gray !important;
-                margin: 0 !important;
+                transform: translate({role_x}, {role_y}) !important;
+                position: relative; z-index: 9;
+                font-size: 0.875rem; color: gray; margin-bottom: 20px;
             }}
 
-            /* [5] 안내 박스: 절대 위치 */
-            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker):not(:has(> div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker))) {{
-                position: absolute !important;
-                top: {prompt_top} !important;
-                left: {prompt_left} !important;
-                width: 100% !important;
-                max-width: 700px !important;
-                margin: 0 !important;
-                z-index: 8 !important;
+            /* 5. 안내 박스 컨테이너 이동 */
+            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
+                transform: translate({prompt_x}, {prompt_y}) !important;
+                position: relative; 
+                z-index: 8;
             }}
 
-            /* [6] 추천 표현 바: 절대 위치 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) {{
-                position: absolute !important;
-                top: {smart_top} !important;
-                left: {smart_left} !important;
-                width: 100% !important;
-                max-width: 700px !important;
-                margin: 0 !important;
-                z-index: 1 !important;
+            /* ====================================================================
+               [수정 2] 추천 표현 바: 채팅창 너비에 맞춤 & 중앙 정렬 & 뭉침 방지
+               ==================================================================== */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
+                transform: translate({smart_x}, {smart_y}) !important;
+                position: relative; 
+                z-index: 1; 
+                
+                width: 100% !important;        
+                max-width: 700px !important;   /* 최대 너비 700px (채팅창과 동일) */
+                
+                /* 중앙 정렬 */
+                margin-left: auto !important;
+                margin-right: auto !important;
+                left: 0 !important;
+                right: 0 !important;
+                
+                display: block !important;
             }}
 
-            /* 채팅 영역: 위 요소들과 겹치지 않도록 상단 여백 (컨테이너 전체에만 적용) */
-            div[data-testid="stVerticalBlock"]:has(div#chat-area-marker):has(> div[data-testid="stVerticalBlock"]:has(div#chat-area-marker)) {{
-                padding-top: {chat_area_top} !important;
-            }}
-
-            /* 추천 표현 바 내부 컬럼/버튼 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stHorizontalBlock"] {{
+            /* 내부 컬럼 컨테이너 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 gap: 10px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stColumn"] {{
+
+            /* 각 컬럼(기둥) */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stColumn"] {{
                 flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button {{
+
+            /* 버튼 디자인 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
                 height: auto !important;
                 min-height: 60px !important;
+                
                 white-space: pre-wrap !important;
                 word-break: keep-all !important;
+                
                 background-color: #FFFFFF !important;
                 border: 1px solid #E5E5E5 !important;
                 color: #4B5563 !important;
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                text-align: center !important;
+                
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                text-align: center;
                 padding: 12px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button:hover {{
+            
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
             }}
@@ -388,10 +382,9 @@ def main():
     st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
     st.markdown(f"<div id='role-caption-wrap'>💡 역할: {html.escape(current_scenario['role'])}</div>", unsafe_allow_html=True)
 
-    # 3. 채팅창 (상단 여백용 마커 — 리모컨 chat_area_top 으로 조절)
+    # 3. 채팅창
     chat_container = st.container()
     with chat_container:
-        st.markdown('<div id="chat-area-marker"></div>', unsafe_allow_html=True)
         if not st.session_state.messages:
             # [중요] 안내 박스를 '컨테이너'에 담고 ID를 부여해서 CSS로 제어 가능하게 만듦
             with st.container():
