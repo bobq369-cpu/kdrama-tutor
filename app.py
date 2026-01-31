@@ -83,79 +83,46 @@ def inject_custom_css():
                 padding: 0 !important;
             }}
 
-            /* 3. 제목 래퍼 (Transform 이동, 찌그러짐 방지) */
+            /* 3. 제목 래퍼 (Transform 이동) */
             #learning-title-wrap {{
                 transform: translate({title_x}, {title_y}) !important;
-                position: relative !important;
-                z-index: 10;
-                margin-bottom: 10px !important;
-                display: block !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+                position: relative; z-index: 10;
+                margin-bottom: 10px;
             }}
 
-            /* 4. 역할 설명 래퍼 (Transform 이동, 찌그러짐 방지) */
+            /* 4. 역할 설명 래퍼 (Transform 이동) */
             #role-caption-wrap {{
                 transform: translate({role_x}, {role_y}) !important;
-                position: relative !important;
-                z-index: 9;
-                font-size: 0.875rem !important;
-                color: gray !important;
-                margin-bottom: 20px !important;
-                display: block !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+                position: relative; z-index: 9;
+                font-size: 0.875rem; color: gray; margin-bottom: 20px;
             }}
 
-            /* 5. 안내 박스 컨테이너 이동 (찌그러짐 방지) */
+            /* 5. 안내 박스 컨테이너 이동 */
             div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
                 transform: translate({prompt_x}, {prompt_y}) !important;
-                position: relative !important;
+                position: relative; 
                 z-index: 8;
-                width: 100% !important;
-                min-width: 100% !important;
-                display: block !important;
-                box-sizing: border-box !important;
             }}
 
-            /* 6. 추천 표현 바: 마커+2열을 모두 포함하는 블록만 선택 (뭉침 방지) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) {{
+            /* 6. [핵심 수정] 추천 표현 바 컨테이너 찌그러짐 방지 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
-                position: relative !important;
-                z-index: 1;
+                position: relative; 
+                z-index: 1; 
+                width: 100% !important;     /* 너비 강제 */
+                min-width: 100% !important; /* 최소 너비 강제 (이게 핵심!) */
+            }}
+
+            /* [추가된 코드] 추천 표현 안의 가로 줄(Columns)이 쪼그라들지 않게 내부까지 강제 확장 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
                 min-width: 100% !important;
-                max-width: 100% !important;
-                display: block !important;
-                box-sizing: border-box !important;
             }}
 
-            /* 추천 표현 내부: 2열 그리드로 고정 (한 좌표에 뭉침 방지) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stHorizontalBlock"] {{
+            /* 7. 추천 버튼 디자인 통일 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
-                min-width: 100% !important;
-                display: grid !important;
-                grid-template-columns: 1fr 1fr !important;
-                gap: 12px !important;
-                box-sizing: border-box !important;
-            }}
-
-            /* 각 컬럼 셀: 그리드가 배치하므로 min-width:0으로 찌그러짐 방지 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stHorizontalBlock"] > div {{
-                min-width: 0 !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
-            }}
-
-            /* 추천 버튼: 셀 안에서 100%, 뭉침 방지 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton {{
-                width: 100% !important;
-                max-width: 100% !important;
-            }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button {{
-                width: 100% !important;
-                min-width: 0 !important;
-                max-width: 100% !important;
+                min-width: 100px !important; /* 버튼 자체 최소 너비 */
                 min-height: 80px !important;
                 height: auto !important;
                 background-color: #FFFFFF !important;
@@ -164,14 +131,10 @@ def inject_custom_css():
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
                 white-space: pre-wrap !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                text-align: center !important;
+                display: flex; align-items: center; justify-content: center; text-align: center;
                 padding: 10px !important;
-                transition: all 0.2s ease !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button:hover {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
             }}
