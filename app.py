@@ -52,7 +52,7 @@ def inject_custom_css():
 
     # [6] 추천 표현 바 위치
     smart_x = "0px"
-    smart_y = "0px"    # 예: -20px 올리기
+    smart_y = "0px"    # 위로 올리려면 "-20px"
     
     # ============================================================
 
@@ -104,19 +104,25 @@ def inject_custom_css():
                 z-index: 8;
             }}
 
-            /* 6. [수정됨] 추천 표현 바 컨테이너 이동 */
-            /* display: block 삭제 -> 2열 배열(Flex) 깨짐 방지 */
+            /* 6. [핵심 수정] 추천 표현 바 컨테이너 이동 & 찌그러짐 방지 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
                 position: relative; 
-                z-index: 1; /* 채팅창과 겹칠 경우 조절 */
+                z-index: 1; 
                 width: 100% !important;
+            }}
+
+            /* [추가된 코드] 추천 표현 안의 가로 줄(Columns)이 쪼그라들지 않게 강제 확장 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
+                width: 100% !important;
+                min-width: 100% !important;
+                flex-wrap: nowrap !important;
             }}
 
             /* 7. 추천 버튼 디자인 통일 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
-                min-width: 150px !important; /* 최소 너비 확보 (찌그러짐 방지) */
+                min-width: 100px !important; /* 최소 너비 보장 */
                 min-height: 80px !important;
                 height: auto !important;
                 background-color: #FFFFFF !important;
