@@ -83,46 +83,75 @@ def inject_custom_css():
                 padding: 0 !important;
             }}
 
-            /* 3. 제목 래퍼 (Transform 이동) */
+            /* 3. 제목 래퍼 (Transform 이동, 찌그러짐 방지) */
             #learning-title-wrap {{
                 transform: translate({title_x}, {title_y}) !important;
-                position: relative; z-index: 10;
-                margin-bottom: 10px;
+                position: relative !important;
+                z-index: 10;
+                margin-bottom: 10px !important;
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }}
 
-            /* 4. 역할 설명 래퍼 (Transform 이동) */
+            /* 4. 역할 설명 래퍼 (Transform 이동, 찌그러짐 방지) */
             #role-caption-wrap {{
                 transform: translate({role_x}, {role_y}) !important;
-                position: relative; z-index: 9;
-                font-size: 0.875rem; color: gray; margin-bottom: 20px;
+                position: relative !important;
+                z-index: 9;
+                font-size: 0.875rem !important;
+                color: gray !important;
+                margin-bottom: 20px !important;
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }}
 
-            /* 5. 안내 박스 컨테이너 이동 */
+            /* 5. 안내 박스 컨테이너 이동 (찌그러짐 방지) */
             div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
                 transform: translate({prompt_x}, {prompt_y}) !important;
-                position: relative; 
+                position: relative !important;
                 z-index: 8;
+                width: 100% !important;
+                min-width: 100% !important;
+                display: block !important;
+                box-sizing: border-box !important;
             }}
 
-            /* 6. [핵심 수정] 추천 표현 바 컨테이너 찌그러짐 방지 */
+            /* 6. 추천 표현 바 컨테이너 (찌그러짐 방지 + 이동) */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
-                position: relative; 
-                z-index: 1; 
-                width: 100% !important;     /* 너비 강제 */
-                min-width: 100% !important; /* 최소 너비 강제 (이게 핵심!) */
+                position: relative !important;
+                z-index: 1;
+                width: 100% !important;
+                min-width: 100% !important;
+                max-width: 100% !important;
+                display: block !important;
+                box-sizing: border-box !important;
             }}
 
-            /* [추가된 코드] 추천 표현 안의 가로 줄(Columns)이 쪼그라들지 않게 내부까지 강제 확장 */
+            /* 추천 표현 내부: 가로 줄(2열)이 쪼그라들지 않게 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
                 min-width: 100% !important;
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                box-sizing: border-box !important;
             }}
 
-            /* 7. 추천 버튼 디자인 통일 */
+            /* 추천 표현 2열: 각 컬럼이 균등 비율 유지 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] > div {{
+                flex: 1 1 0% !important;
+                min-width: 0 !important;
+                max-width: none !important;
+                box-sizing: border-box !important;
+            }}
+
+            /* 7. 추천 버튼 디자인 통일 (찌그러짐 방지) */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
-                min-width: 100px !important; /* 버튼 자체 최소 너비 */
+                min-width: 120px !important;
+                max-width: 100% !important;
                 min-height: 80px !important;
                 height: auto !important;
                 background-color: #FFFFFF !important;
