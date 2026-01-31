@@ -25,27 +25,39 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. CSS 설정 (상단 여백 + 뒤로가기/제목/추천 표현 격리) ---
+# --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨]
+    # 🎛️ [사장님 전용 리모컨] - 요소별로 숫자만 바꾸면 됩니다
     # ============================================================
+    # [1] 전체 화면 상단 여백 (건드리면 전체가 같이 움직임)
     main_top_padding = "0px"
     main_top_margin = "0px"
-    back_x = "15px"
-    back_y = "15px"
-    title_x = "0px"
-    title_y = "0px"
-    adjust_smart_y = "0px"
+
+    # [2] 뒤로가기 버튼(✕) 위치 (고정)
+    back_x = "15px"   # 좌우 (음수: 왼쪽, 양수: 오른쪽)
+    back_y = "15px"   # 상하 (음수: 위, 양수: 아래)
+
+    # [3] 제목(Title) 위치 (유체이탈)
+    title_x = "0px"   # 좌우
+    title_y = "0px"   # 상하
+
+    # [4] 역할 설명(💡 역할: ...) 위치 (유체이탈)
+    subtitle_x = "0px"
+    subtitle_y = "0px"
+
+    # [5] 안내 박스(👋 대화를 시작해보세요...) 위치 (유체이탈)
+    prompt_x = "0px"
+    prompt_y = "0px"
+
+    # [6] 추천 표현 바 위치 (유체이탈)
     adjust_smart_x = "0px"
+    adjust_smart_y = "100px"
+
     if "remocon" not in st.session_state:
         st.session_state.remocon = {}
     st.session_state.remocon["adjust_smart_x"] = adjust_smart_x
     st.session_state.remocon["adjust_smart_y"] = adjust_smart_y
-    subtitle_x = "0px"
-    subtitle_y = "0px"
-    prompt_x = "0px"
-    prompt_y = "0px"
     st.session_state.remocon["prompt_x"] = prompt_x
     st.session_state.remocon["prompt_y"] = prompt_y
     # ============================================================
@@ -64,7 +76,8 @@ def inject_custom_css():
                 margin-top: 10px !important; margin-bottom: 10px !important;
                 padding: 0 !important; position: relative; z-index: 10;
             }}
-            div:has(div#back-btn-area) .stButton button {{
+            div:has(div#back-btn-area) .stButton button,
+            [data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
                 position: fixed !important;
                 left: {back_x} !important; top: {back_y} !important;
                 z-index: 99999 !important;
