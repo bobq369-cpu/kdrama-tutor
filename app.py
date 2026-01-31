@@ -44,7 +44,7 @@ def inject_custom_css():
     title_y = "-200px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치
-    adjust_smart_y = "0px"
+    adjust_smart_y = "100px"
     adjust_smart_x = "0px"
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
@@ -112,13 +112,13 @@ def inject_custom_css():
                 transform: translate({prompt_x}, {prompt_y}) !important;
             }}
 
-            /* 7. 추천 표현 바: 마커 블록 + 다음 형제들(divider, 캡션, 버튼 영역) 모두 같은 transform */
+            /* 7. 추천 표현 바: transform 적용 (직계부모가 div가 아닐 수 있으므로 * 포함) */
             div:has(> #smart-reply-area),
-            div:has(> #smart-reply-area) + div,
-            div:has(> #smart-reply-area) + div + div,
-            div:has(> #smart-reply-area) + div + div + div,
-            div:has(> #smart-reply-area) + div + div + div + div,
-            div:has(> #smart-reply-area) + div + div + div + div + div {{
+            div:has(> #smart-reply-area) ~ div,
+            *:has(> #smart-reply-area),
+            *:has(> #smart-reply-area) ~ *,
+            div:has(#smart-reply-area):has(> div:nth-child(2)):not(:has(div:has(#smart-reply-area):has(> div:nth-child(2)))),
+            [data-testid="stVerticalBlock"]:has(#smart-reply-area):not(:has([data-testid="stVerticalBlock"]:has(#smart-reply-area))) {{
                 position: relative !important;
                 z-index: 1 !important;
                 transform: translate({adjust_smart_x}, {adjust_smart_y}) !important;
