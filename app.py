@@ -89,7 +89,7 @@ def inject_custom_css():
                 top: {back_y} !important;
                 z-index: 99999 !important;
                 width: 40px !important;
-                height: 40px !important;
+                height: 10px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
                 border: 1px solid #eee !important;
