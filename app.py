@@ -63,21 +63,16 @@ def inject_custom_css():
     )
 
 def inject_back_button_css():
-    """뒤로가기 버튼을 화면 좌측 상단에 '공중부양(Fixed)' 시켜서 고정"""
+    """뒤로가기 버튼 전용 스타일 (추천 버튼과 충돌 방지됨)"""
     st.markdown(
         """
         <style>
-            /* 버튼을 화면 왼쪽 위에 나사로 박듯이 고정 */
-            div[data-testid="stVerticalBlock"] .stButton:first-of-type {
+            /* [수정] 마커가 있는 컨테이너 안의 버튼만 타겟팅 */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-marker) .stButton button {
                 position: fixed !important;
-                top: 15px !important;   /* 맨 위에서 15px */
-                left: 15px !important;  /* 왼쪽에서 15px */
-                z-index: 99999 !important; /* 제일 위에 표시 */
-                width: auto !important;
-            }
-
-            /* 버튼 디자인 (동그라미) */
-            div[data-testid="stVerticalBlock"] .stButton:first-of-type button {
+                top: 15px !important;
+                left: 15px !important;
+                z-index: 99999 !important;
                 width: 40px !important;
                 height: 40px !important;
                 border-radius: 50% !important;
@@ -390,10 +385,12 @@ def main():
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
     inject_back_button_css()
 
-    # 뒤로 가기: 좌측 상단 작은 원형 버튼
-    if st.button("✕", key="back_btn"):
-        st.session_state.current_page = "HOME"
-        st.rerun()
+    # [수정] 뒤로가기 버튼을 별도 컨테이너로 격리 + 마커 부착
+    with st.container():
+        st.markdown('<div id="back-btn-marker"></div>', unsafe_allow_html=True)
+        if st.button("✕", key="back_btn"):
+            st.session_state.current_page = "HOME"
+            st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
