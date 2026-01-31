@@ -259,23 +259,26 @@ def render_smart_reply_bar(current_scenario):
     # 🎛️ 사장님 전용 미세 조정 패널 (숫자만 바꾸세요)
     # ==========================================
     
-    # 1. Y축 (위/아래 여백) — margin만 써서 제목은 안 움직임
+    # 1. Y축 (채팅과 추천 표현 사이 여백) — 채팅 끝에만 margin이라 제목 안 움직임
     # - "0px" : 기본
-    # - "20px" : 추천 표현을 아래로 띄움
-    # - "-10px" : 추천 표현을 위로 당김
-    adjust_y = "100px"
+    # - "20px" : 추천 표현을 아래로 띄움 (채팅과 간격 생김)
+    # - "40px" : 더 아래로
+    adjust_y = "0px"
 
     # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
     
     # ==========================================
 
-    # CSS 적용 (margin만 사용 → 제목/다른 요소와 분리되어 추천 표현만 이동)
+    # CSS 적용 (채팅 끝 마커에 margin-bottom → 추천 표현만 아래로, 제목은 그대로)
     st.markdown(f"""
     <style>
-    /* [수정] 추천 표현 구역만 이동 (상위 블록 잡지 않도록 margin 사용) */
+    /* 채팅 끝 블록에만 아래 여백 → 제목/채팅은 고정, 추천 표현만 아래로 내려감 */
+    div:has(div#chat-area-end) {{
+        margin-bottom: {adjust_y} !important;
+    }}
+    /* 추천 표현 좌우만 이동 */
     div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
-        margin-top: {adjust_y} !important;
         margin-left: {adjust_x} !important;
         width: 100% !important;
     }}
@@ -357,6 +360,9 @@ def main():
                 {html.escape(display)}{tts_code}{corr_html}</div>{img_html}</div></div>""", unsafe_allow_html=True)
 
         if st.session_state.get("play_tts"): st.session_state.play_tts = False
+
+        # 채팅 끝 마커 (이 블록에 margin-bottom 주면 추천 표현만 아래로 내려감, 제목 안 움직임)
+        st.markdown('<div id="chat-area-end"></div>', unsafe_allow_html=True)
 
     # 추천 표현 (사장님이 원하셨던 '그 버전' + 찌그러짐 방지 포함)
     render_smart_reply_bar(current_scenario)
