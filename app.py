@@ -40,19 +40,19 @@ def inject_custom_css():
     # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
     # * 이걸 움직여도 밑에 있는 채팅창/부제목은 가만히 있습니다! *
     title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
-    title_y = "-150px"    # 상하 이동 (음수: 위로, 양수: 아래로)
+    title_y = "-200px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치
-    adjust_smart_y = "200px"
+    adjust_smart_y = "220px"
     adjust_smart_x = "0px"
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "200px"
-    subtitle_y = "-100px"
+    subtitle_y = "-200px"
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
-    prompt_y = "-200px"
+    prompt_y = "100px"
     st.markdown(
         f"""
         <style>
