@@ -28,16 +28,15 @@ def inject_custom_css():
     st.markdown(
         """
         <style>
-            /* [강력 적용] 상단 헤더(햄버거 버튼 등) 아예 삭제 */
+            /* [핵심] 상단 헤더 공간 완전 삭제 (이게 범인입니다) */
             header[data-testid="stHeader"] {
                 display: none !important;
             }
 
-            /* [강력 적용] 메인 컨텐츠 최상단 여백 제거 */
+            /* [핵심] 메인 화면 여백 강제 제거 (천장에 붙이기) */
             .main .block-container {
-                padding-top: 10px !important; /* 여기를 0에 가깝게 줄임 */
+                padding-top: 10px !important; /* 60px -> 10px로 강제 축소 */
                 margin-top: 0px !important;
-                padding-bottom: 5rem;
                 max-width: 700px;
             }
 
@@ -47,7 +46,7 @@ def inject_custom_css():
                 font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             }
 
-            /* (기존 스타일 유지) */
+            /* (나머지 기존 스타일 유지) */
             .kakao-user-wrap { display: flex; justify-content: flex-end; margin-bottom: 10px; }
             .kakao-ai-wrap { display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start; }
             .kakao-user-bubble { width: fit-content; max-width: 70%; word-wrap: break-word; }
@@ -64,39 +63,27 @@ def inject_custom_css():
     )
 
 def inject_back_button_css():
-    """학습 화면에서만: 뒤로가기 버튼을 화면 좌측 상단에 강제 고정(Fixed)"""
+    """뒤로가기 버튼을 화면 좌측 상단에 '공중부양(Fixed)' 시켜서 고정"""
     st.markdown(
         """
         <style>
-            /* 1. 버튼 위치를 화면 왼쪽 위(Top-Left)에 강제 고정 */
-            .main .block-container .stButton:first-of-type {
+            /* 버튼을 화면 왼쪽 위에 나사로 박듯이 고정 */
+            div[data-testid="stVerticalBlock"] .stButton:first-of-type {
                 position: fixed !important;
-                top: 10px !important;   /* 맨 위에서 10px 띄움 */
-                left: 10px !important;  /* 왼쪽에서 10px 띄움 */
-                z-index: 99999 !important; /* 다른 것보다 무조건 위에 */
+                top: 15px !important;   /* 맨 위에서 15px */
+                left: 15px !important;  /* 왼쪽에서 15px */
+                z-index: 99999 !important; /* 제일 위에 표시 */
                 width: auto !important;
             }
 
-            /* 2. 버튼 모양 (원형 디자인 + 그림자) */
-            .main .block-container .stButton:first-of-type button {
-                width: 45px !important;
-                height: 45px !important;
-                padding: 0 !important;
+            /* 버튼 디자인 (동그라미) */
+            div[data-testid="stVerticalBlock"] .stButton:first-of-type button {
+                width: 40px !important;
+                height: 40px !important;
                 border-radius: 50% !important;
-                background-color: #FFFFFF !important; /* 배경 흰색 */
-                border: 1px solid #E5E5E5 !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important; /* 잘 보이게 그림자 추가 */
-                font-size: 1.2rem !important;
-                color: #333 !important;
-                transition: transform 0.2s ease !important;
-            }
-
-            /* 3. 호버 효과 */
-            .main .block-container .stButton:first-of-type button:hover {
-                transform: scale(1.1) !important;
-                background-color: #F8F9FA !important;
-                border-color: #007AFF !important;
-                color: #007AFF !important;
+                background-color: white !important;
+                border: 1px solid #eee !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
             }
         </style>
         """,
