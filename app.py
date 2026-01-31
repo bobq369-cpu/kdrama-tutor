@@ -37,7 +37,7 @@ def inject_custom_css():
     back_y = "-200px"   # 위쪽 간격
 
     # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
-    title_margin_top = "-200px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
+    title_margin_top = "-400px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
     title_padding_top = "10px"    # 제목 위쪽 패딩
     title_margin_bottom = "0px"   # 제목 아래쪽 여백
     # ============================================================
