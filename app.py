@@ -48,7 +48,7 @@ def inject_custom_css():
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "0px"
-    subtitle_y = "-100px"
+    subtitle_y = "-200px"
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
