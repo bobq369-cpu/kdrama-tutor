@@ -44,7 +44,7 @@ def inject_custom_css():
     title_y = "0px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치 (세션에 저장 → render_smart_reply_bar + 스크립트에서 사용)
-    adjust_smart_y = "200px"
+    adjust_smart_y = "210px"
     adjust_smart_x = "0px"
     if "remocon" not in st.session_state:
         st.session_state.remocon = {}
