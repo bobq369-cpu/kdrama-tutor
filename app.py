@@ -315,72 +315,23 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (하단 중앙 고정 + 여백 보정) ---
+# --- 6. 스마트 답장 바 (채팅 맨 아래 버튼 그리드) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [좌표 보정 버전] 입력창 바로 위에 안전하게 고정 (글자 가림 방지 포함)
+    [롤백 완료] 복잡한 CSS 제거하고 가장 기본적인 버튼 그리드로 복구.
+    위치: main() 함수에서 호출한 그 자리(채팅 기록 맨 끝)에 그대로 표시됨.
     """
-    # ==========================================
-    # 🎛️ 사장님 전용 컨트롤러 (여기 숫자만 건드리세요)
-    # ==========================================
+    st.divider()
+    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
 
-    # 1. 높이 (바닥에서 얼마나 띄울지)
-    # 90px 정도가 입력창 바로 위입니다. (입력창과 겹치면 110px로 올리세요)
-    bottom_pos = "90px"
+    phrases = list(current_scenario["key_phrases"].items())
+    col_a, col_b = st.columns(2)
 
-    # 2. 박스 너비 (PC화면에서 너무 넓어지는 것 방지)
-    # 채팅창 너비와 똑같이 맞췄습니다 (700px). 건드리지 마세요!
-    box_width = "700px"
-
-    # ==========================================
-
-    st.markdown(f"""
-    <style>
-    /* 1. 둥둥 떠있는 추천 박스 스타일 (앵커가 있는 블록 전체에 적용) */
-    div[data-testid="stVerticalBlock"]:has(.smart-reply-fixed-anchor) {{
-        position: fixed;
-        bottom: {bottom_pos};
-        left: 50%;
-        transform: translateX(-50%);
-
-        width: 100%;
-        max-width: {box_width};
-
-        background-color: rgba(255, 255, 255, 0.98);
-        padding: 15px 20px;
-        border-radius: 20px;
-        border: 1px solid #eee;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.08);
-        z-index: 9999;
-        text-align: center;
-    }}
-
-    /* 2. [중요] 글자가 박스 뒤에 숨지 않도록 화면 아래 공간 확보 */
-    .main .block-container {{
-        padding-bottom: 250px !important;
-    }}
-
-    /* 3. 모바일에서 좌우 여백 확보 */
-    @media (max-width: 600px) {{
-        div[data-testid="stVerticalBlock"]:has(.smart-reply-fixed-anchor) {{
-            width: 95%;
-            bottom: 80px;
-        }}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    # 앵커 + 버튼을 같은 컨테이너에 (고정 박스 안에 함께 들어가도록)
-    with st.container():
-        st.markdown('<div class="smart-reply-fixed-anchor"></div>', unsafe_allow_html=True)
-        st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
-        phrases = list(current_scenario["key_phrases"].items())
-        col_a, col_b = st.columns(2)
-        for idx, (kor, eng) in enumerate(phrases):
-            with col_a if idx % 2 == 0 else col_b:
-                if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
-                    st.session_state.messages.append({"role": "user", "content": kor})
-                    st.rerun()
+    for idx, (kor, eng) in enumerate(phrases):
+        with col_a if idx % 2 == 0 else col_b:
+            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": kor})
+                st.rerun()
 
 
 # --- 7. 메인 앱 로직 ---
@@ -490,8 +441,7 @@ def main():
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
 
-    # [유일한 위치] 추천 표현: 채팅 루프 직후, st.chat_input 직전. 상단 호출 없음.
-    st.divider()
+    # [유일한 위치] 추천 표현: 채팅 루프 직후, st.chat_input 직전. (구분선은 함수 내부에서 처리)
     render_smart_reply_bar(current_scenario)
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
