@@ -263,7 +263,7 @@ def render_smart_reply_bar(current_scenario):
     # 1. Y축 (채팅과 추천 표현 사이 여백) — 채팅 끝만 margin이라 제목 안 움직임
     # - "0px" : 기본
     # - "20px" : 추천 표현을 아래로 띄움
-    adjust_y = "-100px"
+    adjust_y = "-300px"
 
     # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
