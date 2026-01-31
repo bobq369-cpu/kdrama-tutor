@@ -34,10 +34,10 @@ def inject_custom_css():
     # [1] 전체 화면 상단 여백 (이걸 건드리면 전체가 다 같이 움직입니다)
     main_top_padding = "0px"
     main_top_margin = "0px"  # 최대한 위로 붙임
-
     # [2] 뒤로가기 버튼 위치 (고정됨)
     back_x = "0px"
     back_y = "15px"
+
 
     # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
     title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
@@ -85,8 +85,10 @@ def inject_custom_css():
                 z-index: 10;
             }}
 
-            /* 4. 뒤로가기 버튼 (고정) */
-            div:has(div#back-btn-area) .stButton button {{
+            /* 4. 뒤로가기 버튼 (고정 위치) - position: fixed 필수 */
+            div:has(div#back-btn-area) .stButton button,
+            [data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
+                position: fixed !important;
                 left: {back_x} !important;
                 top: {back_y} !important;
                 z-index: 99999 !important;
