@@ -297,17 +297,19 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (Flow 유지 + X/Y 미세 조정 + 너비 고정) ---
+# --- 6. 스마트 답장 바 (Transform 방식 미세 조정) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [안전 모드 + 너비 고정] 좌표 이동 시 버튼이 찌그러지는 문제를 해결한 버전
+    [무결점 버전] 너비 깨짐(Squash) 방지 + 안전한 위치 이동 (Transform 사용)
     """
     # ==========================================
     # 🎛️ 사장님 전용 미세 조정 패널
     # ==========================================
 
     # 1. Y축 (위/아래 이동)
-    # 일단 '0px'로 두었습니다. 화면 보시고 다시 숫자를 넣어보세요!
+    # - "0px" : 가만히 둠 (기본값)
+    # - "-10px" : 위로 살짝 띄우기 (공중부양)
+    # - "10px" : 아래로 살짝 내리기
     adjust_y = "0px"
 
     # 2. X축 (좌/우 이동)
@@ -315,25 +317,25 @@ def render_smart_reply_bar(current_scenario):
 
     # ==========================================
 
-    # 1. CSS로 미세 조정 적용
+    # CSS 적용 (Transform 사용 -> 레이아웃 절대 안 깨짐)
     st.markdown(f"""
     <style>
-    /* [핵심 수정] width: 100%를 추가하여 가로폭을 강제로 확보 */
+    /* 1. id='safe-reply-container'를 가진 구역을 찾아서 안전하게 이동 */
     div[data-testid="stVerticalBlock"]:has(#safe-reply-container) {{
-        width: 100% !important;  /* 👈 이게 없어서 찌그러졌던 겁니다! */
-        position: relative;
-        top: {adjust_y};
-        left: {adjust_x};
+        width: 100% !important;      /* 가로 꽉 채우기 (강제) */
+        min-width: 100% !important;  /* 최소 너비 보장 (찌그러짐 방지) */
 
-        background-color: transparent;
+        /* [핵심] 좌표계 대신 Transform을 사용하여 시각적으로만 이동 */
+        transform: translate({adjust_x}, {adjust_y}) !important;
+
         z-index: 1;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-    # 2. 위치 타겟팅용 투명 앵커
+    # 앵커 및 버튼 출력
     with st.container():
-        st.markdown('<div id="safe-reply-container"></div>', unsafe_allow_html=True)
+        st.markdown('<div id="safe-reply-container"></div>', unsafe_allow_html=True)  # 좌표 타겟용 앵커
 
         st.divider()
         st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
