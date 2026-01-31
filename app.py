@@ -32,8 +32,8 @@ def inject_custom_css():
     # ============================================================
 
     # [1] 전체 화면 상단 여백 (이걸 건드리면 전체가 다 같이 움직입니다)
-    main_top_padding = "0px"
-    main_top_margin = "-50px"  # 최대한 위로 붙임
+    main_top_padding = "50px"
+    main_top_margin = "0px"  # 최대한 위로 붙임
 
     # [2] 뒤로가기 버튼 위치 (고정됨)
     back_x = "15px"
