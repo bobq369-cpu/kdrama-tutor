@@ -245,7 +245,7 @@ def render_smart_reply_bar(current_scenario):
     # - "0px" : 기본 위치
     # - "-20px" : 위로 올리기
     # - "20px" : 아래로 내리기
-    adjust_y = "180px" 
+    adjust_y = "150px" 
 
     # 2. X축 (좌/우 이동)
     adjust_x = "0px" 
