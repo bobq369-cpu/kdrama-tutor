@@ -64,10 +64,17 @@ def inject_custom_css():
     )
 
 def inject_back_button_css():
-    """학습 화면에서만: 좌측 상단 뒤로가기 버튼을 작은 원형으로 스타일링"""
+    """학습 화면에서만: 뒤로가기 버튼을 화면 상단에 고정 + 작은 원형 스타일"""
     st.markdown(
         """
         <style>
+            /* 뒤로가기 버튼을 화면 최상단 좌측에 고정 */
+            .main .block-container .stButton:first-of-type {
+                position: fixed !important;
+                top: 10px !important;
+                left: 10px !important;
+                z-index: 999 !important;
+            }
             .main .block-container .stButton:first-of-type button {
                 width: 40px !important;
                 height: 40px !important;
@@ -83,6 +90,10 @@ def inject_back_button_css():
             }
             .main .block-container .stButton:first-of-type button:hover {
                 background: rgba(0,0,0,0.06) !important;
+            }
+            /* 버튼 아래 콘텐츠가 가려지지 않도록 상단 여백 확보 */
+            .main .block-container {
+                padding-top: 56px !important;
             }
         </style>
         """,
