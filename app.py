@@ -30,7 +30,12 @@ def inject_custom_css():
     # ============================================================
     # 뒤로가기 버튼 위치
     back_x = "15px"   # 왼쪽 간격
-    back_y = "15px"   # 위쪽 간격 (100px은 너무 아래라 15px로 원복했습니다!)
+    back_y = "15px"   # 위쪽 간격
+
+    # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
+    title_margin_top = "-100px"    # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
+    title_padding_top = "10px"  # 제목 위쪽 패딩
+    title_margin_bottom = "0px" # 제목 아래쪽 여백
     # ============================================================
 
     st.markdown(
@@ -48,10 +53,11 @@ def inject_custom_css():
                 max-width: 700px;
             }}
 
-            /* 3. 제목(h1) 위쪽 여백도 강제 삭제 */
+            /* 3. 제목(h1) 위치 (리모컨 적용) */
             h1 {{
-                margin-top: 0px !important;
-                padding-top: 10px !important; /* 최소한의 숨구멍만 남김 */
+                margin-top: {title_margin_top} !important;
+                padding-top: {title_padding_top} !important;
+                margin-bottom: {title_margin_bottom} !important;
             }}
 
             /* 4. 전체 폰트 및 배경 */
