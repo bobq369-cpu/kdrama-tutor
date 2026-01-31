@@ -297,35 +297,30 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (Flow 유지 + X/Y 미세 조정) ---
+# --- 6. 스마트 답장 바 (Flow 유지 + X/Y 미세 조정 + 너비 고정) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [안전 모드] 현재 위치를 기반으로 X, Y 좌표만큼만 살짝 이동시키는 함수.
-    (화면을 가리거나 망가뜨리지 않음)
+    [안전 모드 + 너비 고정] 좌표 이동 시 버튼이 찌그러지는 문제를 해결한 버전
     """
     # ==========================================
     # 🎛️ 사장님 전용 미세 조정 패널
     # ==========================================
 
     # 1. Y축 (위/아래 이동)
-    # - "0px" : 가만히 둠 (기본값)
-    # - "-20px" : 위로 20px 올림
-    # - "20px" : 아래로 20px 내림
-    adjust_y = "160px"
+    # 일단 '0px'로 두었습니다. 화면 보시고 다시 숫자를 넣어보세요!
+    adjust_y = "0px"
 
     # 2. X축 (좌/우 이동)
-    # - "0px" : 가만히 둠 (기본값)
-    # - "50px" : 오른쪽으로 이동
-    # - "-50px" : 왼쪽으로 이동
     adjust_x = "0px"
 
     # ==========================================
 
-    # 1. CSS로 미세 조정 적용 (position: relative 사용)
+    # 1. CSS로 미세 조정 적용
     st.markdown(f"""
     <style>
-    /* id가 'safe-reply-container'인 블록을 찾아서 좌표 이동 */
+    /* [핵심 수정] width: 100%를 추가하여 가로폭을 강제로 확보 */
     div[data-testid="stVerticalBlock"]:has(#safe-reply-container) {{
+        width: 100% !important;  /* 👈 이게 없어서 찌그러졌던 겁니다! */
         position: relative;
         top: {adjust_y};
         left: {adjust_x};
@@ -336,9 +331,10 @@ def render_smart_reply_bar(current_scenario):
     </style>
     """, unsafe_allow_html=True)
 
-    # 2. 앵커 + 버튼을 같은 컨테이너에 (미세 조정이 전체에 적용되도록)
+    # 2. 위치 타겟팅용 투명 앵커
     with st.container():
         st.markdown('<div id="safe-reply-container"></div>', unsafe_allow_html=True)
+
         st.divider()
         st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
 
