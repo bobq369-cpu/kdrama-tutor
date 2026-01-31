@@ -51,7 +51,7 @@ def inject_custom_css():
     prompt_left = "0px"
 
     # [6] 추천 표현 바 — 절대 위치
-    smart_top = "230px"
+    smart_top = "300px"
     smart_left = "0px"
 
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
@@ -72,8 +72,8 @@ def inject_custom_css():
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* [2] 뒤로가기 버튼: 화면 고정, 다른 요소와 완전 독립 */
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
+            /* [2] 뒤로가기 버튼: 화면 고정, 가장 안쪽 블록만 선택 (다른 요소와 완전 독립) */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area):not(:has(> div[data-testid="stVerticalBlock"]:has(div#back-btn-area))) {{
                 position: fixed !important;
                 top: {back_y} !important;
                 left: {back_x} !important;
@@ -81,7 +81,7 @@ def inject_custom_css():
                 height: auto !important;
                 z-index: 999999 !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area):not(:has(> div[data-testid="stVerticalBlock"]:has(div#back-btn-area))) .stButton button {{
                 width: 32px !important;
                 height: 32px !important;
                 border-radius: 50% !important;
@@ -132,8 +132,8 @@ def inject_custom_css():
                 z-index: 8 !important;
             }}
 
-            /* [6] 추천 표현 바: 절대 위치 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) {{
+            /* [6] 추천 표현 바: 절대 위치 — 가장 안쪽 블록만 선택 (다른 요소와 독립) */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area))) {{
                 position: absolute !important;
                 top: {smart_top} !important;
                 left: {smart_left} !important;
@@ -149,18 +149,18 @@ def inject_custom_css():
             }}
 
             /* 추천 표현 바 내부 컬럼/버튼 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stHorizontalBlock"] {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area))) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 gap: 10px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) [data-testid="stColumn"] {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area))) [data-testid="stColumn"] {{
                 flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area))) .stButton button {{
                 width: 100% !important;
                 height: auto !important;
                 min-height: 60px !important;
@@ -177,7 +177,7 @@ def inject_custom_css():
                 text-align: center !important;
                 padding: 12px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]) .stButton button:hover {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
             }}

@@ -51,7 +51,7 @@ def inject_custom_css():
     prompt_left = "0px"
 
     # [6] 추천 표현 바 — 절대 위치
-    smart_top = "300px"
+    smart_top = "100px"
     smart_left = "0px"
 
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
