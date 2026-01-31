@@ -28,14 +28,18 @@ def inject_custom_css():
     # ============================================================
     # 🎛️ [사장님 전용 리모컨]
     # ============================================================
+    # 상단 여백 (화면 맨 위에서 콘텐츠까지의 간격)
+    main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움, 40px=더 띄움
+    main_top_margin = "0px"    # 마진으로도 조절 가능
+
     # 뒤로가기 버튼 위치
     back_x = "15px"   # 왼쪽 간격
     back_y = "15px"   # 위쪽 간격
 
     # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
-    title_margin_top = "-100px"    # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
-    title_padding_top = "10px"  # 제목 위쪽 패딩
-    title_margin_bottom = "0px" # 제목 아래쪽 여백
+    title_margin_top = "0px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
+    title_padding_top = "10px"    # 제목 위쪽 패딩
+    title_margin_bottom = "0px"   # 제목 아래쪽 여백
     # ============================================================
 
     st.markdown(
@@ -46,10 +50,10 @@ def inject_custom_css():
                 display: none !important;
             }}
 
-            /* 2. [핵심] 메인 화면 여백 '0'으로 만들기 */
+            /* 2. 메인 화면 상단 여백 (리모컨 적용) */
             .main .block-container {{
-                padding-top: 0px !important;    /* 10px -> 0px (완전 제거) */
-                margin-top: 0px !important;
+                padding-top: {main_top_padding} !important;
+                margin-top: {main_top_margin} !important;
                 max-width: 700px;
             }}
 
