@@ -28,53 +28,34 @@ def inject_custom_css():
     st.markdown(
         """
         <style>
-            /* 전체 배경: 완전 흰색 */
+            /* 1. 기본 배경 및 폰트 */
             .stApp {
                 background-color: #FFFFFF;
                 font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             }
-            /* 채팅 영역만 연한 그림자로 떠 있는 느낌 */
+
+            /* 2. 메인 컨테이너 (여기가 핵심! 위쪽 여백 대폭 축소) */
             .main .block-container {
                 max-width: 700px;
-                padding-top: 2rem;
+                padding-top: 1rem !important; /* 2rem -> 1rem으로 축소 (더 줄이려면 0.5rem) */
                 padding-bottom: 5rem;
-                background-color: #FFFFFF;
-                border-radius: 24px;
-                box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-                margin-top: 20px;
-                margin-bottom: 20px;
+                margin-top: 0px !important;   /* 마진 제거 */
             }
-            header {visibility: hidden;}
-            footer {visibility: hidden;}
-            /* 카카오톡 스타일: 말풍선 fit-content + max-width 70% */
+
+            /* 3. 불필요한 헤더 공간 완전 삭제 (중요) */
+            header[data-testid="stHeader"] {
+                display: none;
+            }
+
+            /* (아래는 기존 스타일 그대로 유지) */
             .kakao-user-wrap { display: flex; justify-content: flex-end; margin-bottom: 10px; }
             .kakao-ai-wrap { display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start; }
             .kakao-user-bubble { width: fit-content; max-width: 70%; word-wrap: break-word; }
             .kakao-ai-bubble { width: fit-content; max-width: 100%; word-wrap: break-word; }
             .kakao-ai-avatar { flex-shrink: 0; }
-            .kakao-ai-body { max-width: 70%; }
             .kakao-chat-img { max-width: 100%; border-radius: 12px; margin-top: 8px; }
             .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
-            .stTabs [data-baseweb="tab-list"] { gap: 10px; }
-            .stTabs [data-baseweb="tab"] {
-                height: 50px;
-                white-space: pre-wrap;
-                background-color: #E9E9EB;
-                border-radius: 15px;
-                color: #8E8E93;
-                font-weight: 600;
-                padding: 0 20px;
-            }
-            .stTabs [aria-selected="true"] {
-                background-color: #007AFF !important;
-                color: white !important;
-            }
-            .tts-player-wrap {
-                margin-top: 8px;
-                padding: 8px 12px;
-                background: #F8F8F8;
-                border-radius: 12px;
-            }
+            .tts-player-wrap { margin-top: 8px; padding: 8px 12px; background: #F8F8F8; border-radius: 12px; }
             .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
             .tts-player-wrap audio::-webkit-media-controls-panel { background: transparent; }
         </style>
