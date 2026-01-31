@@ -35,8 +35,9 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 (✕) 위치
-    back_x = "10px"    # 왼쪽 벽에서 10px
-    back_y = "10px"    # 천장에서 10px
+    # 왼쪽 끝에 딱 붙입니다!
+    back_x = "20px"    # 왼쪽 벽에서 20px (너무 붙지 않게 여유 줌)
+    back_y = "20px"    # 천장에서 20px
 
     # [3] 제목 (Title) 위치
     title_x = "0px"
@@ -52,7 +53,7 @@ def inject_custom_css():
 
     # [6] 추천 표현 바 위치
     smart_x = "0px"
-    smart_y = "200px"    
+    smart_y = "0px"    
     
     # ============================================================
 
@@ -64,21 +65,24 @@ def inject_custom_css():
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
-                max-width: 700px; /* 채팅창 최대 너비 */
+                max-width: 700px;
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* 2. 뒤로가기 버튼: 작고 귀엽게 왼쪽 상단 고정 */
+            /* ====================================================================
+               [수정 1] 뒤로가기 버튼: 왼쪽 상단 고정 (작은 원형)
+               ==================================================================== */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
                 position: fixed !important;
                 top: {back_y} !important;
                 left: {back_x} !important;
-                width: auto !important;
+                width: auto !important;  /* 내용물만큼만 크기 차지 */
                 height: auto !important;
                 z-index: 999999 !important;
             }}
+            
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
-                width: 32px !important;
+                width: 32px !important;   /* 버튼 크기 작게 */
                 height: 32px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
@@ -111,17 +115,17 @@ def inject_custom_css():
             }}
 
             /* ====================================================================
-               [핵심 수정] 추천 표현 바: 채팅창 너비(700px)에 맞추고 중앙 정렬
+               [수정 2] 추천 표현 바: 채팅창 너비에 맞춤 & 중앙 정렬 & 뭉침 방지
                ==================================================================== */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
                 position: relative; 
                 z-index: 1; 
                 
-                width: 100% !important;        /* 가득 채우되 */
-                max-width: 700px !important;   /* 700px은 넘지 마라 (채팅창 사이즈) */
+                width: 100% !important;        
+                max-width: 700px !important;   /* 최대 너비 700px (채팅창과 동일) */
                 
-                /* 화면 중앙 정렬 */
+                /* 중앙 정렬 */
                 margin-left: auto !important;
                 margin-right: auto !important;
                 left: 0 !important;
@@ -135,7 +139,7 @@ def inject_custom_css():
                 width: 100% !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
-                gap: 10px !important; /* 버튼 사이 간격 */
+                gap: 10px !important;
             }}
 
             /* 각 컬럼(기둥) */
