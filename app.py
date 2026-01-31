@@ -37,7 +37,7 @@ def inject_custom_css():
     back_y = "15px"   # 위쪽 간격
 
     # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
-    title_margin_top = "0px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
+    title_margin_top = "-350px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
     title_padding_top = "10px"    # 제목 위쪽 패딩
     title_margin_bottom = "0px"   # 제목 아래쪽 여백
     # ============================================================
@@ -57,8 +57,8 @@ def inject_custom_css():
                 max-width: 700px;
             }}
 
-            /* 3. 제목(h1) 위치 (리모컨 적용) */
-            h1 {{
+            /* 3. 제목만 이동 (learning-title-wrap만 타겟 → 다른 요소 안 움직임) */
+            #learning-title-wrap {{
                 margin-top: {title_margin_top} !important;
                 padding-top: {title_padding_top} !important;
                 margin-bottom: {title_margin_bottom} !important;
@@ -263,7 +263,7 @@ def render_smart_reply_bar(current_scenario):
     # - "0px" : 기본
     # - "20px" : 추천 표현을 아래로 띄움
     # - "-10px" : 추천 표현을 위로 당김
-    adjust_y = "0px"
+    adjust_y = "50px"
 
     # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
@@ -329,7 +329,8 @@ def main():
             st.session_state.current_page = "HOME"
             st.rerun()
 
-    st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
+    # 제목만 감싸는 wrapper (이 ID만 스타일하면 제목만 옮겨짐)
+    st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
     # 채팅 출력
