@@ -30,7 +30,7 @@ def inject_custom_css():
     # ============================================================
     # [1] 상단 여백 (화면 맨 위에서 콘텐츠까지의 간격)
     main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움
-    main_top_margin = "0px"
+    main_top_margin = "50px"
 
     # [2] 뒤로가기 버튼 위치 (✕)
     back_x = "0px"   # 왼쪽 간격
