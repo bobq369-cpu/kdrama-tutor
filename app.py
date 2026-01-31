@@ -52,7 +52,7 @@ def inject_custom_css():
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
-    prompt_y = "-150px"
+    prompt_y = "-100px"
     st.markdown(
         f"""
         <style>
@@ -103,15 +103,15 @@ def inject_custom_css():
                 transform: translate({subtitle_x}, {subtitle_y}) !important;
             }}
 
-            /* 6. "대화를 시작해보세요!..." 안내 박스 (유체이탈) */
-            div[data-testid="stVerticalBlock"]:has(#start-prompt-wrap) {{
+            /* 6. "대화를 시작해보세요!..." 안내 박스 (직계 부모만 → 다른 요소와 분리) */
+            div:has(> #start-prompt-wrap) {{
                 position: relative !important;
                 z-index: 8 !important;
                 transform: translate({prompt_x}, {prompt_y}) !important;
             }}
 
-            /* 7. 추천 표현 바 (독립 이동) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
+            /* 7. 추천 표현 바 (직계 부모만 → 독립 이동) */
+            div:has(> div#smart-reply-area) {{
                 position: relative !important;
                 top: {adjust_smart_y} !important;
                 left: {adjust_smart_x} !important;
