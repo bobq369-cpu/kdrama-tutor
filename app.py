@@ -50,8 +50,6 @@ def inject_custom_css():
         st.session_state.remocon = {}
     st.session_state.remocon["adjust_smart_x"] = adjust_smart_x
     st.session_state.remocon["adjust_smart_y"] = adjust_smart_y
-    st.session_state.remocon["prompt_x"] = prompt_x
-    st.session_state.remocon["prompt_y"] = prompt_y
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "200px"
@@ -60,6 +58,8 @@ def inject_custom_css():
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
     prompt_y = "-100px"
+    st.session_state.remocon["prompt_x"] = prompt_x
+    st.session_state.remocon["prompt_y"] = prompt_y
     # ============================================================
 
     st.markdown(
