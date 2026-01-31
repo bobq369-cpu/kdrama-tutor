@@ -36,8 +36,8 @@ def inject_custom_css():
 
     # [2] 뒤로가기 버튼 (✕) 위치
     # 왼쪽 끝에 딱 붙입니다!
-    back_x = "20px"    # 왼쪽 벽에서 20px (너무 붙지 않게 여유 줌)
-    back_y = "20px"    # 천장에서 20px
+    back_x = "0px"    # 왼쪽 벽에서 20px (너무 붙지 않게 여유 줌)
+    back_y = "0px"    # 천장에서 20px
 
     # [3] 제목 (Title) 위치
     title_x = "0px"
