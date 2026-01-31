@@ -57,7 +57,7 @@ def inject_custom_css():
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
-    prompt_y = "-100px"
+    prompt_y = "-150px"
     st.session_state.remocon["prompt_x"] = prompt_x
     st.session_state.remocon["prompt_y"] = prompt_y
     # ============================================================
