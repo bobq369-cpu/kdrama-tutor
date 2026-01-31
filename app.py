@@ -85,7 +85,6 @@ def inject_custom_css():
 
             /* 4. 뒤로가기 버튼 (고정) */
             div:has(div#back-btn-area) .stButton button {{
-                position: fixed !important;
                 left: {back_x} !important;
                 top: {back_y} !important;
                 z-index: 99999 !important;
