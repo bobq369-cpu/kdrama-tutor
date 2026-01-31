@@ -45,6 +45,14 @@ def inject_custom_css():
     # [4] 추천 표현 바 위치
     adjust_smart_y = "0px"
     adjust_smart_x = "0px"
+
+    # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
+    subtitle_x = "0px"
+    subtitle_y = "-200px"
+
+    # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
+    prompt_x = "0px"
+    prompt_y = "-200px"
     # ============================================================
 
     st.markdown(
@@ -90,7 +98,21 @@ def inject_custom_css():
                 padding: 0 !important;
             }}
 
-            /* 5. 추천 표현 바 (독립 이동) */
+            /* 5. 역할 캡션("💡 역할: ...") (유체이탈) */
+            #role-caption-wrap {{
+                position: relative !important;
+                z-index: 9 !important;
+                transform: translate({subtitle_x}, {subtitle_y}) !important;
+            }}
+
+            /* 6. "대화를 시작해보세요!..." 안내 박스 (유체이탈) */
+            div[data-testid="stVerticalBlock"]:has(#start-prompt-wrap) {{
+                position: relative !important;
+                z-index: 8 !important;
+                transform: translate({prompt_x}, {prompt_y}) !important;
+            }}
+
+            /* 7. 추천 표현 바 (독립 이동) */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 position: relative !important;
                 top: {adjust_smart_y} !important;
@@ -322,12 +344,16 @@ def main():
 
     # 제목만 감싸는 wrapper (이 ID만 스타일하면 제목만 옮겨짐)
     st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
-    st.caption(f"💡 역할: {current_scenario['role']}")
+    st.markdown(
+        f"<div id='role-caption-wrap' style='font-size:0.875rem;color:gray;'>💡 역할: {html.escape(current_scenario['role'])}</div>",
+        unsafe_allow_html=True
+    )
 
     # 채팅 출력
     chat_container = st.container()
     with chat_container:
         if not st.session_state.messages:
+            st.markdown('<div id="start-prompt-wrap"></div>', unsafe_allow_html=True)
             st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
         
         for i, msg in enumerate(st.session_state.messages):
