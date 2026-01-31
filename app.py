@@ -34,10 +34,10 @@ def inject_custom_css():
 
     # 뒤로가기 버튼 위치
     back_x = "15px"   # 왼쪽 간격
-    back_y = "15px"   # 위쪽 간격
+    back_y = "-200px"   # 위쪽 간격
 
     # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
-    title_margin_top = "0px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
+    title_margin_top = "-200px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
     title_padding_top = "10px"    # 제목 위쪽 패딩
     title_margin_bottom = "0px"   # 제목 아래쪽 여백
     # ============================================================
