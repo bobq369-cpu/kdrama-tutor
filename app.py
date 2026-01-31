@@ -329,7 +329,7 @@ def render_smart_reply_bar(current_scenario):
     # - "0px" : 가만히 둠 (기본값)
     # - "-20px" : 위로 20px 올림
     # - "20px" : 아래로 20px 내림
-    adjust_y = "0px"
+    adjust_y = "-80px"
 
     # 2. X축 (좌/우 이동)
     # - "0px" : 가만히 둠 (기본값)
