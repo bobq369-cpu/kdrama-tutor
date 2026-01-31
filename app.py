@@ -23,7 +23,7 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. CSS 설정 (철저한 격리 적용) ---
+# --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기/추천 버튼 격리) ---
 def inject_custom_css():
     st.markdown(
         """
@@ -32,7 +32,7 @@ def inject_custom_css():
             header[data-testid="stHeader"] {
                 display: none !important;
             }
-            
+
             /* 2. 메인 화면 여백 제거 (천장 뚫기) */
             .main .block-container {
                 padding-top: 10px !important;
@@ -47,7 +47,6 @@ def inject_custom_css():
             }
 
             /* [안전장치 1] 뒤로가기 버튼 전용 스타일 */
-            /* id="back-btn-area"가 있는 곳의 버튼만 동그라미로 만듦 */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
                 top: 15px !important;
@@ -61,16 +60,36 @@ def inject_custom_css():
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
                 padding: 0 !important;
             }
-            
-            /* [안전장치 2] 추천 표현 버튼 전용 스타일 (위의 동그라미 스타일 영향 차단) */
-            /* id="smart-reply-area"가 있는 곳의 버튼은 네모난 모양 유지 */
+
+            /* [안전장치 2] 추천 표현 버튼 디자인 통일 (크기/색상/정렬) */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {
-                position: static !important; /* 고정 해제 */
+                position: static !important;
                 width: 100% !important;
+                min-height: 80px !important;   /* [핵심] 키(높이) 최소값 통일 */
                 height: auto !important;
-                border-radius: 8px !important;
-                box-shadow: none !important;
-                min-width: 150px !important; /* 찌그러짐 방지 */
+
+                background-color: #FFFFFF !important; /* [핵심] 배경색 흰색 통일 */
+                border: 1px solid #E5E5E5 !important; /* [핵심] 테두리 통일 */
+                color: #4B5563 !important;            /* 글자색 진한 회색 */
+
+                border-radius: 12px !important;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+
+                /* 글자 정렬 */
+                white-space: pre-wrap !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                padding: 10px !important;
+                transition: all 0.2s ease !important;
+            }
+
+            /* 추천 버튼 마우스 올렸을 때 효과 (선택사항) */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {
+                background-color: #F9FAFB !important;
+                border-color: #6B7280 !important;
+                transform: translateY(-2px);
             }
 
             /* 기타 말풍선 스타일 */
