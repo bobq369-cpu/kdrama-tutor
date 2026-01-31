@@ -26,20 +26,21 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기/추천 버튼 격리) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨]
+    # 🎛️ [사장님 전용 리모컨] — 각 요소마다 따로 위치 조절 가능
     # ============================================================
-    # 상단 여백 (화면 맨 위에서 콘텐츠까지의 간격)
-    main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움, 40px=더 띄움
-    main_top_margin = "0px"    # 마진으로도 조절 가능
+    # [1] 상단 여백 (화면 맨 위에서 콘텐츠까지의 간격)
+    main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움
+    main_top_margin = "0px"
 
-    # 뒤로가기 버튼 위치
+    # [2] 뒤로가기 버튼 위치 (✕)
     back_x = "15px"   # 왼쪽 간격
     back_y = "15px"   # 위쪽 간격
 
-    # 제목(h1) 위치 조절 (테마 선택 후 화면의 큰 제목)
-    title_margin_top = "-80px"      # 제목 위쪽 여백 (숫자 키우면 제목이 아래로 내려감)
-    title_padding_top = "10px"    # 제목 위쪽 패딩
-    title_margin_bottom = "0px"   # 제목 아래쪽 여백
+    # [3] 제목(h1) 위치 (테마 선택 후 큰 제목만 이동)
+    title_margin_top = "0px"      # 제목 위쪽 여백 (키우면 제목만 아래로)
+    title_padding_top = "10px"
+    title_margin_bottom = "0px"
+    # [4] 추천 표현 위치 → render_smart_reply_bar() 안 adjust_y, adjust_x
     # ============================================================
 
     st.markdown(
@@ -259,10 +260,9 @@ def render_smart_reply_bar(current_scenario):
     # 🎛️ 사장님 전용 미세 조정 패널 (숫자만 바꾸세요)
     # ==========================================
     
-    # 1. Y축 (위/아래 여백) — margin만 써서 제목은 안 움직임
+    # 1. Y축 (채팅과 추천 표현 사이 여백) — 채팅 끝만 margin이라 제목 안 움직임
     # - "0px" : 기본
     # - "20px" : 추천 표현을 아래로 띄움
-    # - "-10px" : 추천 표현을 위로 당김
     adjust_y = "0px"
 
     # 2. X축 (좌/우 여백)
@@ -357,6 +357,9 @@ def main():
                 {html.escape(display)}{tts_code}{corr_html}</div>{img_html}</div></div>""", unsafe_allow_html=True)
 
         if st.session_state.get("play_tts"): st.session_state.play_tts = False
+
+        # 채팅 끝 마커 (직계 부모에만 margin-bottom → 제목/다른 요소 안 움직임)
+        st.markdown('<div id="chat-area-end"></div>', unsafe_allow_html=True)
 
     # 추천 표현 (사장님이 원하셨던 '그 버전' + 찌그러짐 방지 포함)
     render_smart_reply_bar(current_scenario)
