@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os
 import re
 import html
+import time
 from gtts import gTTS
 import tempfile
 import base64
@@ -43,7 +44,7 @@ def inject_custom_css():
     title_y = "-200px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치
-    adjust_smart_y = "0px"
+    adjust_smart_y = "150px"
     adjust_smart_x = "0px"
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
@@ -111,12 +112,16 @@ def inject_custom_css():
                 transform: translate({prompt_x}, {prompt_y}) !important;
             }}
 
-            /* 7. 추천 표현 바: #smart-reply-area가 있는 가장 안쪽 블록만 이동 (상위 블록 제외) */
-            div[data-testid="stVerticalBlock"]:has(#smart-reply-area):not(:has(> div[data-testid="stVerticalBlock"]:has(#smart-reply-area))) {{
+            /* 7. 추천 표현 바: 마커 블록 + 다음 형제들(divider, 캡션, 버튼 영역) 모두 같은 transform */
+            div:has(> #smart-reply-area),
+            div:has(> #smart-reply-area) + div,
+            div:has(> #smart-reply-area) + div + div,
+            div:has(> #smart-reply-area) + div + div + div,
+            div:has(> #smart-reply-area) + div + div + div + div,
+            div:has(> #smart-reply-area) + div + div + div + div + div {{
                 position: relative !important;
                 z-index: 1 !important;
                 transform: translate({adjust_smart_x}, {adjust_smart_y}) !important;
-                width: 100% !important;
             }}
 
             /* 추천 버튼 디자인 */
@@ -150,6 +155,34 @@ def inject_custom_css():
             /* 폰트 및 배경 */
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }}
         </style>
+        """,
+        unsafe_allow_html=True
+    )
+    # 추천 표현 바 위치: Streamlit DOM에서 #smart-reply-area가 있는 가장 안쪽 블록에 transform 적용
+    st.markdown(
+        f"""
+        <script>
+        (function() {{
+            var x = "{adjust_smart_x}";
+            var y = "{adjust_smart_y}";
+            function apply() {{
+                var blocks = document.querySelectorAll('[data-testid="stVerticalBlock"]');
+                var target = null;
+                for (var i = 0; i < blocks.length; i++) {{
+                    if (blocks[i].querySelector('#smart-reply-area')) target = blocks[i];
+                }}
+                if (target) {{
+                    target.style.setProperty('position', 'relative', 'important');
+                    target.style.setProperty('z-index', '1', 'important');
+                    target.style.setProperty('transform', 'translate(' + x + ', ' + y + ')', 'important');
+                    target.style.setProperty('width', '100%', 'important');
+                }}
+            }}
+            if (document.readyState === 'complete') apply();
+            else window.addEventListener('load', apply);
+            setTimeout(apply, 500);
+        }})();
+        </script>
         """,
         unsafe_allow_html=True
     )
@@ -262,13 +295,30 @@ def get_ai_response(messages, scenario_key):
     상황: {SCENARIOS[scenario_key]['context']}
     지침: 한국어 튜터로서 친절하게 답하고, 필요시 [IMAGE: key] 태그 사용. 오류 교정 시 끝에 || 사용.
     """
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
-        gemini_messages = [{"role": "user" if m["role"]=="user" else "model", "parts": [m["content"]]} for m in messages]
-        response = model.generate_content(gemini_messages)
-        return response.text
-    except Exception as e:
-        return f"(AI 응답 오류: {e})"
+    model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
+    gemini_messages = [{"role": "user" if m["role"]=="user" else "model", "parts": [m["content"]]} for m in messages]
+    max_retries = 3
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(gemini_messages)
+            return response.text
+        except Exception as e:
+            last_error = e
+            err_str = str(e)
+            # 429 할당량/속도 제한 → 잠시 대기 후 재시도
+            if "429" in err_str or "quota" in err_str.lower() or "rate" in err_str.lower():
+                if attempt < max_retries - 1:
+                    wait = 4  # 에러 메시지의 "retry in 3.09s" 대략 반영
+                    if "retry in" in err_str.lower():
+                        match = re.search(r"retry in (\d+(?:\.\d+)?)\s*s", err_str, re.I)
+                        if match:
+                            wait = max(3, min(10, int(float(match.group(1)) + 0.5)))
+                    time.sleep(wait)
+                    continue
+                return "⏳ 지금은 요청이 많아 일시적으로 응답할 수 없어요. 잠시 후 다시 시도해 주세요. (무료 한도 초과)"
+            return f"(AI 응답 오류: {e})"
+    return f"(AI 응답 오류: {last_error})"
 
 def parse_ai_message(content):
     raw = content or ""
