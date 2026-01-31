@@ -315,17 +315,44 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (채팅 기록 아래, 입력창 바로 위) ---
+# --- 6. 스마트 답장 바 (CSS position: fixed로 화면 하단 고정) ---
 def render_smart_reply_bar(current_scenario):
-    """스마트 답장 바(추천 표현 2열 버튼)를 렌더링."""
-    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
-    phrases = list(current_scenario["key_phrases"].items())
-    col_a, col_b = st.columns(2)
-    for idx, (kor, eng) in enumerate(phrases):
-        with col_a if idx % 2 == 0 else col_b:
-            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
-                st.session_state.messages.append({"role": "user", "content": kor})
-                st.rerun()
+    """
+    CSS 'position: fixed'를 사용하여 화면 하단 특정 위치(X, Y)에 강제로 고정된 추천 바를 렌더링.
+    """
+    # 1. 좌표 조절용 CSS (여기서 숫자만 바꾸면 위치가 변합니다)
+    st.markdown("""
+    <style>
+    /* id가 'fixed-reply-container'인 요소를 포함한 블록을 위치 고정 */
+    div[data-testid="stVerticalBlock"]:has(#fixed-reply-container) {
+        position: fixed;
+        /* [Y축 조절] 바닥에서 얼마나 띄울지 (입력창 높이에 맞춰 조절) */
+        bottom: 85px;
+        /* [X축 조절] 왼쪽에서 50% 위치 (중앙 정렬용) */
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 700px;
+        z-index: 9999;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 10px 20px;
+        border-top: 1px solid #f0f0f0;
+        border-radius: 15px 15px 0 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # 2. 고정 타겟 앵커 + 버튼을 같은 컨테이너에 (고정 시 버튼이 함께 이동하도록)
+    with st.container():
+        st.markdown('<div id="fixed-reply-container"></div>', unsafe_allow_html=True)
+        st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+        phrases = list(current_scenario["key_phrases"].items())
+        col_a, col_b = st.columns(2)
+        for idx, (kor, eng) in enumerate(phrases):
+            with col_a if idx % 2 == 0 else col_b:
+                if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": kor})
+                    st.rerun()
 
 
 # --- 7. 메인 앱 로직 ---
@@ -457,3 +484,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# 서버 업데이트용 강제 주석 (v2.0)
