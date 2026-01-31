@@ -46,11 +46,15 @@ def inject_custom_css():
                 font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
             }
 
-            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 */
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {
+            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 (광범위 선택자 적용) */
+            /* 수정됨: 'stVerticalBlock' 같은 복잡한 이름표를 떼고, 마커가 있는 곳이면 어디든 잡습니다. */
+            div:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
-                top: 100px !important;
-                left: 15px !important;
+
+                /* 👇 위치는 여기서 조절하세요 (현재: 위 20px, 왼쪽 20px) */
+                top: 20px !important;
+                left: 20px !important;
+
                 z-index: 99999 !important;
                 width: 40px !important;
                 height: 40px !important;
@@ -61,21 +65,20 @@ def inject_custom_css():
                 padding: 0 !important;
             }
 
-            /* [안전장치 2] 추천 표현 버튼 디자인 통일 (크기/색상/정렬) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {
+            /* [안전장치 2] 추천 표현 버튼 디자인 통일 */
+            div:has(div#smart-reply-area) .stButton button {
                 position: static !important;
                 width: 100% !important;
-                min-height: 80px !important;   /* [핵심] 키(높이) 최소값 통일 */
+                min-height: 80px !important;
                 height: auto !important;
 
-                background-color: #FFFFFF !important; /* [핵심] 배경색 흰색 통일 */
-                border: 1px solid #E5E5E5 !important; /* [핵심] 테두리 통일 */
-                color: #4B5563 !important;            /* 글자색 진한 회색 */
+                background-color: #FFFFFF !important;
+                border: 1px solid #E5E5E5 !important;
+                color: #4B5563 !important;
 
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
 
-                /* 글자 정렬 */
                 white-space: pre-wrap !important;
                 display: flex !important;
                 align-items: center !important;
@@ -85,14 +88,12 @@ def inject_custom_css():
                 transition: all 0.2s ease !important;
             }
 
-            /* 추천 버튼 마우스 올렸을 때 효과 (선택사항) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {
+            div:has(div#smart-reply-area) .stButton button:hover {
                 background-color: #F9FAFB !important;
                 border-color: #6B7280 !important;
                 transform: translateY(-2px);
             }
 
-            /* 기타 말풍선 스타일 */
             .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
             .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
         </style>
