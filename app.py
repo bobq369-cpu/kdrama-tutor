@@ -28,26 +28,26 @@ def inject_custom_css():
     st.markdown(
         """
         <style>
-            /* 1. 기본 배경 및 폰트 */
+            /* [강력 적용] 상단 헤더(햄버거 버튼 등) 아예 삭제 */
+            header[data-testid="stHeader"] {
+                display: none !important;
+            }
+
+            /* [강력 적용] 메인 컨텐츠 최상단 여백 제거 */
+            .main .block-container {
+                padding-top: 10px !important; /* 여기를 0에 가깝게 줄임 */
+                margin-top: 0px !important;
+                padding-bottom: 5rem;
+                max-width: 700px;
+            }
+
+            /* 전체 배경 및 폰트 */
             .stApp {
                 background-color: #FFFFFF;
                 font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
             }
 
-            /* 2. 메인 컨테이너 (여기가 핵심! 위쪽 여백 대폭 축소) */
-            .main .block-container {
-                max-width: 700px;
-                padding-top: 1rem !important; /* 2rem -> 1rem으로 축소 (더 줄이려면 0.5rem) */
-                padding-bottom: 5rem;
-                margin-top: 0px !important;   /* 마진 제거 */
-            }
-
-            /* 3. 불필요한 헤더 공간 완전 삭제 (중요) */
-            header[data-testid="stHeader"] {
-                display: none;
-            }
-
-            /* (아래는 기존 스타일 그대로 유지) */
+            /* (기존 스타일 유지) */
             .kakao-user-wrap { display: flex; justify-content: flex-end; margin-bottom: 10px; }
             .kakao-ai-wrap { display: flex; justify-content: flex-start; margin-bottom: 10px; align-items: flex-start; }
             .kakao-user-bubble { width: fit-content; max-width: 70%; word-wrap: break-word; }
