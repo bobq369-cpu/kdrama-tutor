@@ -315,12 +315,7 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 위치 (수동 편집) ---
-# "above_chat": 채팅 기록 위 (제목/역할 아래)
-# "below_chat": 채팅 기록 바로 아래, 입력창 바로 위
-SMART_REPLY_POSITION = "below_chat"
-
-
+# --- 6. 스마트 답장 바 (채팅 기록 아래, 입력창 바로 위) ---
 def render_smart_reply_bar(current_scenario):
     """스마트 답장 바(추천 표현 2열 버튼)를 렌더링."""
     st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
@@ -378,9 +373,6 @@ def main():
     # 선택된 테마 제목 (h1으로 강조)
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
-
-    if SMART_REPLY_POSITION == "above_chat":
-        render_smart_reply_bar(current_scenario)
 
     # 단일 채팅 인터페이스 (대화 기록)
     chat_container = st.container()
@@ -443,8 +435,9 @@ def main():
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
 
-    if SMART_REPLY_POSITION == "below_chat":
-        render_smart_reply_bar(current_scenario)
+    # 추천 표현: 채팅 기록 맨 아래, 입력창 바로 위 (구분선 + 버튼 그리드)
+    st.divider()
+    render_smart_reply_bar(current_scenario)
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
