@@ -25,35 +25,45 @@ genai.configure(api_key=GOOGLE_API_KEY)
 
 # --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기/추천 버튼 격리) ---
 def inject_custom_css():
+    # ============================================================
+    # 🎛️ [사장님 전용 리모컨] 여기서 숫자만 바꾸면 위치가 변합니다!
+    # ============================================================
+
+    # [1] 뒤로가기 버튼 (✕) 위치 조절
+    # - 숫자가 커질수록 오른쪽/아래로 이동합니다.
+    back_x = "15px"   # 왼쪽 벽에서 얼마나 띄울까요? (Left)
+    back_y = "15px"   # 천장에서 얼마나 띄울까요? (Top)
+
+    # ============================================================
+
     st.markdown(
-        """
+        f"""
         <style>
             /* 1. 상단 헤더 숨기기 */
-            header[data-testid="stHeader"] {
+            header[data-testid="stHeader"] {{
                 display: none !important;
-            }
+            }}
 
             /* 2. 메인 화면 여백 제거 (천장 뚫기) */
-            .main .block-container {
+            .main .block-container {{
                 padding-top: 10px !important;
                 margin-top: 0px !important;
-                max-width: 700px;
-            }
+                max-width: 100px;
+            }}
 
             /* 3. 전체 폰트 및 배경 */
-            .stApp {
+            .stApp {{
                 background-color: #FFFFFF;
                 font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-            }
+            }}
 
-            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 (광범위 선택자 적용) */
-            /* 수정됨: 'stVerticalBlock' 같은 복잡한 이름표를 떼고, 마커가 있는 곳이면 어디든 잡습니다. */
-            div:has(div#back-btn-area) .stButton button {
+            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 (리모컨 연결됨) */
+            div:has(div#back-btn-area) .stButton button {{
                 position: fixed !important;
 
-                /* 👇 테마 선택 후 화면의 뒤로가기 버튼 위치 (위·왼쪽 여백) */
-                top: 20px !important;   /* 위에서 20px (숫자 키우면 더 아래로) */
-                left: 20px !important; /* 왼쪽에서 20px (숫자 키우면 더 오른쪽으로) */
+                /* 🎛️ 사장님이 설정한 변수값이 여기에 적용됩니다 */
+                left: {back_x} !important;
+                top: {back_y} !important;
 
                 z-index: 99999 !important;
                 width: 40px !important;
@@ -63,10 +73,10 @@ def inject_custom_css():
                 border: 1px solid #eee !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
                 padding: 0 !important;
-            }
+            }}
 
             /* [안전장치 2] 추천 표현 버튼 디자인 통일 */
-            div:has(div#smart-reply-area) .stButton button {
+            div:has(div#smart-reply-area) .stButton button {{
                 position: static !important;
                 width: 100% !important;
                 min-height: 80px !important;
@@ -86,16 +96,16 @@ def inject_custom_css():
                 text-align: center !important;
                 padding: 10px !important;
                 transition: all 0.2s ease !important;
-            }
+            }}
 
-            div:has(div#smart-reply-area) .stButton button:hover {
+            div:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 border-color: #6B7280 !important;
                 transform: translateY(-2px);
-            }
+            }}
 
-            .kakao-correction { font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }
-            .tts-player-wrap audio { width: 100%; height: 36px; outline: none; }
+            .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
+            .tts-player-wrap audio {{ width: 100%; height: 36px; outline: none; }}
         </style>
         """,
         unsafe_allow_html=True
