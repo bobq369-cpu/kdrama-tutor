@@ -23,55 +23,59 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기/추천 버튼 격리) ---
+# --- 2. CSS 설정 (상단 여백 + 뒤로가기/제목/추천 표현 격리) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨] — 각 요소마다 따로 위치 조절 가능
+    # 🎛️ [사장님 전용 리모컨]
     # ============================================================
-    # [1] 상단 여백 (화면 맨 위에서 콘텐츠까지의 간격)
-    main_top_padding = "0px"   # 0px=띄우지 않음, 20px=조금 띄움
-    main_top_margin = "50px"
 
-    # [2] 뒤로가기 버튼 위치 (✕)
-    back_x = "0px"   # 왼쪽 간격
-    back_y = "15px"   # 위쪽 간격
+    # [1] 전체 화면 상단 여백 (이걸 건드리면 전체가 다 같이 움직입니다)
+    main_top_padding = "0px"
+    main_top_margin = "0px"  # 최대한 위로 붙임
 
-    # [3] 제목(h1) 위치 (테마 선택 후 큰 제목만 이동)
-    title_margin_top = "-100px"      # 제목 위쪽 여백 (키우면 제목만 아래로)
-    title_padding_top = "-100px"
-    title_margin_bottom = "0px"
-    # [4] 추천 표현 위치 → render_smart_reply_bar() 안 adjust_y, adjust_x
+    # [2] 뒤로가기 버튼 위치 (고정됨)
+    back_x = "15px"
+    back_y = "15px"
+
+    # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
+    # * 이걸 움직여도 밑에 있는 채팅창/부제목은 가만히 있습니다! *
+    title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
+    title_y = "0px"    # 상하 이동 (음수: 위로, 양수: 아래로)
+
+    # [4] 추천 표현 바 위치
+    adjust_smart_y = "0px"
+    adjust_smart_x = "0px"
     # ============================================================
 
     st.markdown(
         f"""
         <style>
-            /* 1. 상단 헤더 숨기기 */
-            header[data-testid="stHeader"] {{
-                display: none !important;
-            }}
+            /* 1. 헤더 숨기기 */
+            header[data-testid="stHeader"] {{ display: none !important; }}
 
-            /* 2. 메인 화면 상단 여백 (리모컨 적용) */
+            /* 2. 메인 컨테이너 여백 */
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
                 max-width: 700px;
             }}
 
-            /* 3. 제목만 이동 (learning-title-wrap만 타겟 → 다른 요소 안 움직임) */
+            /* 3. [핵심] 제목 래퍼 스타일 (Transform 사용) */
             #learning-title-wrap {{
-                margin-top: {title_margin_top} !important;
-                padding-top: {title_padding_top} !important;
-                margin-bottom: {title_margin_bottom} !important;
+                /* 원래 자리는 차지하되, 보이는 위치만 이동시킴 */
+                transform: translate({title_x}, {title_y}) !important;
+
+                /* 주변 요소에 영향을 주는 여백은 제거하거나 최소화 */
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+                padding: 0 !important;
+
+                /* 제목이 다른 요소 위로 겹쳐 보일 수 있게 설정 */
+                position: relative;
+                z-index: 10;
             }}
 
-            /* 4. 전체 폰트 및 배경 */
-            .stApp {{
-                background-color: #FFFFFF;
-                font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
-            }}
-
-            /* [안전장치 1] 뒤로가기 버튼 (리모컨 적용) */
+            /* 4. 뒤로가기 버튼 (고정) */
             div:has(div#back-btn-area) .stButton button {{
                 position: fixed !important;
                 left: {back_x} !important;
@@ -86,7 +90,16 @@ def inject_custom_css():
                 padding: 0 !important;
             }}
 
-            /* [안전장치 2] 추천 표현 버튼 디자인 통일 */
+            /* 5. 추천 표현 바 (독립 이동) */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
+                position: relative !important;
+                top: {adjust_smart_y} !important;
+                left: {adjust_smart_x} !important;
+                width: 100% !important;
+                z-index: 1;
+            }}
+
+            /* 추천 버튼 디자인 */
             div:has(div#smart-reply-area) .stButton button {{
                 position: static !important;
                 width: 100% !important;
@@ -105,7 +118,6 @@ def inject_custom_css():
                 padding: 10px !important;
                 transition: all 0.2s ease !important;
             }}
-
             div:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 border-color: #6B7280 !important;
@@ -114,6 +126,9 @@ def inject_custom_css():
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
             .tts-player-wrap audio {{ width: 100%; height: 36px; outline: none; }}
+
+            /* 폰트 및 배경 */
+            .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -256,31 +271,7 @@ def render_smart_reply_bar(current_scenario):
     사장님이 원하셨던 '그 버전'입니다.
     안전한 Relative 방식을 사용하며, 뒤로가기 버튼의 스타일 간섭을 받지 않도록 격리(Marker)했습니다.
     """
-    # ==========================================
-    # 🎛️ 사장님 전용 미세 조정 패널 (숫자만 바꾸세요)
-    # ==========================================
-    
-    # 1. Y축 (채팅과 추천 표현 사이 여백) — 채팅 끝만 margin이라 제목 안 움직임
-    # - "0px" : 기본
-    # - "20px" : 추천 표현을 아래로 띄움
-    adjust_y = "0px"
-
-    # 2. X축 (좌/우 여백)
-    adjust_x = "0px" 
-    
-    # ==========================================
-
-    # CSS 적용 (margin만 사용 → 제목/다른 요소와 분리되어 추천 표현만 이동)
-    st.markdown(f"""
-    <style>
-    /* [수정] 추천 표현 구역만 이동 (상위 블록 잡지 않도록 margin 사용) */
-    div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
-        margin-top: {adjust_y} !important;
-        margin-left: {adjust_x} !important;
-        width: 100% !important;
-    }}
-    </style>
-    """, unsafe_allow_html=True)
+    # 추천 표현 위치는 inject_custom_css() 리모컨 [4] adjust_smart_y, adjust_smart_x 에서 조절
 
     with st.container():
         # [핵심] 이 마커가 있어야 스타일이 충돌하지 않습니다!
