@@ -24,66 +24,52 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# --- 2. CSS 설정 (상단 여백 + 뒤로가기/제목/추천 표현 격리) ---
+# --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨]
+    # 🎛️ [사장님 전용 리모컨] - 여기서 모든 위치를 조절하세요!
+    # ============================================================
+    
+    # [1] 전체 화면 상단 여백
+    main_top_padding = "0px"
+    main_top_margin = "0px"
+
+    # [2] 뒤로가기 버튼 (✕) 위치
+    back_x = "15px"    # 왼쪽 여백
+    back_y = "15px"    # 위쪽 여백
+
+    # [3] 제목 (Title) 위치 (유체이탈 이동)
+    title_x = "0px"    # 좌우 (음수:왼쪽, 양수:오른쪽)
+    title_y = "0px"    # 상하 (음수:위로, 양수:아래로)
+
+    # [4] 역할 설명 (💡 역할: ...) 위치
+    role_x = "0px"
+    role_y = "0px"
+
+    # [5] 안내 박스 (👋 대화를 시작해보세요...) 위치
+    prompt_x = "0px"
+    prompt_y = "50px"  # 예: 50px 내리기
+
+    # [6] 추천 표현 바 위치
+    smart_x = "0px"
+    smart_y = "0px"    # 예: -20px 올리기
+    
     # ============================================================
 
-    # [1] 전체 화면 상단 여백 (이걸 건드리면 전체가 다 같이 움직입니다)
-    main_top_padding = "0px"
-    main_top_margin = "0px"  # 최대한 위로 붙임
-
-    # [2] 뒤로가기 버튼 위치 (고정됨)
-    back_x = "15px"
-    back_y = "15px"
-
-    # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
-    # * 이걸 움직여도 밑에 있는 채팅창/부제목은 가만히 있습니다! *
-    title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
-    title_y = "-100px"    # 상하 이동 (음수: 위로, 양수: 아래로)
-
-    # [4] 추천 표현 바 위치
-    adjust_smart_y = "-100px"
-    adjust_smart_x = "0px"
-
-    # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
-    subtitle_x = "100px"
-    subtitle_y = "-200px"
-
-    # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
-    prompt_x = "0px"
-    prompt_y = "100px"
     st.markdown(
         f"""
         <style>
-            /* 1. 헤더 숨기기 */
+            /* 1. 기본 헤더 숨김 & 메인 컨테이너 여백 제거 */
             header[data-testid="stHeader"] {{ display: none !important; }}
-
-            /* 2. 메인 컨테이너 여백 */
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
                 max-width: 700px;
             }}
+            .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* 3. [핵심] 제목 래퍼 스타일 (Transform 사용) */
-            #learning-title-wrap {{
-                /* 원래 자리는 차지하되, 보이는 위치만 이동시킴 */
-                transform: translate({title_x}, {title_y}) !important;
-
-                /* 주변 요소에 영향을 주는 여백은 제거하거나 최소화 */
-                margin-top: 10px !important;
-                margin-bottom: 10px !important;
-                padding: 0 !important;
-
-                /* 제목이 다른 요소 위로 겹쳐 보일 수 있게 설정 */
-                position: relative;
-                z-index: 10;
-            }}
-
-            /* 4. 뒤로가기 버튼 (고정) */
-            div:has(div#back-btn-area) .stButton button {{
+            /* 2. 뒤로가기 버튼 (고정 위치) */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
                 position: fixed !important;
                 left: {back_x} !important;
                 top: {back_y} !important;
@@ -97,36 +83,36 @@ def inject_custom_css():
                 padding: 0 !important;
             }}
 
-            /* 5. 역할 캡션("💡 역할: ...") (유체이탈) */
+            /* 3. 제목 래퍼 (Transform 이동) */
+            #learning-title-wrap {{
+                transform: translate({title_x}, {title_y}) !important;
+                position: relative; z-index: 10;
+                margin-bottom: 10px;
+            }}
+
+            /* 4. 역할 설명 래퍼 (Transform 이동) */
             #role-caption-wrap {{
-                position: relative !important;
-                z-index: 9 !important;
-                transform: translate({subtitle_x}, {subtitle_y}) !important;
+                transform: translate({role_x}, {role_y}) !important;
+                position: relative; z-index: 9;
+                font-size: 0.875rem; color: gray; margin-bottom: 20px;
             }}
 
-            /* 6. "대화를 시작해보세요!..." 안내 박스: 마커 블록 + 다음 형제(실제 안내 박스) 둘 다 이동 */
-            div:has(> #start-prompt-wrap),
-            div:has(> #start-prompt-wrap) + div {{
-                position: relative !important;
-                z-index: 8 !important;
+            /* 5. 안내 박스(st.info) 컨테이너 이동 */
+            /* id="start-prompt-marker"가 들어있는 박스 전체를 이동시킴 */
+            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
                 transform: translate({prompt_x}, {prompt_y}) !important;
+                position: relative; z-index: 8;
             }}
 
-            /* 7. 추천 표현 바: transform 적용 (직계부모가 div가 아닐 수 있으므로 * 포함) */
-            div:has(> #smart-reply-area),
-            div:has(> #smart-reply-area) ~ div,
-            *:has(> #smart-reply-area),
-            *:has(> #smart-reply-area) ~ *,
-            div:has(#smart-reply-area):has(> div:nth-child(2)):not(:has(div:has(#smart-reply-area):has(> div:nth-child(2)))),
-            [data-testid="stVerticalBlock"]:has(#smart-reply-area):not(:has([data-testid="stVerticalBlock"]:has(#smart-reply-area))) {{
-                position: relative !important;
-                z-index: 1 !important;
-                transform: translate({adjust_smart_x}, {adjust_smart_y}) !important;
+            /* 6. 추천 표현 바 컨테이너 이동 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
+                transform: translate({smart_x}, {smart_y}) !important;
+                position: relative; z-index: 5;
+                width: 100% !important;
             }}
 
-            /* 추천 버튼 디자인 */
-            div:has(div#smart-reply-area) .stButton button {{
-                position: static !important;
+            /* 7. 추천 버튼 디자인 통일 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
                 min-height: 80px !important;
                 height: auto !important;
@@ -136,53 +122,17 @@ def inject_custom_css():
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
                 white-space: pre-wrap !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                text-align: center !important;
+                display: flex; align-items: center; justify-content: center; text-align: center;
                 padding: 10px !important;
-                transition: all 0.2s ease !important;
             }}
-            div:has(div#smart-reply-area) .stButton button:hover {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
-                border-color: #6B7280 !important;
                 transform: translateY(-2px);
             }}
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
             .tts-player-wrap audio {{ width: 100%; height: 36px; outline: none; }}
-
-            /* 폰트 및 배경 */
-            .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', 'Noto Sans KR', sans-serif; }}
         </style>
-        """,
-        unsafe_allow_html=True
-    )
-    # 추천 표현 바 위치: Streamlit DOM에서 #smart-reply-area가 있는 가장 안쪽 블록에 transform 적용
-    st.markdown(
-        f"""
-        <script>
-        (function() {{
-            var x = "{adjust_smart_x}";
-            var y = "{adjust_smart_y}";
-            function apply() {{
-                var blocks = document.querySelectorAll('[data-testid="stVerticalBlock"]');
-                var target = null;
-                for (var i = 0; i < blocks.length; i++) {{
-                    if (blocks[i].querySelector('#smart-reply-area')) target = blocks[i];
-                }}
-                if (target) {{
-                    target.style.setProperty('position', 'relative', 'important');
-                    target.style.setProperty('z-index', '1', 'important');
-                    target.style.setProperty('transform', 'translate(' + x + ', ' + y + ')', 'important');
-                    target.style.setProperty('width', '100%', 'important');
-                }}
-            }}
-            if (document.readyState === 'complete') apply();
-            else window.addEventListener('load', apply);
-            setTimeout(apply, 500);
-        }})();
-        </script>
         """,
         unsafe_allow_html=True
     )
@@ -203,7 +153,7 @@ def inject_home_card_css():
                 align-items: center !important;
                 justify-content: flex-start !important;
                 padding: 1.25rem 1.5rem !important;
-                font-family: 'Pretendard', 'Noto Sans KR', sans-serif !important;
+                font-family: 'Pretendard', sans-serif !important;
                 color: #1a1a1a !important;
                 white-space: pre-wrap !important;
                 line-height: 1.45 !important;
@@ -233,6 +183,7 @@ SCENARIOS = {
             "방문 목적이 무엇입니까?": "What is the purpose of your visit?",
             "여행으로 왔습니다.": "I am here for travel/tourism.",
             "얼마나 머무르실 예정입니까?": "How long will you be staying?",
+            "일주일 정도 있을 겁니다.": "I will stay for about a week.",
             "숙소는 어디입니까?": "Where is your accommodation?"
         }
     },
@@ -242,6 +193,7 @@ SCENARIOS = {
         "role": "친절하고 활기찬 서울 맛집 식당 이모님",
         "context": "사용자가 식당에 들어와서 메뉴를 고르고 주문을 하려고 합니다.",
         "key_phrases": {
+            "어서 오세요! 몇 분이세요?": "Welcome! How many people?",
             "두 명이에요.": "Two people, please.",
             "여기요, 주문할게요.": "Excuse me, I'd like to order.",
             "이거 덜 맵게 해주세요.": "Please make this less spicy.",
@@ -255,8 +207,9 @@ SCENARIOS = {
         "context": "사용자가 활기찬 시장에서 물건을 구경하고 가격을 물어봅니다.",
         "key_phrases": {
             "이거 얼마예요?": "How much is this?",
-            "깎아주세요.": "Please give me a discount.",
+            "좀 깎아주세요.": "Please give me a discount.",
             "맛 좀 봐도 될까요?": "Can I taste this?",
+            "너무 비싸요.": "It's too expensive.",
             "많이 파세요!": "Have a great sale! (Goodbye greeting)"
         }
     }
@@ -297,28 +250,11 @@ def get_ai_response(messages, scenario_key):
     """
     model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
     gemini_messages = [{"role": "user" if m["role"]=="user" else "model", "parts": [m["content"]]} for m in messages]
-    max_retries = 3
-    last_error = None
-    for attempt in range(max_retries):
-        try:
-            response = model.generate_content(gemini_messages)
-            return response.text
-        except Exception as e:
-            last_error = e
-            err_str = str(e)
-            # 429 할당량/속도 제한 → 잠시 대기 후 재시도
-            if "429" in err_str or "quota" in err_str.lower() or "rate" in err_str.lower():
-                if attempt < max_retries - 1:
-                    wait = 4  # 에러 메시지의 "retry in 3.09s" 대략 반영
-                    if "retry in" in err_str.lower():
-                        match = re.search(r"retry in (\d+(?:\.\d+)?)\s*s", err_str, re.I)
-                        if match:
-                            wait = max(3, min(10, int(float(match.group(1)) + 0.5)))
-                    time.sleep(wait)
-                    continue
-                return "⏳ 지금은 요청이 많아 일시적으로 응답할 수 없어요. 잠시 후 다시 시도해 주세요. (무료 한도 초과)"
-            return f"(AI 응답 오류: {e})"
-    return f"(AI 응답 오류: {last_error})"
+    try:
+        response = model.generate_content(gemini_messages)
+        return response.text
+    except Exception as e:
+        return f"(AI 응답 오류: {e})"
 
 def parse_ai_message(content):
     raw = content or ""
@@ -332,18 +268,11 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 4. [복구 완료] 스마트 답장 바 (Relative 방식 + 격리) ---
+# --- 4. 추천 표현 바 ---
 def render_smart_reply_bar(current_scenario):
-    """
-    사장님이 원하셨던 '그 버전'입니다.
-    안전한 Relative 방식을 사용하며, 뒤로가기 버튼의 스타일 간섭을 받지 않도록 격리(Marker)했습니다.
-    """
-    # 추천 표현 위치는 inject_custom_css() 리모컨 [4] adjust_smart_y, adjust_smart_x 에서 조절
-
+    # CSS에서 'div#smart-reply-area'가 있는 컨테이너를 통째로 이동시킴 (리모컨 연동)
     with st.container():
-        # [핵심] 이 마커가 있어야 스타일이 충돌하지 않습니다!
         st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
-        
         st.divider()
         st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
         
@@ -380,26 +309,25 @@ def main():
     # [LEARNING PAGE]
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
     
-    # [수정] 뒤로가기 버튼 격리 (Marker 사용) -> 추천 버튼에 절대 영향 안 줌
+    # 1. 뒤로가기 버튼
     with st.container():
         st.markdown('<div id="back-btn-area"></div>', unsafe_allow_html=True)
         if st.button("✕", key="back_btn"):
             st.session_state.current_page = "HOME"
             st.rerun()
 
-    # 제목만 감싸는 wrapper (이 ID만 스타일하면 제목만 옮겨짐)
+    # 2. 제목 & 역할 설명
     st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
-    st.markdown(
-        f"<div id='role-caption-wrap' style='font-size:0.875rem;color:gray;'>💡 역할: {html.escape(current_scenario['role'])}</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown(f"<div id='role-caption-wrap'>💡 역할: {html.escape(current_scenario['role'])}</div>", unsafe_allow_html=True)
 
-    # 채팅 출력
+    # 3. 채팅창
     chat_container = st.container()
     with chat_container:
         if not st.session_state.messages:
-            st.markdown('<div id="start-prompt-wrap"></div>', unsafe_allow_html=True)
-            st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
+            # [중요] 안내 박스를 '컨테이너'에 담고 ID를 부여해서 CSS로 제어 가능하게 만듦
+            with st.container():
+                st.markdown('<div id="start-prompt-marker"></div>', unsafe_allow_html=True)
+                st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
         
         for i, msg in enumerate(st.session_state.messages):
             if msg["role"] == "user":
@@ -420,12 +348,10 @@ def main():
 
         if st.session_state.get("play_tts"): st.session_state.play_tts = False
 
-        # 채팅 끝 마커 (직계 부모에만 margin-bottom → 제목/다른 요소 안 움직임)
-        st.markdown('<div id="chat-area-end"></div>', unsafe_allow_html=True)
-
-    # 추천 표현 (사장님이 원하셨던 '그 버전' + 찌그러짐 방지 포함)
+    # 4. 추천 표현 바
     render_smart_reply_bar(current_scenario)
 
+    # 5. 입력창
     if prompt := st.chat_input("한국어로 대화해보세요..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.rerun()
