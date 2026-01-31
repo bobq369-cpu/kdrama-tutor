@@ -26,14 +26,11 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # --- 2. CSS 설정 (상단 여백 제거 + 뒤로가기/추천 버튼 격리) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨] 여기서 숫자만 바꾸면 위치가 변합니다!
+    # 🎛️ [사장님 전용 리모컨]
     # ============================================================
-
-    # [1] 뒤로가기 버튼 (✕) 위치 조절
-    # - 숫자가 커질수록 오른쪽/아래로 이동합니다.
-    back_x = "15px"   # 왼쪽 벽에서 얼마나 띄울까요? (Left)
-    back_y = "15px"   # 천장에서 얼마나 띄울까요? (Top)
-
+    # 뒤로가기 버튼 위치
+    back_x = "15px"   # 왼쪽 간격
+    back_y = "15px"   # 위쪽 간격 (100px은 너무 아래라 15px로 원복했습니다!)
     # ============================================================
 
     st.markdown(
@@ -44,27 +41,30 @@ def inject_custom_css():
                 display: none !important;
             }}
 
-            /* 2. 메인 화면 여백 제거 (천장 뚫기) */
+            /* 2. [핵심] 메인 화면 여백 '0'으로 만들기 */
             .main .block-container {{
-                padding-top: 10px !important;
+                padding-top: 0px !important;    /* 10px -> 0px (완전 제거) */
                 margin-top: 0px !important;
-                max-width: 100px;
+                max-width: 700px;
             }}
 
-            /* 3. 전체 폰트 및 배경 */
+            /* 3. 제목(h1) 위쪽 여백도 강제 삭제 */
+            h1 {{
+                margin-top: 0px !important;
+                padding-top: 10px !important; /* 최소한의 숨구멍만 남김 */
+            }}
+
+            /* 4. 전체 폰트 및 배경 */
             .stApp {{
                 background-color: #FFFFFF;
                 font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
             }}
 
-            /* [안전장치 1] 뒤로가기 버튼 전용 스타일 (리모컨 연결됨) */
+            /* [안전장치 1] 뒤로가기 버튼 (리모컨 적용) */
             div:has(div#back-btn-area) .stButton button {{
                 position: fixed !important;
-
-                /* 🎛️ 사장님이 설정한 변수값이 여기에 적용됩니다 */
                 left: {back_x} !important;
                 top: {back_y} !important;
-
                 z-index: 99999 !important;
                 width: 40px !important;
                 height: 40px !important;
@@ -81,14 +81,11 @@ def inject_custom_css():
                 width: 100% !important;
                 min-height: 80px !important;
                 height: auto !important;
-
                 background-color: #FFFFFF !important;
                 border: 1px solid #E5E5E5 !important;
                 color: #4B5563 !important;
-
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-
                 white-space: pre-wrap !important;
                 display: flex !important;
                 align-items: center !important;
