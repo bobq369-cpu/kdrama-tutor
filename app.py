@@ -33,7 +33,7 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 위치 (✕)
-    back_x = "15px"   # 왼쪽 간격
+    back_x = "0px"   # 왼쪽 간격
     back_y = "15px"   # 위쪽 간격
 
     # [3] 제목(h1) 위치 (테마 선택 후 큰 제목만 이동)
