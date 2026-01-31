@@ -27,7 +27,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
     # ============================================================
-    # 🎛️ [사장님 전용 리모컨] - 여기서 모든 위치를 조절하세요!
+    # 🎛️ [사장님 전용 리모컨]
     # ============================================================
     
     # [1] 전체 화면 상단 여백
@@ -35,8 +35,9 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 (✕) 위치
-    back_x = "15px"    # 왼쪽 여백
-    back_y = "15px"    # 위쪽 여백
+    # 왼쪽 구석에 작게 붙입니다.
+    back_x = "10px"    # 왼쪽 벽에서 10px
+    back_y = "10px"    # 천장에서 10px
 
     # [3] 제목 (Title) 위치
     title_x = "0px"
@@ -48,11 +49,11 @@ def inject_custom_css():
 
     # [5] 안내 박스 (👋 대화를 시작해보세요...) 위치
     prompt_x = "0px"
-    prompt_y = "50px"  # 예: 50px 내리기
+    prompt_y = "50px"  # 50px 아래로
 
     # [6] 추천 표현 바 위치
     smart_x = "0px"
-    smart_y = "0px"    # 예: -20px 올리기
+    smart_y = "0px"    
     
     # ============================================================
 
@@ -68,29 +69,41 @@ def inject_custom_css():
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* 2. 뒤로가기 버튼 (고정 위치) */
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
+            /* ====================================================================
+               [수정 1] 뒤로가기 버튼: 컨테이너 크기를 최소화하여 제목 침범 방지
+               ==================================================================== */
+            /* 마커가 있는 컨테이너 자체를 고정 위치로 보내고 크기를 줄임 */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
                 position: fixed !important;
-                left: {back_x} !important;
                 top: {back_y} !important;
-                z-index: 99999 !important;
-                width: 40px !important;
-                height: 40px !important;
+                left: {back_x} !important;
+                width: auto !important;  /* 핵심: 화면 전체 차지하지 않게 함 */
+                height: auto !important;
+                z-index: 999999 !important;
+            }}
+            
+            /* 버튼 디자인: 작고 동그랗게 */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
+                width: 32px !important;   /* 사이즈 축소 */
+                height: 32px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
                 border: 1px solid #eee !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
                 padding: 0 !important;
+                line-height: 1 !important;
+                font-size: 14px !important;
             }}
 
-            /* 3. 제목 래퍼 (Transform 이동) */
+            /* 3. 제목 래퍼 */
             #learning-title-wrap {{
                 transform: translate({title_x}, {title_y}) !important;
                 position: relative; z-index: 10;
                 margin-bottom: 10px;
+                pointer-events: none; /* 제목이 버튼 클릭 방해하지 않게 */
             }}
 
-            /* 4. 역할 설명 래퍼 (Transform 이동) */
+            /* 4. 역할 설명 래퍼 */
             #role-caption-wrap {{
                 transform: translate({role_x}, {role_y}) !important;
                 position: relative; z-index: 9;
@@ -104,36 +117,57 @@ def inject_custom_css():
                 z-index: 8;
             }}
 
-            /* 6. [핵심 수정] 추천 표현 바 컨테이너 찌그러짐 방지 */
+            /* ====================================================================
+               [수정 2] 추천 표현 바: 뭉침(Squashing) 현상 강력 해결
+               ==================================================================== */
+            
+            /* (1) 추천 표현 구역 전체를 강제로 넓힘 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
                 position: relative; 
                 z-index: 1; 
-                width: 100% !important;     /* 너비 강제 */
-                min-width: 100% !important; /* 최소 너비 강제 (이게 핵심!) */
+                width: 100% !important;      /* 너비 100% 강제 */
+                min-width: 100% !important;  /* 최소 너비 100% 강제 */
+                display: block !important;
             }}
 
-            /* [추가된 코드] 추천 표현 안의 가로 줄(Columns)이 쪼그라들지 않게 내부까지 강제 확장 */
+            /* (2) 내부의 컬럼(st.columns) 컨테이너도 강제로 넓힘 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
                 min-width: 100% !important;
+                display: flex !important;
+                flex-wrap: nowrap !important; /* 줄바꿈 금지 */
             }}
 
-            /* 7. 추천 버튼 디자인 통일 */
+            /* (3) 각 컬럼(기둥)이 50%씩 공간을 차지하도록 강제 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stColumn"] {{
+                flex: 1 1 50% !important; /* 50% 너비 확보 */
+                width: 50% !important;
+                min-width: 0 !important;
+            }}
+
+            /* (4) 버튼 디자인: 꽉 채우기 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
-                min-width: 100px !important; /* 버튼 자체 최소 너비 */
-                min-height: 80px !important;
                 height: auto !important;
+                min-height: 60px !important;
+                
+                white-space: pre-wrap !important; /* 글자 줄바꿈 허용 (뭉침 방지) */
+                word-break: keep-all !important;  /* 단어 중간 끊김 방지 */
+                
                 background-color: #FFFFFF !important;
                 border: 1px solid #E5E5E5 !important;
                 color: #4B5563 !important;
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-                white-space: pre-wrap !important;
-                display: flex; align-items: center; justify-content: center; text-align: center;
-                padding: 10px !important;
+                
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                text-align: center;
+                padding: 12px !important;
             }}
+            
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
@@ -334,7 +368,7 @@ def main():
     # [LEARNING PAGE]
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
     
-    # 1. 뒤로가기 버튼
+    # 1. 뒤로가기 버튼 (상단 격리)
     with st.container():
         st.markdown('<div id="back-btn-area"></div>', unsafe_allow_html=True)
         if st.button("✕", key="back_btn"):
