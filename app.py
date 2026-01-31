@@ -35,7 +35,7 @@ def inject_custom_css():
     main_top_padding = "0px"
     main_top_margin = "0px"  # 최대한 위로 붙임
     # [2] 뒤로가기 버튼 위치 (고정됨)
-    back_x = "0px"
+    back_x = "15px"
     back_y = "15px"
 
 
