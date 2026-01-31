@@ -259,27 +259,25 @@ def render_smart_reply_bar(current_scenario):
     # 🎛️ 사장님 전용 미세 조정 패널 (숫자만 바꾸세요)
     # ==========================================
     
-    # 1. Y축 (위/아래 이동)
-    # - "0px" : 기본 위치
-    # - "-20px" : 위로 올리기
-    # - "20px" : 아래로 내리기
-    adjust_y = "180px" 
+    # 1. Y축 (위/아래 여백) — margin만 써서 제목은 안 움직임
+    # - "0px" : 기본
+    # - "20px" : 추천 표현을 아래로 띄움
+    # - "-10px" : 추천 표현을 위로 당김
+    adjust_y = "10px"
 
-    # 2. X축 (좌/우 이동)
+    # 2. X축 (좌/우 여백)
     adjust_x = "0px" 
     
     # ==========================================
 
-    # CSS 적용 (안전한 Relative 사용)
+    # CSS 적용 (margin만 사용 → 제목/다른 요소와 분리되어 추천 표현만 이동)
     st.markdown(f"""
     <style>
-    /* id='smart-reply-area'가 있는 구역만 이동 */
+    /* [수정] 추천 표현 구역만 이동 (상위 블록 잡지 않도록 margin 사용) */
     div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
-        position: relative; 
-        top: {adjust_y};
-        left: {adjust_x};
-        background-color: transparent; 
-        z-index: 1;
+        margin-top: {adjust_y} !important;
+        margin-left: {adjust_x} !important;
+        width: 100% !important;
     }}
     </style>
     """, unsafe_allow_html=True)
