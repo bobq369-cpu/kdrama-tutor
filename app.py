@@ -35,7 +35,6 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 (✕) 위치
-    # 왼쪽 구석에 작게 붙입니다.
     back_x = "10px"    # 왼쪽 벽에서 10px
     back_y = "10px"    # 천장에서 10px
 
@@ -65,26 +64,21 @@ def inject_custom_css():
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
-                max-width: 700px;
+                max-width: 700px; /* 채팅창 최대 너비 */
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* ====================================================================
-               [수정 1] 뒤로가기 버튼: 컨테이너 크기를 최소화하여 제목 침범 방지
-               ==================================================================== */
-            /* 마커가 있는 컨테이너 자체를 고정 위치로 보내고 크기를 줄임 */
+            /* 2. 뒤로가기 버튼: 작고 귀엽게 왼쪽 상단 고정 */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
                 position: fixed !important;
                 top: {back_y} !important;
                 left: {back_x} !important;
-                width: auto !important;  /* 핵심: 화면 전체 차지하지 않게 함 */
+                width: auto !important;
                 height: auto !important;
                 z-index: 999999 !important;
             }}
-            
-            /* 버튼 디자인: 작고 동그랗게 */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
-                width: 32px !important;   /* 사이즈 축소 */
+                width: 32px !important;
                 height: 32px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
@@ -100,7 +94,6 @@ def inject_custom_css():
                 transform: translate({title_x}, {title_y}) !important;
                 position: relative; z-index: 10;
                 margin-bottom: 10px;
-                pointer-events: none; /* 제목이 버튼 클릭 방해하지 않게 */
             }}
 
             /* 4. 역할 설명 래퍼 */
@@ -118,42 +111,48 @@ def inject_custom_css():
             }}
 
             /* ====================================================================
-               [수정 2] 추천 표현 바: 뭉침(Squashing) 현상 강력 해결
+               [핵심 수정] 추천 표현 바: 채팅창 너비(700px)에 맞추고 중앙 정렬
                ==================================================================== */
-            
-            /* (1) 추천 표현 구역 전체를 강제로 넓힘 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
                 transform: translate({smart_x}, {smart_y}) !important;
                 position: relative; 
                 z-index: 1; 
-                width: 100% !important;      /* 너비 100% 강제 */
-                min-width: 100% !important;  /* 최소 너비 100% 강제 */
+                
+                width: 100% !important;        /* 가득 채우되 */
+                max-width: 700px !important;   /* 700px은 넘지 마라 (채팅창 사이즈) */
+                
+                /* 화면 중앙 정렬 */
+                margin-left: auto !important;
+                margin-right: auto !important;
+                left: 0 !important;
+                right: 0 !important;
+                
                 display: block !important;
             }}
 
-            /* (2) 내부의 컬럼(st.columns) 컨테이너도 강제로 넓힘 */
+            /* 내부 컬럼 컨테이너 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
                 width: 100% !important;
-                min-width: 100% !important;
                 display: flex !important;
-                flex-wrap: nowrap !important; /* 줄바꿈 금지 */
+                flex-wrap: nowrap !important;
+                gap: 10px !important; /* 버튼 사이 간격 */
             }}
 
-            /* (3) 각 컬럼(기둥)이 50%씩 공간을 차지하도록 강제 */
+            /* 각 컬럼(기둥) */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stColumn"] {{
-                flex: 1 1 50% !important; /* 50% 너비 확보 */
+                flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
             }}
 
-            /* (4) 버튼 디자인: 꽉 채우기 */
+            /* 버튼 디자인 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
                 width: 100% !important;
                 height: auto !important;
                 min-height: 60px !important;
                 
-                white-space: pre-wrap !important; /* 글자 줄바꿈 허용 (뭉침 방지) */
-                word-break: keep-all !important;  /* 단어 중간 끊김 방지 */
+                white-space: pre-wrap !important;
+                word-break: keep-all !important;
                 
                 background-color: #FFFFFF !important;
                 border: 1px solid #E5E5E5 !important;
@@ -368,7 +367,7 @@ def main():
     # [LEARNING PAGE]
     current_scenario = SCENARIOS[st.session_state.selected_scenario]
     
-    # 1. 뒤로가기 버튼 (상단 격리)
+    # 1. 뒤로가기 버튼
     with st.container():
         st.markdown('<div id="back-btn-area"></div>', unsafe_allow_html=True)
         if st.button("✕", key="back_btn"):
