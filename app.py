@@ -68,10 +68,10 @@ def inject_back_button_css():
     st.markdown(
         """
         <style>
-            /* 뒤로가기 버튼을 화면 최상단 좌측에 고정 */
+            /* 뒤로가기 버튼을 맨 위에서 20px만 띄워 고정 */
             .main .block-container .stButton:first-of-type {
                 position: fixed !important;
-                top: 10px !important;
+                top: 20px !important;
                 left: 10px !important;
                 z-index: 999 !important;
             }
@@ -91,9 +91,9 @@ def inject_back_button_css():
             .main .block-container .stButton:first-of-type button:hover {
                 background: rgba(0,0,0,0.06) !important;
             }
-            /* 버튼 아래 콘텐츠가 가려지지 않도록 상단 여백 확보 */
+            /* 버튼 아래 콘텐츠가 가려지지 않도록 상단 여백 확보 (20px + 버튼 40px) */
             .main .block-container {
-                padding-top: 56px !important;
+                padding-top: 66px !important;
             }
         </style>
         """,
