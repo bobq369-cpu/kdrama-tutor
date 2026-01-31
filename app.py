@@ -51,9 +51,9 @@ def inject_custom_css():
             div:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
 
-                /* 👇 위치는 여기서 조절하세요 (현재: 위 -100px, 왼쪽 -100px) */
-                top: -100px !important;
-                left: -100px !important;
+                /* 👇 테마 선택 후 화면의 뒤로가기 버튼 위치 (위·왼쪽 여백) */
+                top: 20px !important;   /* 위에서 20px (숫자 키우면 더 아래로) */
+                left: 20px !important; /* 왼쪽에서 20px (숫자 키우면 더 오른쪽으로) */
 
                 z-index: 99999 !important;
                 width: 40px !important;
