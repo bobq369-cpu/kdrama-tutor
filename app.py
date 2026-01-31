@@ -52,7 +52,7 @@ def inject_custom_css():
 
     # [6] 추천 표현 바 위치
     smart_x = "0px"
-    smart_y = "0px"    # 예: -20px 올리기
+    smart_y = "150px"    # 예: -20px 올리기
     
     # ============================================================
 
@@ -74,8 +74,8 @@ def inject_custom_css():
                 left: {back_x} !important;
                 top: {back_y} !important;
                 z-index: 99999 !important;
-                width: 40px !important;
-                height: 40px !important;
+                width: 20px !important;
+                height: 20px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
                 border: 1px solid #eee !important;
