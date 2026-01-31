@@ -44,7 +44,7 @@ def inject_custom_css():
     title_y = "-200px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치
-    adjust_smart_y = "180px"
+    adjust_smart_y = "0px"
     adjust_smart_x = "0px"
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
