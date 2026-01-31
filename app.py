@@ -370,7 +370,7 @@ def main():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 선택된 테마 제목 (h1으로 강조)
+    # 선택된 테마 제목 (h1으로 강조) — 상단에는 제목·역할만. 추천 표현 바 호출 없음.
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
@@ -435,7 +435,7 @@ def main():
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
 
-    # 추천 표현: 채팅 기록 맨 아래, 입력창 바로 위 (구분선 + 버튼 그리드)
+    # [유일한 위치] 추천 표현: 채팅 루프 직후, st.chat_input 직전. 상단 호출 없음.
     st.divider()
     render_smart_reply_bar(current_scenario)
 
