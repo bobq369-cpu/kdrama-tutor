@@ -304,7 +304,26 @@ def parse_ai_message(content):
         correction = parts[1].strip() if len(parts) > 1 else None
     return display, image_keys, correction
 
-# --- 6. 메인 앱 로직 ---
+
+# --- 6. 스마트 답장 바 위치 (수동 편집) ---
+# "above_chat": 채팅 기록 위 (제목/역할 아래)
+# "below_chat": 채팅 기록 바로 아래, 입력창 바로 위
+SMART_REPLY_POSITION = "below_chat"
+
+
+def render_smart_reply_bar(current_scenario):
+    """스마트 답장 바(추천 표현 2열 버튼)를 렌더링."""
+    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+    phrases = list(current_scenario["key_phrases"].items())
+    col_a, col_b = st.columns(2)
+    for idx, (kor, eng) in enumerate(phrases):
+        with col_a if idx % 2 == 0 else col_b:
+            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                st.session_state.messages.append({"role": "user", "content": kor})
+                st.rerun()
+
+
+# --- 7. 메인 앱 로직 ---
 
 def main():
     # 세션 상태 초기화
@@ -350,15 +369,8 @@ def main():
     st.markdown(f"<h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1>", unsafe_allow_html=True)
     st.caption(f"💡 역할: {current_scenario['role']}")
 
-    # 스마트 답장 바: 채팅창 위에 위치 (2열 버튼)
-    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
-    phrases = list(current_scenario["key_phrases"].items())
-    col_a, col_b = st.columns(2)
-    for idx, (kor, eng) in enumerate(phrases):
-        with col_a if idx % 2 == 0 else col_b:
-            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
-                st.session_state.messages.append({"role": "user", "content": kor})
-                st.rerun()
+    if SMART_REPLY_POSITION == "above_chat":
+        render_smart_reply_bar(current_scenario)
 
     # 단일 채팅 인터페이스 (대화 기록)
     chat_container = st.container()
@@ -420,6 +432,9 @@ def main():
 
         if st.session_state.get("play_tts"):
             st.session_state.play_tts = False
+
+    if SMART_REPLY_POSITION == "below_chat":
+        render_smart_reply_bar(current_scenario)
 
     # 채팅 입력: 입력 시 메시지 추가 후 rerun
     if prompt := st.chat_input("한국어로 대화해보세요..."):
