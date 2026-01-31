@@ -50,6 +50,8 @@ def inject_custom_css():
         st.session_state.remocon = {}
     st.session_state.remocon["adjust_smart_x"] = adjust_smart_x
     st.session_state.remocon["adjust_smart_y"] = adjust_smart_y
+    st.session_state.remocon["prompt_x"] = prompt_x
+    st.session_state.remocon["prompt_y"] = prompt_y
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "200px"
@@ -57,7 +59,7 @@ def inject_custom_css():
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
-    prompt_y = "100px"
+    prompt_y = "-100px"
     # ============================================================
 
     st.markdown(
@@ -104,9 +106,10 @@ def inject_custom_css():
                 transform: translate({subtitle_x}, {subtitle_y}) !important;
             }}
 
-            /* 6. "대화를 시작해보세요!..." 안내 박스: 마커 블록 + 다음 형제(실제 안내 박스) 둘 다 이동 */
+            /* 6. "대화를 시작해보세요!..." 안내 박스: 마커+안내가 들어 있는 블록 이동 (여러 선택자로 DOM 대응) */
             div:has(> #start-prompt-wrap),
-            div:has(> #start-prompt-wrap) + div {{
+            div:has(> #start-prompt-wrap) + div,
+            [data-testid="stVerticalBlock"]:has(#start-prompt-wrap):not(:has([data-testid="stVerticalBlock"]:has(#start-prompt-wrap))) {{
                 position: relative !important;
                 z-index: 8 !important;
                 transform: translate({prompt_x}, {prompt_y}) !important;
@@ -329,7 +332,35 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 4. 추천 표현 바 위치 적용 (부모 문서 DOM 조작) ---
+# --- 4-1. 안내 박스 위치 적용 (부모 문서 DOM 조작) ---
+def _apply_prompt_position_script():
+    """리모컨 prompt_x, prompt_y로 '대화를 시작해보세요' 블록에 transform 적용."""
+    components.html(
+        """
+        <script>
+        (function() {
+            var doc = window.parent.document;
+            var el = doc.getElementById("start-prompt-wrap");
+            if (!el) return;
+            var x = el.getAttribute("data-x") || "0px";
+            var y = el.getAttribute("data-y") || "0px";
+            var blocks = doc.querySelectorAll("[data-testid='stVerticalBlock']");
+            var target = null;
+            for (var i = 0; i < blocks.length; i++) {
+                if (blocks[i].querySelector("#start-prompt-wrap")) target = blocks[i];
+            }
+            if (target) {
+                target.style.setProperty("position", "relative", "important");
+                target.style.setProperty("z-index", "8", "important");
+                target.style.setProperty("transform", "translate(" + x + ", " + y + ")", "important");
+            }
+        })();
+        </script>
+        """,
+        height=0,
+    )
+
+# --- 4-2. 추천 표현 바 위치 적용 (부모 문서 DOM 조작) ---
 def _apply_smart_reply_position_script():
     """리모컨 값으로 추천 표현 바가 들어 있는 블록에 transform 적용. CSS 선택자가 Streamlit DOM에서 안 먹힐 때 사용."""
     components.html(
@@ -416,8 +447,14 @@ def main():
     chat_container = st.container()
     with chat_container:
         if not st.session_state.messages:
-            st.markdown('<div id="start-prompt-wrap"></div>', unsafe_allow_html=True)
-            st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
+            remocon = st.session_state.get("remocon", {})
+            px, py = remocon.get("prompt_x", "0px"), remocon.get("prompt_y", "0px")
+            with st.container():
+                st.markdown(
+                    f'<div id="start-prompt-wrap" data-x="{px}" data-y="{py}"></div>',
+                    unsafe_allow_html=True
+                )
+                st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
         for i, msg in enumerate(st.session_state.messages):
             if msg["role"] == "user":
                 st.markdown(f"""<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
@@ -435,6 +472,9 @@ def main():
                 {html.escape(display)}{tts_code}{corr_html}</div>{img_html}</div></div>""", unsafe_allow_html=True)
         if st.session_state.get("play_tts"): st.session_state.play_tts = False
         st.markdown('<div id="chat-area-end"></div>', unsafe_allow_html=True)
+
+    if not st.session_state.messages:
+        _apply_prompt_position_script()
 
     render_smart_reply_bar(current_scenario)
 
