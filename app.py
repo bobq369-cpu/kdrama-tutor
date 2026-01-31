@@ -103,20 +103,20 @@ def inject_custom_css():
                 transform: translate({subtitle_x}, {subtitle_y}) !important;
             }}
 
-            /* 6. "대화를 시작해보세요!..." 안내 박스 (직계 부모만 → 다른 요소와 분리) */
-            div:has(> #start-prompt-wrap) {{
+            /* 6. "대화를 시작해보세요!..." 안내 박스: 마커 블록 + 다음 형제(실제 안내 박스) 둘 다 이동 */
+            div:has(> #start-prompt-wrap),
+            div:has(> #start-prompt-wrap) + div {{
                 position: relative !important;
                 z-index: 8 !important;
                 transform: translate({prompt_x}, {prompt_y}) !important;
             }}
 
-            /* 7. 추천 표현 바 (직계 부모만 → 독립 이동) */
-            div:has(> div#smart-reply-area) {{
+            /* 7. 추천 표현 바: #smart-reply-area가 있는 가장 안쪽 블록만 이동 (상위 블록 제외) */
+            div[data-testid="stVerticalBlock"]:has(#smart-reply-area):not(:has(> div[data-testid="stVerticalBlock"]:has(#smart-reply-area))) {{
                 position: relative !important;
-                top: {adjust_smart_y} !important;
-                left: {adjust_smart_x} !important;
+                z-index: 1 !important;
+                transform: translate({adjust_smart_x}, {adjust_smart_y}) !important;
                 width: 100% !important;
-                z-index: 1;
             }}
 
             /* 추천 버튼 디자인 */
