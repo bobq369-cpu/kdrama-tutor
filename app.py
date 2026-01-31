@@ -57,7 +57,7 @@ def inject_custom_css():
 
     # [6] "대화를 시작해보세요!..." 안내 박스 위치 (유체이탈)
     prompt_x = "0px"
-    prompt_y = "-100px"
+    prompt_y = "100px"
     # ============================================================
 
     st.markdown(
@@ -89,7 +89,7 @@ def inject_custom_css():
                 top: {back_y} !important;
                 z-index: 99999 !important;
                 width: 40px !important;
-                height: 10px !important;
+                height: 40px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
                 border: 1px solid #eee !important;
