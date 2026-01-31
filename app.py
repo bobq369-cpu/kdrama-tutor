@@ -315,23 +315,58 @@ def parse_ai_message(content):
     return display, image_keys, correction
 
 
-# --- 6. 스마트 답장 바 (채팅 맨 아래 버튼 그리드) ---
+# --- 6. 스마트 답장 바 (Flow 유지 + X/Y 미세 조정) ---
 def render_smart_reply_bar(current_scenario):
     """
-    [롤백 완료] 복잡한 CSS 제거하고 가장 기본적인 버튼 그리드로 복구.
-    위치: main() 함수에서 호출한 그 자리(채팅 기록 맨 끝)에 그대로 표시됨.
+    [안전 모드] 현재 위치를 기반으로 X, Y 좌표만큼만 살짝 이동시키는 함수.
+    (화면을 가리거나 망가뜨리지 않음)
     """
-    st.divider()
-    st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+    # ==========================================
+    # 🎛️ 사장님 전용 미세 조정 패널
+    # ==========================================
 
-    phrases = list(current_scenario["key_phrases"].items())
-    col_a, col_b = st.columns(2)
+    # 1. Y축 (위/아래 이동)
+    # - "0px" : 가만히 둠 (기본값)
+    # - "-20px" : 위로 20px 올림
+    # - "20px" : 아래로 20px 내림
+    adjust_y = "0px"
 
-    for idx, (kor, eng) in enumerate(phrases):
-        with col_a if idx % 2 == 0 else col_b:
-            if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
-                st.session_state.messages.append({"role": "user", "content": kor})
-                st.rerun()
+    # 2. X축 (좌/우 이동)
+    # - "0px" : 가만히 둠 (기본값)
+    # - "50px" : 오른쪽으로 이동
+    # - "-50px" : 왼쪽으로 이동
+    adjust_x = "0px"
+
+    # ==========================================
+
+    # 1. CSS로 미세 조정 적용 (position: relative 사용)
+    st.markdown(f"""
+    <style>
+    /* id가 'safe-reply-container'인 블록을 찾아서 좌표 이동 */
+    div[data-testid="stVerticalBlock"]:has(#safe-reply-container) {{
+        position: relative;
+        top: {adjust_y};
+        left: {adjust_x};
+
+        background-color: transparent;
+        z-index: 1;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # 2. 앵커 + 버튼을 같은 컨테이너에 (미세 조정이 전체에 적용되도록)
+    with st.container():
+        st.markdown('<div id="safe-reply-container"></div>', unsafe_allow_html=True)
+        st.divider()
+        st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+
+        phrases = list(current_scenario["key_phrases"].items())
+        col_a, col_b = st.columns(2)
+        for idx, (kor, eng) in enumerate(phrases):
+            with col_a if idx % 2 == 0 else col_b:
+                if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": kor})
+                    st.rerun()
 
 
 # --- 7. 메인 앱 로직 ---
