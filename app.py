@@ -49,7 +49,7 @@ def inject_custom_css():
             /* [안전장치 1] 뒤로가기 버튼 전용 스타일 */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {
                 position: fixed !important;
-                top: 0px !important;
+                top: 15px !important;
                 left: 15px !important;
                 z-index: 99999 !important;
                 width: 40px !important;
