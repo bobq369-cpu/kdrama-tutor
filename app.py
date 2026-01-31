@@ -34,7 +34,7 @@ def inject_custom_css():
     main_top_margin = "0px"  # 최대한 위로 붙임
 
     # [2] 뒤로가기 버튼 위치 (고정됨)
-    back_x = "15px"
+    back_x = "50px"
     back_y = "15px"
 
     # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
