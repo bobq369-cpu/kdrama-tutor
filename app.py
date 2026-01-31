@@ -44,7 +44,7 @@ def inject_custom_css():
 
     # [4] 추천 표현 바 위치
     adjust_smart_y = "220px"
-    adjust_smart_x = "0px"
+    adjust_smart_x = "100px"
 
     # [5] 역할 캡션("💡 역할: ...") 위치 (유체이탈)
     subtitle_x = "200px"
