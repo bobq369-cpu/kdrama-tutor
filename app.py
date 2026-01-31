@@ -229,7 +229,6 @@ SCENARIOS = {
         "role": "깐깐하지만 공정한 한국 입국 심사관",
         "context": "사용자가 한국에 막 도착해서 입국 심사를 받고 있습니다.",
         "key_phrases": {
-            "방문 목적이 무엇입니까?": "What is the purpose of your visit?",
             "여행으로 왔습니다.": "I am here for travel/tourism.",
             "얼마나 머무르실 예정입니까?": "How long will you be staying?",
             "일주일 정도 있을 겁니다.": "I will stay for about a week.",
@@ -242,7 +241,6 @@ SCENARIOS = {
         "role": "친절하고 활기찬 서울 맛집 식당 이모님",
         "context": "사용자가 식당에 들어와서 메뉴를 고르고 주문을 하려고 합니다.",
         "key_phrases": {
-            "어서 오세요! 몇 분이세요?": "Welcome! How many people?",
             "두 명이에요.": "Two people, please.",
             "여기요, 주문할게요.": "Excuse me, I'd like to order.",
             "이거 덜 맵게 해주세요.": "Please make this less spicy.",
@@ -256,9 +254,8 @@ SCENARIOS = {
         "context": "사용자가 활기찬 시장에서 물건을 구경하고 가격을 물어봅니다.",
         "key_phrases": {
             "이거 얼마예요?": "How much is this?",
-            "좀 깎아주세요.": "Please give me a discount.",
+            "깎아주세요.": "Please give me a discount.",
             "맛 좀 봐도 될까요?": "Can I taste this?",
-            "너무 비싸요.": "It's too expensive.",
             "많이 파세요!": "Have a great sale! (Goodbye greeting)"
         }
     }
