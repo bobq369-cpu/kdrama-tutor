@@ -52,8 +52,8 @@ def inject_custom_css():
                 position: fixed !important;
 
                 /* 👇 위치는 여기서 조절하세요 (현재: 위 20px, 왼쪽 20px) */
-                top: 20px !important;
-                left: 20px !important;
+                top: -20px !important;
+                left: -20px !important;
 
                 z-index: 99999 !important;
                 width: 40px !important;
