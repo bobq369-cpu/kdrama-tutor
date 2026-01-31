@@ -32,7 +32,7 @@ def inject_custom_css():
     # ============================================================
 
     # [1] 전체 화면 상단 여백 (이걸 건드리면 전체가 다 같이 움직입니다)
-    main_top_padding = "50px"
+    main_top_padding = "0px"
     main_top_margin = "0px"  # 최대한 위로 붙임
 
     # [2] 뒤로가기 버튼 위치 (고정됨)
@@ -41,7 +41,7 @@ def inject_custom_css():
 
     # [3] 제목(Title) 위치 미세 조정 (유체이탈 방식)
     title_x = "0px"    # 좌우 이동 (음수: 왼쪽, 양수: 오른쪽)
-    title_y = "0px"    # 상하 이동 (음수: 위로, 양수: 아래로)
+    title_y = "-200px"    # 상하 이동 (음수: 위로, 양수: 아래로)
 
     # [4] 추천 표현 바 위치 (세션에 저장 → render_smart_reply_bar + 스크립트에서 사용)
     adjust_smart_y = "410px"
