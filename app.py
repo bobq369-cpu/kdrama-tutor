@@ -398,26 +398,20 @@ def render_smart_reply_bar(current_scenario):
     st.components.v1.html(f"""
     <script>
     (function() {{
-        function run() {{
-            const doc = window.parent?.document || document;
-            const applyBack = (el, top, off) => {{
-                if (!el) return;
-                let block = el.closest('[data-testid="stVerticalBlock"]');
-                if (block) block.style.cssText = 'position:fixed!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:auto!important;height:auto!important;z-index:999999!important;';
-            }};
-            const applyPos = (el, top, off, z) => {{
-                if (!el) return;
-                let block = el.closest('[data-testid="stVerticalBlock"]');
-                if (block) block.style.cssText = 'position:absolute!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:'+z+'!important;';
-            }};
-            const applyDirect = (el, top, off, z) => {{
-                if (!el) return;
-                el.style.cssText = 'position:absolute!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:'+z+'!important;';
-            }};
-            applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
-            const titleEl = doc.getElementById('learning-title-wrap');
-            if (titleEl) applyDirect(titleEl, '{title_top}', '{title_off}', 10);
-            applyPos(doc.getElementById('role-caption-wrap'), '{role_top}', '{role_off}', 9);
+        const doc = window.parent?.document || document;
+        const applyBack = (el, top, off) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:fixed!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:auto!important;height:auto!important;z-index:999999!important;';
+        }};
+        applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
+        const applyPos = (el, top, off, z) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:absolute!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:'+z+'!important;';
+        }};
+        applyPos(doc.getElementById('learning-title-wrap'), '{title_top}', '{title_off}', 10);
+        applyPos(doc.getElementById('role-caption-wrap'), '{role_top}', '{role_off}', 9);
         const promptEl = doc.getElementById('start-prompt-marker');
         if (promptEl) {{
             let block = promptEl.closest('[data-testid="stVerticalBlock"]');
@@ -435,10 +429,6 @@ def render_smart_reply_bar(current_scenario):
                 block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
             }}
         }}
-        }}
-        run();
-        setTimeout(run, 200);
-        setTimeout(run, 600);
     }})();
     </script>
     """, height=0)
