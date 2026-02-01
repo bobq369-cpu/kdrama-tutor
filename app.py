@@ -54,7 +54,7 @@ def inject_custom_css():
     prompt_left_offset = "0px"
 
     # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용)
-    smart_top = "530px"
+    smart_top = "750px"
     smart_left_offset = "0px"
     REMOCON["smart_top"] = smart_top
     REMOCON["smart_left_offset"] = smart_left_offset
