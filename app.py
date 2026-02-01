@@ -171,11 +171,14 @@ def inject_custom_css():
                 width: 50% !important;
                 min-width: 0 !important;
                 display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton {{
-                flex: 1 !important;
+                flex: 0 0 90px !important;
                 min-width: 0 !important;
                 width: 100% !important;
+                min-height: 90px !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button {{
                 width: 100% !important;
