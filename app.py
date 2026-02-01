@@ -78,7 +78,7 @@ def inject_custom_css():
     footer_font_size = "12px"   # 글자 크기
 
     # [8] 채팅 입력창("한국어로 대화해보세요...") 크기
-    chat_input_height = "30px"      # 입력창 높이
+    chat_input_height = "20px"      # 입력창 높이
     chat_input_padding = "12px 16px" # 입력창 내부 여백
     chat_input_font_size = "16px"   # placeholder/입력 글자 크기
 
