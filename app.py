@@ -428,6 +428,9 @@ def render_smart_reply_bar(current_scenario):
     prompt_off = REMOCON.get("prompt_left_offset", "0px")
     smart_top = REMOCON.get("smart_top", "230px")
     smart_off = REMOCON.get("smart_left_offset", "0px")
+    footer_height = REMOCON.get("footer_height", "20px")
+    footer_padding = REMOCON.get("footer_padding", "2px 0.5rem")
+    footer_font_size = REMOCON.get("footer_font_size", "12px")
     st.components.v1.html(f"""
     <script>
     (function() {{
@@ -475,6 +478,14 @@ def render_smart_reply_bar(current_scenario):
                 block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
             }}
         }}
+            const footer = doc.querySelector('[data-testid="stFooter"]') || doc.querySelector('footer');
+            if (footer) {{
+                footer.style.setProperty('min-height', '{footer_height}', 'important');
+                footer.style.setProperty('max-height', '{footer_height}', 'important');
+                footer.style.setProperty('padding', '{footer_padding}', 'important');
+                footer.style.setProperty('font-size', '{footer_font_size}', 'important');
+                footer.style.setProperty('background-color', '#FAFAD2', 'important');
+            }}
         }}
         run();
         setTimeout(run, 300);
