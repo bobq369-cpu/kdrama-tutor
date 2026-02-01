@@ -82,6 +82,13 @@ def inject_custom_css():
     chat_input_padding = "12px 16px" # 입력창 내부 여백
     chat_input_font_size = "16px"   # placeholder/입력 글자 크기
 
+    # [9] 채팅 입력창 배경 박스 (입력창을 감싸는 영역)
+    chat_input_box_bg = "#FFFAFA"        # 배경 색상
+    chat_input_box_height = "80px"      # 박스 높이
+    chat_input_box_padding = "16px"     # 박스 내부 여백
+    chat_input_box_radius = "16px"      # 모서리 둥글기
+    chat_input_box_max_width = "700px"  # 박스 최대 너비 (비우면 100%)
+
     # ============================================================
 
     st.markdown(
@@ -238,17 +245,28 @@ def inject_custom_css():
             }}
 
             /* [8] 채팅 입력창("한국어로 대화해보세요...") 크기 */
-            .stChatInputContainer,
-            .stChatInputContainer > div,
-            [data-testid="stChatInput"] {{
-                min-height: {chat_input_height} !important;
-                height: {chat_input_height} !important;
-            }}
             .stChatInputContainer textarea,
             [data-testid="stChatInput"] textarea {{
                 min-height: {chat_input_height} !important;
                 padding: {chat_input_padding} !important;
                 font-size: {chat_input_font_size} !important;
+            }}
+
+            /* [9] 채팅 입력창 배경 박스 — 크기·색상 */
+            .stChatInputContainer,
+            .stChatInputContainer > div,
+            [data-testid="stChatInput"] {{
+                min-height: {chat_input_box_height} !important;
+                height: auto !important;
+                padding: {chat_input_box_padding} !important;
+                background-color: {chat_input_box_bg} !important;
+                border-radius: {chat_input_box_radius} !important;
+                max-width: {chat_input_box_max_width} !important;
+                box-sizing: border-box !important;
+            }}
+            .stChatInputContainer > div,
+            [data-testid="stChatInput"] > div {{
+                min-height: {chat_input_height} !important;
             }}
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #E6E6FA; border-radius: 10px; }}
