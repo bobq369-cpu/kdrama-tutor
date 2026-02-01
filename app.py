@@ -111,7 +111,7 @@ def inject_custom_css():
                 width: 32px !important;
                 height: 32px !important;
                 border-radius: 50% !important;
-                background-color: white !important;
+                background-color: snow !important;
                 border: 1px solid #eee !important;
                 box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
                 padding: 0 !important;
