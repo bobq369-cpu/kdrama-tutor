@@ -83,7 +83,7 @@ def inject_custom_css():
     chat_input_font_size = "16px"   # placeholder/입력 글자 크기
 
     # [9] 채팅 입력창 배경 박스 (입력창을 감싸는 영역)
-    chat_input_box_bg = "#FFFAFA"        # 배경 색상
+    chat_input_box_bg = "#F5F5F5"        # 배경 색상
     chat_input_box_height = "80px"      # 박스 높이
     chat_input_box_padding = "16px"     # 박스 내부 여백
     chat_input_box_radius = "16px"      # 모서리 둥글기
