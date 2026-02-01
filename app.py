@@ -251,7 +251,7 @@ def inject_custom_css():
                 font-size: {chat_input_font_size} !important;
             }}
 
-            .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
+            .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #E6E6FA; border-radius: 10px; }}
             .tts-player-wrap audio {{ width: 100%; height: 36px; outline: none; }}
         </style>
         """,
