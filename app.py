@@ -1,18 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
-import sqlite3
-import difflib
-import time
-import base64
-import json
 import os
-import io
-from datetime import datetime
+import re
+import html
+import time
 from gtts import gTTS
+import tempfile
+import base64
 
-# ==========================================
-# 1. 환경 설정 및 초기화 (보고서 3.1, 5.1)
-# ==========================================
+# --- 1. 기본 설정 및 비밀키 가져오기 ---
 st.set_page_config(
     page_title="K-Tutor Global",
     page_icon="🇰🇷",
@@ -20,372 +16,336 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# API 키 설정
 try:
     GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=GOOGLE_API_KEY)
 except (KeyError, FileNotFoundError):
-    st.error("🚨 API 키가 설정되지 않았습니다. .streamlit/secrets.toml 파일을 확인해주세요.")
+    st.error("API 키가 설정되지 않았습니다. 스트림릿 설정에서 GOOGLE_API_KEY를 추가해주세요.")
     st.stop()
 
-# DB 초기화 (보고서 3.3, 5.2)
-DB_NAME = "k_tutor.db"
+genai.configure(api_key=GOOGLE_API_KEY)
 
-def init_db():
-    conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS chat_logs (
-                    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    scenario_id TEXT,
-                    user_message TEXT,
-                    ai_response TEXT,
-                    correction TEXT,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-                )''')
-    conn.commit()
-    conn.close()
-
-if "db_initialized" not in st.session_state:
-    init_db()
-    st.session_state.db_initialized = True
-
-# ==========================================
-# 2. 디자인 시스템: CSS 주입 (보고서 4.1, 4.2)
-# ==========================================
+# --- 2. CSS 설정 (채팅 화면 및 공통) ---
 def inject_custom_css():
-    st.markdown("""
-    <style>
-        /* 폰트 설정 (Pretendard) */
-        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
-        
-        html, body, [class*="css"] {
-            font-family: 'Pretendard', sans-serif !important;
-            background-color: #FAF1DB; /* Hanok Beige: 배경색 */
-        }
-        
-        .stApp {
-            background-color: #FAF1DB; /* 전체 배경 */
-        }
+    # [사장님 전용 리모컨 좌표]
+    back_x = "20px"
+    back_y = "20px"
+    prompt_y = "50px"
 
-        /* 상단 헤더 제거 및 여백 조정 (보고서 4.2) */
-        header {visibility: hidden;}
-        .main .block-container {
-            padding-top: 2rem !important;
-            padding-bottom: 5rem !important;
-            max-width: 700px;
-        }
+    st.markdown(
+        f"""
+        <style>
+            /* 기본 폰트 및 배경 설정 */
+            .stApp {{ background-color: #F8F9FA; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }}
+            header[data-testid="stHeader"] {{ display: none !important; }}
+            .main .block-container {{ max-width: 700px; padding-top: 2rem; }}
 
-        /* 시나리오 카드 디자인 (보고서 5.3) */
-        .scenario-card-btn > button {
-            background-color: #FFFFFF !important;
-            border: 1px solid #E5E5E5 !important;
-            border-radius: 15px !important;
-            padding: 20px !important;
-            height: auto !important;
-            min-height: 160px !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important;
-            transition: transform 0.2s !important;
-            width: 100%;
-        }
-        .scenario-card-btn > button:hover {
-            transform: translateY(-5px);
-            border-color: #81DFDC !important; /* Seoul Sky */
-        }
+            /* [채팅 화면] 뒤로가기 버튼 (왼쪽 상단 고정) */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
+                position: fixed !important; top: {back_y} !important; left: {back_x} !important;
+                width: auto !important; height: auto !important; z-index: 999999 !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
+                width: 32px !important; height: 32px !important; border-radius: 50% !important;
+                background-color: white !important; border: 1px solid #eee !important;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; padding: 0 !important;
+                line-height: 1 !important; font-size: 14px !important;
+            }}
 
-        /* 채팅 말풍선 디자인 (보고서 4.1) */
-        .chat-bubble {
-            padding: 12px 18px;
-            border-radius: 18px;
-            margin-bottom: 10px;
-            font-size: 16px;
-            line-height: 1.5;
-            max-width: 85%;
-            word-wrap: break-word;
-            position: relative;
-        }
-        
-        .user-bubble {
-            background-color: #81DFDC; /* Seoul Sky */
-            color: #004D40;
-            margin-left: auto;
-            border-top-right-radius: 0;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-        }
-        
-        .ai-bubble {
-            background-color: #FFFFFF;
-            color: #265481; /* Ink Navy */
-            border: 1px solid #E9ECEF;
-            margin-right: auto;
-            border-top-left-radius: 0;
-        }
+            /* [채팅 화면] 안내 박스 위치 조정 */
+            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
+                transform: translate(0px, {prompt_y}) !important; position: relative; z-index: 8;
+            }}
 
-        /* Diff View (교정) 디자인 (보고서 5.5) */
-        .correction-box {
-            background-color: #FFF9DB; /* 연한 노란색 */
-            border-left: 4px solid #EE6C4D; /* Persimmon */
-            padding: 12px;
-            margin: 5px 0 15px 0;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            color: #495057;
-        }
-        .diff-del {
-            background-color: #FFC9C9;
-            text-decoration: line-through;
-            color: #C92A2A;
-            padding: 0 4px;
-            border-radius: 3px;
-        }
-        .diff-add {
-            background-color: #B2F2BB; /* Soft Sage */
-            font-weight: bold;
-            color: #2B8A3E;
-            padding: 0 4px;
-            border-radius: 3px;
-        }
+            /* [채팅 화면] 추천 표현 바 정렬 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
+                width: 100% !important; max-width: 700px !important; margin: 0 auto !important;
+            }}
+            /* 추천 표현 버튼 스타일 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
+                width: 100% !important; min-height: 60px !important; height: auto !important;
+                background-color: #FFFFFF !important; border: 1px solid #E5E5E5 !important;
+                color: #4B5563 !important; border-radius: 12px !important;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+                white-space: pre-wrap !important; word-break: keep-all !important;
+                display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
+                background-color: #F9FAFB !important; transform: translateY(-2px);
+            }}
 
-        /* 하단 오디오 입력창 스타일 */
-        .stAudioInput {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 680px;
-            z-index: 999;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-    </style>
-    """, unsafe_allow_html=True)
+            /* 기타 유틸리티 */
+            .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
+            .tts-player-wrap audio {{ width: 100%; height: 36px; outline: none; }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# --- [핵심] 홈 화면 카드 디자인 CSS ---
+def inject_home_card_css():
+    st.markdown(
+        """
+        <style>
+            /* 홈 화면의 시나리오 카드 버튼 전용 스타일 */
+            .scenario-card-button > button {
+                background-color: #FFFFFF !important;
+                border: 1px solid #E6E6E6 !important; /* 은은한 테두리 */
+                border-radius: 20px !important; /* 둥근 모서리 */
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important; /* 부드러운 그림자 */
+                padding: 30px 25px !important; /* 내부 여백 */
+                height: auto !important; 
+                min-height: 180px !important; /* 카드 최소 높이 설정 */
+                
+                text-align: left !important;
+                display: flex !important;
+                flex-direction: column !important; /* 내용 세로 배치 */
+                align-items: flex-start !important; /* 왼쪽 정렬 */
+                justify-content: flex-start !important; /* 상단 정렬 */
+                
+                white-space: pre-wrap !important; /* 줄바꿈 허용 */
+                font-family: 'Pretendard', sans-serif !important;
+                color: #1a1a1a !important;
+                line-height: 1.6 !important;
+                transition: all 0.2s ease !important; /* 부드러운 움직임 */
+            }
+            
+            /* 마우스 올렸을 때 효과 */
+            .scenario-card-button > button:hover {
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-3px); /* 살짝 떠오름 */
+                border-color: #d0d0d0 !important;
+            }
+
+            /* 홈 화면 제목 스타일 */
+            .home-title {
+                text-align: center;
+                margin-bottom: 3rem;
+                font-weight: 700;
+                color: #333;
+                font-size: 2.2rem;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 inject_custom_css()
 
-# ==========================================
-# 3. 데이터 및 시나리오 정의
-# ==========================================
+# --- 3. 데이터 및 헬퍼 함수 ---
+IMAGE_GALLERY = {
+    "menu": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
+    "passport": "https://images.unsplash.com/photo-1544015759-42b786315268",
+    "money": "https://images.unsplash.com/photo-1554672723-bca4ef185960",
+    "baggage": "https://images.unsplash.com/photo-1553531384-cc64ac80f931",
+}
+
 SCENARIOS = {
     "airport": {
-        "id": "airport",
-        "title": "공항 입국 심사",
+        "title": "공항 입국 심사 (Airport Immigration)",
         "icon": "✈️",
-        "role": "깐깐한 입국 심사관",
-        "level": "초급 (Beginner)",
-        "desc": "입국 목적과 체류 기간을 묻는 질문에 대답해보세요.",
-        "context": "당신은 한국 공항의 입국 심사대에 서 있습니다. 심사관이 여권을 확인하며 질문합니다."
+        "role": "깐깐하지만 공정한 한국 입국 심사관",
+        "context": "사용자가 한국에 막 도착해서 입국 심사를 받고 있습니다.",
+        "key_phrases": {
+            "방문 목적이 무엇입니까?": "What is the purpose of your visit?",
+            "여행으로 왔습니다.": "I am here for travel/tourism.",
+            "얼마나 머무르실 예정입니까?": "How long will you be staying?",
+            "일주일 정도 있을 겁니다.": "I will stay for about a week.",
+            "숙소는 어디입니까?": "Where is your accommodation?"
+        }
     },
-    "cafe": {
-        "id": "cafe",
-        "title": "카페 주문하기",
-        "icon": "☕",
-        "role": "친절한 카페 직원",
-        "level": "중급 (Intermediate)",
-        "desc": "원하는 음료와 옵션(얼음 양, 사이즈)을 주문해보세요.",
-        "context": "서울의 힙한 카페입니다. 직원이 주문을 받으러 기다리고 있습니다."
+    "restaurant": {
+        "title": "식당 주문하기 (Ordering at a Restaurant)",
+        "icon": "🍜",
+        "role": "친절하고 활기찬 서울 맛집 식당 이모님",
+        "context": "사용자가 식당에 들어와서 메뉴를 고르고 주문을 하려고 합니다.",
+        "key_phrases": {
+            "어서 오세요! 몇 분이세요?": "Welcome! How many people?",
+            "두 명이에요.": "Two people, please.",
+            "여기요, 주문할게요.": "Excuse me, I'd like to order.",
+            "이거 덜 맵게 해주세요.": "Please make this less spicy.",
+            "반찬 좀 더 주세요.": "Can I get some more side dishes, please?"
+        }
+    },
+    "market": {
+        "title": "전통시장 쇼핑 (Traditional Market Shopping)",
+        "icon": "🍎",
+        "role": "인심 좋고 흥정을 좋아하는 시장 상인",
+        "context": "사용자가 활기찬 시장에서 물건을 구경하고 가격을 물어봅니다.",
+        "key_phrases": {
+            "이거 얼마예요?": "How much is this?",
+            "좀 깎아주세요.": "Please give me a discount.",
+            "맛 좀 봐도 될까요?": "Can I taste this?",
+            "너무 비싸요.": "It's too expensive.",
+            "많이 파세요!": "Have a great sale! (Goodbye greeting)"
+        }
     }
 }
 
-# ==========================================
-# 4. 로직 함수 (AI, Diff, TTS)
-# ==========================================
+def strip_for_tts(text):
+    if not text: return ""
+    t = re.sub(r"\[IMAGE:\s*\w+\]", "", text).strip()
+    if "||" in t: t = t.split("||", 1)[0].strip()
+    return t or ""
 
-# 4.1 Diff 생성 함수 (보고서 5.5)
-def generate_diff_html(original, corrected):
-    matcher = difflib.SequenceMatcher(None, original.split(), corrected.split())
-    html_output = []
-    
-    for opcode, i1, i2, j1, j2 in matcher.get_opcodes():
-        if opcode == 'equal':
-            html_output.append(" ".join(original.split()[i1:i2]))
-        elif opcode == 'replace':
-            html_output.append(f'<span class="diff-del">{" ".join(original.split()[i1:i2])}</span>')
-            html_output.append(f'<span class="diff-add">{" ".join(corrected.split()[j1:j2])}</span>')
-        elif opcode == 'delete':
-            html_output.append(f'<span class="diff-del">{" ".join(original.split()[i1:i2])}</span>')
-        elif opcode == 'insert':
-            html_output.append(f'<span class="diff-add">{" ".join(corrected.split()[j1:j2])}</span>')
-            
-    return " ".join(html_output)
-
-# 4.2 AI 응답 생성 (LLM + STT 통합) - 보고서 3.2
-# 비용 효율성을 위해 STT도 Gemini에게 맡깁니다.
-def process_conversation(audio_bytes, text_input=None):
-    scenario = SCENARIOS[st.session_state.current_scenario]
-    
-    # 시스템 프롬프트: JSON 포맷으로 응답 강제
-    system_prompt = f"""
-    당신은 {scenario['role']}입니다. 상황: {scenario['context']}.
-    한국어 튜터로서 사용자와 대화하세요.
-    
-    반드시 다음 JSON 형식으로만 응답하세요:
-    {{
-        "user_stt": "사용자의 말을 받아적은 텍스트 (오디오 입력인 경우)",
-        "response": "당신의 자연스러운 대답",
-        "correction": "사용자 문장의 자연스러운 교정본 (오류가 없으면 그대로)",
-        "explanation": "교정 이유나 더 나은 표현 팁 (간략하게)"
-    }}
-    
-    사용자 입력이 한국어가 아니거나 어색하면 친절하게 교정해주세요.
-    """
-    
-    model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=system_prompt)
-    
+@st.cache_data(show_spinner=False)
+def _generate_tts_html_cached(clean_text):
+    if not clean_text: return ""
     try:
-        if audio_bytes:
-            # 오디오 입력 처리
-            response = model.generate_content([
-                "사용자의 오디오 입력을 듣고 대화를 이어가세요.",
-                {"mime_type": "audio/wav", "data": audio_bytes}
-            ])
-        else:
-            # 텍스트 입력 처리
-            response = model.generate_content(text_input)
-            
-        return json.loads(response.text)
-    except Exception as e:
-        st.error(f"AI 오류: {e}")
-        return None
-
-# 4.3 TTS 생성
-def generate_tts(text):
-    try:
-        tts = gTTS(text=text, lang='ko', slow=False)
+        tts = gTTS(text=clean_text, lang='ko', slow=False)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
             tts.save(fp.name)
             with open(fp.name, "rb") as f:
                 data = f.read()
                 b64 = base64.b64encode(data).decode()
-        os.unlink(fp.name)
-        return f'<audio controls autoplay src="data:audio/mp3;base64,{b64}" style="width: 100%; height: 30px; margin-top: 5px;"></audio>'
-    except:
-        return ""
+                md = f"""<div class="tts-player-wrap"><audio controls><source src="data:audio/mp3;base64,{b64}" type="audio/mp3"></audio></div>"""
+            os.unlink(fp.name)
+            return md
+    except Exception as e:
+        return f"<span>(오디오 오류: {e})</span>"
 
-# ==========================================
-# 5. 메인 앱 플로우
-# ==========================================
+def text_to_speech_html(text, autoplay=False):
+    html = _generate_tts_html_cached(strip_for_tts(text))
+    if autoplay and html: html = html.replace("<audio controls ", "<audio controls autoplay ", 1)
+    return html
 
+def get_ai_response(messages, scenario_key):
+    system_instruction = f"""
+    역할: {SCENARIOS[scenario_key]['role']}
+    상황: {SCENARIOS[scenario_key]['context']}
+    지침: 한국어 튜터로서 친절하게 답하고, 필요시 [IMAGE: key] 태그 사용. 오류 교정 시 끝에 || 사용.
+    """
+    model = genai.GenerativeModel("gemini-2.0-flash", system_instruction=system_instruction)
+    gemini_messages = [{"role": "user" if m["role"]=="user" else "model", "parts": [m["content"]]} for m in messages]
+    max_retries = 3
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            response = model.generate_content(gemini_messages)
+            return response.text
+        except Exception as e:
+            last_error = e
+            err_str = str(e)
+            if "429" in err_str or "quota" in err_str.lower() or "rate" in err_str.lower():
+                time.sleep(4)
+                continue
+            return f"(AI 응답 오류: {e})"
+    return f"(AI 응답 오류: {last_error})"
+
+def parse_ai_message(content):
+    raw = content or ""
+    image_keys = re.findall(r"\[IMAGE:\s*(\w+)\]", raw)
+    display = re.sub(r"\[IMAGE:\s*\w+\]", "", raw).strip()
+    correction = None
+    if "||" in display:
+        parts = display.split("||", 1)
+        display = parts[0].strip()
+        correction = parts[1].strip() if len(parts) > 1 else None
+    return display, image_keys, correction
+
+
+# --- 4. 추천 표현 바 ---
+def render_smart_reply_bar(current_scenario):
+    with st.container():
+        st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
+        st.divider()
+        st.caption("💡 추천 표현 (클릭하면 전송됩니다)")
+        
+        phrases = list(current_scenario["key_phrases"].items())
+        col_a, col_b = st.columns(2)
+        for idx, (kor, eng) in enumerate(phrases):
+            with col_a if idx % 2 == 0 else col_b:
+                if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
+                    st.session_state.messages.append({"role": "user", "content": kor})
+                    st.rerun()
+
+
+# --- 5. 메인 앱 로직 ---
 def main():
-    if "page" not in st.session_state: st.session_state.page = "HOME"
     if "messages" not in st.session_state: st.session_state.messages = []
-    
-    # --- PAGE 1: 홈 (시나리오 선택) ---
-    if st.session_state.page == "HOME":
-        st.markdown("<h1 style='text-align: center; color: #265481;'>🇰🇷 K-Tutor Global</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: gray;'>오늘 연습할 대화 주제를 선택해주세요.</p>", unsafe_allow_html=True)
-        st.write("") # 간격
+    if "selected_scenario" not in st.session_state: st.session_state.selected_scenario = "airport"
+    if "current_page" not in st.session_state: st.session_state.current_page = "HOME"
 
-        col1, col2 = st.columns(2)
-        for idx, (key, data) in enumerate(SCENARIOS.items()):
-            with col1 if idx % 2 == 0 else col2:
-                # 보고서 5.3: 카드형 UI 구현
-                st.markdown(f'<div class="scenario-card-btn">', unsafe_allow_html=True)
-                if st.button(f"{data['icon']}\n\n{data['title']}\n{data['level']}", key=key):
-                    st.session_state.current_scenario = key
-                    st.session_state.messages = [] # 대화 초기화
-                    st.session_state.page = "CHAT"
+    # ==========================================
+    # [HOME 페이지] - 카드 디자인 적용
+    # ==========================================
+    if st.session_state.current_page == "HOME":
+        inject_home_card_css() # 홈 화면 전용 CSS 주입
+        
+        st.markdown("<h1 class='home-title'>오늘 어디서 연습할까요?</h1>", unsafe_allow_html=True)
+        
+        items = list(SCENARIOS.items())
+        col0, col1 = st.columns(2)
+        for j, (key, sc) in enumerate(items):
+            with col0 if j % 2 == 0 else col1:
+                # 버튼을 감싸는 div에 클래스 적용하여 카드 스타일링
+                st.markdown('<div class="scenario-card-button">', unsafe_allow_html=True)
+                # 버튼 텍스트에 줄바꿈을 넣어 제목과 내용 분리
+                button_text = f"{sc['icon']} {sc['title']}\n\n{sc['context']}"
+                if st.button(button_text, key=f"start_{key}", use_container_width=True):
+                    st.session_state.current_page = "LEARNING"
+                    st.session_state.selected_scenario = key
+                    st.session_state.messages = []
                     st.rerun()
                 st.markdown('</div>', unsafe_allow_html=True)
+        return
 
-    # --- PAGE 2: 채팅 (롤플레잉) ---
-    elif st.session_state.page == "CHAT":
-        sc = SCENARIOS[st.session_state.current_scenario]
-        
-        # 상단 네비게이션
-        c1, c2 = st.columns([1, 8])
-        with c1:
-            if st.button("⬅", help="홈으로"):
-                st.session_state.page = "HOME"
-                st.rerun()
-        with c2:
-            st.markdown(f"**{sc['icon']} {sc['title']}** ({sc['role']})")
-        
-        st.divider()
-
-        # 채팅 영역
-        chat_container = st.container()
-        with chat_container:
-            if not st.session_state.messages:
-                st.info(f"💡 Tip: {sc['desc']}")
-                # 초기 인사
-                initial_msg = "안녕하세요! 여권 좀 보여주시겠습니까?" if sc['id'] == 'airport' else "어서오세요! 주문 도와드릴까요?"
-                st.session_state.messages.append({"role": "assistant", "content": initial_msg})
-
-            # 메시지 렌더링 Loop
-            for msg in st.session_state.messages:
-                if msg["role"] == "user":
-                    st.markdown(f'<div class="chat-bubble user-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="chat-bubble ai-bubble">{msg["content"]}</div>', unsafe_allow_html=True)
-                    
-                    # 보고서 5.5: Diff View 교정 렌더링
-                    if "correction" in msg and msg["correction"]:
-                        original = st.session_state.messages[-2]['content'] # 직전 유저 메시지
-                        correction = msg['correction']
-                        explanation = msg.get('explanation', '')
-                        
-                        if original.strip() != correction.strip():
-                            diff_html = generate_diff_html(original, correction)
-                            st.markdown(f"""
-                            <div class="correction-box">
-                                <strong>✨ AI 교정:</strong> {diff_html}<br>
-                                <span style="font-size: 0.8rem; color: #868E96;">💡 {explanation}</span>
-                            </div>
-                            """, unsafe_allow_html=True)
-                    
-                    # TTS 재생 (마지막 메시지인 경우)
-                    if msg == st.session_state.messages[-1] and "tts_html" not in msg:
-                         msg["tts_html"] = generate_tts(msg["content"])
-                    
-                    if "tts_html" in msg:
-                        st.markdown(msg["tts_html"], unsafe_allow_html=True)
-
-        st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True) # 하단 여백 확보
-
-        # 보고서 5.4: Audio Input & Partial Rerun (Fragment)
-        # 하단에 고정된 오디오 입력창 처리
-        handle_input()
-
-# Fragment를 사용하여 오디오 입력 시 전체 리로드 방지 (보고서 3.1)
-@st.fragment
-def handle_input():
-    audio_val = st.audio_input("말하기 (터치하여 녹음)")
+    # ==========================================
+    # [LEARNING 페이지] - 채팅 화면
+    # ==========================================
+    current_scenario = SCENARIOS[st.session_state.selected_scenario]
     
-    if audio_val:
-        with st.spinner("듣고 있는 중..."):
-            # 오디오 바이트 변환
-            audio_bytes = audio_val.read()
-            
-            # AI 처리
-            result = process_conversation(audio_bytes=audio_bytes)
-            
-            if result:
-                # 세션에 대화 추가
-                user_text = result.get("user_stt", "(음성 인식 불가)")
-                st.session_state.messages.append({"role": "user", "content": user_text})
-                
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": result["response"],
-                    "correction": result.get("correction"),
-                    "explanation": result.get("explanation")
-                })
-                
-                # DB 로그 저장 (보고서 3.3)
-                try:
-                    conn = sqlite3.connect(DB_NAME)
-                    c = conn.cursor()
-                    c.execute("INSERT INTO chat_logs (scenario_id, user_message, ai_response, correction) VALUES (?, ?, ?, ?)",
-                              (st.session_state.current_scenario, user_text, result["response"], result.get("correction")))
-                    conn.commit()
-                    conn.close()
-                except:
-                    pass
+    # 1. 뒤로가기 버튼 (좌측 상단 고정)
+    with st.container():
+        st.markdown('<div id="back-btn-area"></div>', unsafe_allow_html=True)
+        if st.button("✕", key="back_btn"):
+            st.session_state.current_page = "HOME"
+            st.rerun()
 
-                # 강제 리런으로 UI 업데이트
-                st.rerun()
+    # 2. 제목 & 역할 설명
+    st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
+    st.markdown(f"<div id='role-caption-wrap'>💡 역할: {html.escape(current_scenario['role'])}</div>", unsafe_allow_html=True)
+
+    # 3. 채팅창
+    chat_container = st.container()
+    with chat_container:
+        if not st.session_state.messages:
+            with st.container():
+                st.markdown('<div id="start-prompt-marker"></div>', unsafe_allow_html=True)
+                st.info("👋 대화를 시작해보세요! 표현 버튼을 누르거나 직접 입력해보세요.")
+        
+        for i, msg in enumerate(st.session_state.messages):
+            if msg["role"] == "user":
+                st.markdown(f"""<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                <div style="background:#FEE500;padding:10px 15px;border-radius:15px;border-top-right-radius:0;box-shadow:1px 1px 2px rgba(0,0,0,0.1);">
+                {html.escape(msg["content"])}</div></div>""", unsafe_allow_html=True)
+            else:
+                display, imgs, corr = parse_ai_message(msg["content"])
+                tts_code = text_to_speech_html(msg["content"], autoplay=(i==len(st.session_state.messages)-1 and st.session_state.get("play_tts")))
+                corr_html = f"<div class='kakao-correction'>📝 {html.escape(corr)}</div>" if corr else ""
+                img_html = "".join([f"<img src='{IMAGE_GALLERY[k]}' class='kakao-chat-img'>" for k in imgs if k in IMAGE_GALLERY])
+                
+                st.markdown(f"""<div style="display:flex;justify-content:flex-start;margin-bottom:10px;">
+                <div style="font-size:20px;margin-right:10px;">🤖</div>
+                <div style="max-width:80%;">
+                <div style="background:#FFF;border:1px solid #E5E5E5;padding:10px 15px;border-radius:15px;border-top-left-radius:0;">
+                {html.escape(display)}{tts_code}{corr_html}</div>{img_html}</div></div>""", unsafe_allow_html=True)
+
+        if st.session_state.get("play_tts"): st.session_state.play_tts = False
+
+    # 4. 추천 표현 바
+    render_smart_reply_bar(current_scenario)
+
+    # 5. 입력창
+    if prompt := st.chat_input("한국어로 대화해보세요..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.rerun()
+
+    if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+        with st.spinner("AI가 답변 중..."):
+            ai_text = get_ai_response(st.session_state.messages, st.session_state.selected_scenario)
+        st.session_state.messages.append({"role": "assistant", "content": ai_text})
+        st.session_state.play_tts = True
+        st.rerun()
 
 if __name__ == "__main__":
     main()
