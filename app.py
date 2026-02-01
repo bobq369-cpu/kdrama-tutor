@@ -72,13 +72,10 @@ def inject_custom_css():
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
     chat_area_top = "320px"
 
-    # [7] 하단 footer 크기 (학습 화면에서 CSS 주입으로 적용)
-    footer_height = "200px"       # 높이 (0px 로 하면 숨김)
-    footer_padding = "1px 0.5rem" # 내부 여백
+    # [7] 하단 footer 크기
+    footer_height = "20px"       # 높이 (0px 로 하면 숨김)
+    footer_padding = "2px 0.5rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
-    REMOCON["footer_height"] = footer_height
-    REMOCON["footer_padding"] = footer_padding
-    REMOCON["footer_font_size"] = footer_font_size
 
     # [8] 채팅 입력창("한국어로 대화해보세요...") 크기 (학습 화면에서 입력창 렌더 후 CSS 주입)
     chat_input_height = "40px"      # 입력창 높이
@@ -428,9 +425,6 @@ def render_smart_reply_bar(current_scenario):
     prompt_off = REMOCON.get("prompt_left_offset", "0px")
     smart_top = REMOCON.get("smart_top", "230px")
     smart_off = REMOCON.get("smart_left_offset", "0px")
-    footer_height = REMOCON.get("footer_height", "20px")
-    footer_padding = REMOCON.get("footer_padding", "2px 0.5rem")
-    footer_font_size = REMOCON.get("footer_font_size", "12px")
     st.components.v1.html(f"""
     <script>
     (function() {{
@@ -478,23 +472,10 @@ def render_smart_reply_bar(current_scenario):
                 block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
             }}
         }}
-            function styleFooter(el) {{
-                if (!el) return;
-                el.style.setProperty('min-height', '{footer_height}', 'important');
-                el.style.setProperty('max-height', '{footer_height}', 'important');
-                el.style.setProperty('padding', '{footer_padding}', 'important');
-                el.style.setProperty('font-size', '{footer_font_size}', 'important');
-                el.style.setProperty('background-color', '#FAFAD2', 'important');
-            }}
-            const footer = doc.querySelector('[data-testid="stFooter"]') || doc.querySelector('footer');
-            if (footer) styleFooter(footer);
-            const appFooter = doc.getElementById('app-footer');
-            if (appFooter) styleFooter(appFooter);
         }}
         run();
         setTimeout(run, 300);
         setTimeout(run, 800);
-        setTimeout(run, 1500);
     }})();
     </script>
     """, height=0)
@@ -572,9 +553,6 @@ def main():
     _h = REMOCON.get("chat_input_height", "56px")
     _pad = REMOCON.get("chat_input_padding", "12px 16px")
     _fs = REMOCON.get("chat_input_font_size", "16px")
-    _fh = REMOCON.get("footer_height", "20px")
-    _fp = REMOCON.get("footer_padding", "2px 0.5rem")
-    _ffs = REMOCON.get("footer_font_size", "12px")
     st.markdown(
         f"""<style>
         section[data-testid="stChatInput"] textarea,
@@ -583,16 +561,9 @@ def main():
         .stChatInput textarea {{
             min-height: {_h} !important; height: {_h} !important;
             padding: {_pad} !important; font-size: {_fs} !important;
-        }}
-        [data-testid="stFooter"] {{
-            min-height: {_fh} !important; max-height: {_fh} !important;
-            padding: {_fp} !important; font-size: {_ffs} !important;
-            background-color: #FAFAD2 !important;
-        }}
-        #app-footer {{ width: 100%; box-sizing: border-box; }}</style>""",
+        }}</style>""",
         unsafe_allow_html=True
     )
-    st.markdown('<div id="app-footer"></div>', unsafe_allow_html=True)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.rerun()
