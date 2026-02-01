@@ -25,7 +25,7 @@ except (KeyError, FileNotFoundError):
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # 리모컨 값 (inject_custom_css에서 설정, render_smart_reply_bar에서 JS로 사용)
-REMOCON = {"smart_top": "230px", "smart_left_offset": "0px"}
+REMOCON = {"smart_top": "400px", "smart_left": "0px"}
 
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
@@ -37,27 +37,27 @@ def inject_custom_css():
     main_top_padding = "0px"
     main_top_margin = "0px"
 
-    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정
-    back_top = "15px"
-    back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
+    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정, 다른 요소와 무관
+    back_x = "0px"
+    back_y = "0px"
 
-    # [3] 제목 — 절대 위치, 0px 기준 정중앙
+    # [3] 제목 — 절대 위치 (top/left), 다른 요소 움직임 없음
     title_top = "50px"
-    title_left_offset = "0px"
+    title_left = "0px"
 
     # [4] 역할 설명 — 절대 위치
-    role_top = "110px"
-    role_left_offset = "0px"
+    role_top = "50px"
+    role_left = "0px"
 
     # [5] 안내 박스 — 절대 위치
     prompt_top = "160px"
-    prompt_left_offset = "0px"
+    prompt_left = "0px"
 
-    # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용)
-    smart_top = "230px"
-    smart_left_offset = "0px"
+    # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용, CSS 선택자 한계 우회)
+    smart_top = "600px"
+    smart_left = "200px"
     REMOCON["smart_top"] = smart_top
-    REMOCON["smart_left_offset"] = smart_left_offset
+    REMOCON["smart_left"] = smart_left
 
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
     chat_area_top = "320px"
@@ -77,12 +77,11 @@ def inject_custom_css():
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* [2] 뒤로가기 버튼: 화면 고정, 정중앙 (0px 기준) */
+            /* [2] 뒤로가기 버튼: 화면 고정, 가장 안쪽 블록만 선택 (다른 요소와 완전 독립) */
             div[data-testid="stVerticalBlock"]:has(div#back-btn-area):not(:has(> div[data-testid="stVerticalBlock"]:has(div#back-btn-area))) {{
                 position: fixed !important;
-                top: {back_top} !important;
-                left: calc(50% + {back_left_offset}) !important;
-                transform: translate(-50%, 0) !important;
+                top: {back_y} !important;
+                left: {back_x} !important;
                 width: auto !important;
                 height: auto !important;
                 z-index: 999999 !important;
@@ -99,12 +98,11 @@ def inject_custom_css():
                 font-size: 14px !important;
             }}
 
-            /* [3] 제목: 절대 위치, 정중앙 (0px 기준) */
+            /* [3] 제목: 절대 위치 — 이 값만 바꿔도 다른 요소는 그대로 */
             div[data-testid="stVerticalBlock"]:has(#learning-title-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#learning-title-wrap))) {{
                 position: absolute !important;
                 top: {title_top} !important;
-                left: calc(50% + {title_left_offset}) !important;
-                transform: translate(-50%, 0) !important;
+                left: {title_left} !important;
                 width: 100% !important;
                 max-width: 700px !important;
                 margin: 0 !important;
@@ -112,12 +110,11 @@ def inject_custom_css():
             }}
             #learning-title-wrap {{ margin: 0 !important; }}
 
-            /* [4] 역할 설명: 절대 위치, 정중앙 (0px 기준) */
+            /* [4] 역할 설명: 절대 위치 */
             div[data-testid="stVerticalBlock"]:has(#role-caption-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#role-caption-wrap))) {{
                 position: absolute !important;
                 top: {role_top} !important;
-                left: calc(50% + {role_left_offset}) !important;
-                transform: translate(-50%, 0) !important;
+                left: {role_left} !important;
                 width: 100% !important;
                 max-width: 700px !important;
                 margin: 0 !important;
@@ -129,24 +126,23 @@ def inject_custom_css():
                 margin: 0 !important;
             }}
 
-            /* [5] 안내 박스: 절대 위치, 정중앙 (0px 기준) */
+            /* [5] 안내 박스: 절대 위치 */
             div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker):not(:has(> div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker))) {{
                 position: absolute !important;
                 top: {prompt_top} !important;
-                left: calc(50% + {prompt_left_offset}) !important;
-                transform: translate(-50%, 0) !important;
+                left: {prompt_left} !important;
                 width: 100% !important;
                 max-width: 700px !important;
                 margin: 0 !important;
                 z-index: 8 !important;
             }}
 
-            /* [6] 추천 표현 바: 절대 위치, 정중앙 (0px 기준) — CSS + JS 보조 */
+            /* [6] 추천 표현 바: 절대 위치 — 마커+컬럼을 포함하는 블록만 선택 (다른 요소와 독립) */
+            /* stColumn(st.columns) 사용 — Streamlit DOM 구조에 맞춤 */
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) {{
                 position: absolute !important;
                 top: {smart_top} !important;
-                left: calc(50% + {smart_left_offset}) !important;
-                transform: translate(-50%, 0) !important;
+                left: {smart_left} !important;
                 width: 100% !important;
                 max-width: 700px !important;
                 margin: 0 !important;
@@ -362,9 +358,9 @@ def render_smart_reply_bar(current_scenario):
                     st.session_state.messages.append({"role": "user", "content": kor})
                     st.rerun()
 
-    # JS로 추천 표현 바 위치 직접 적용 (정중앙, 0px 기준)
+    # JS로 추천 표현 바 위치 직접 적용 (CSS 선택자 한계 우회)
     smart_top = REMOCON.get("smart_top", "230px")
-    smart_left_offset = REMOCON.get("smart_left_offset", "0px")
+    smart_left = REMOCON.get("smart_left", "0px")
     st.components.v1.html(f"""
     <script>
     (function() {{
@@ -374,7 +370,7 @@ def render_smart_reply_bar(current_scenario):
         let block = el.closest('[data-testid="stVerticalBlock"]');
         while (block) {{
             if (block.querySelector('[data-testid="stColumn"]')) {{
-                block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:calc(50% + {smart_left_offset})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
+                block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:{smart_left}!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
                 break;
             }}
             block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
