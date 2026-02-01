@@ -42,7 +42,7 @@ def inject_custom_css():
     back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
 
     # [3] 제목 — 절대 위치, 0px 기준 정중앙
-    title_top = "50px"
+    title_top = "100px"
     title_left_offset = "0px"
 
     # [4] 역할 설명 — 절대 위치
