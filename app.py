@@ -52,7 +52,7 @@ def inject_custom_css():
     REMOCON["title_left_offset"] = title_left_offset
 
     # [4] 역할 설명 — 절대 위치
-    role_top = "100px"
+    role_top = "80px"
     role_left_offset = "0px"
     REMOCON["role_top"] = role_top
     REMOCON["role_left_offset"] = role_left_offset
