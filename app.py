@@ -73,7 +73,7 @@ def inject_custom_css():
     chat_area_top = "320px"
 
     # [7] 하단 footer 크기 (학습 화면에서 CSS 주입으로 적용)
-    footer_height = "500px"       # 높이 (0px 로 하면 숨김)
+    footer_height = "200px"       # 높이 (0px 로 하면 숨김)
     footer_padding = "1px 0.5rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
     REMOCON["footer_height"] = footer_height
@@ -478,18 +478,23 @@ def render_smart_reply_bar(current_scenario):
                 block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
             }}
         }}
-            const footer = doc.querySelector('[data-testid="stFooter"]') || doc.querySelector('footer');
-            if (footer) {{
-                footer.style.setProperty('min-height', '{footer_height}', 'important');
-                footer.style.setProperty('max-height', '{footer_height}', 'important');
-                footer.style.setProperty('padding', '{footer_padding}', 'important');
-                footer.style.setProperty('font-size', '{footer_font_size}', 'important');
-                footer.style.setProperty('background-color', '#FAFAD2', 'important');
+            function styleFooter(el) {{
+                if (!el) return;
+                el.style.setProperty('min-height', '{footer_height}', 'important');
+                el.style.setProperty('max-height', '{footer_height}', 'important');
+                el.style.setProperty('padding', '{footer_padding}', 'important');
+                el.style.setProperty('font-size', '{footer_font_size}', 'important');
+                el.style.setProperty('background-color', '#FAFAD2', 'important');
             }}
+            const footer = doc.querySelector('[data-testid="stFooter"]') || doc.querySelector('footer');
+            if (footer) styleFooter(footer);
+            const appFooter = doc.getElementById('app-footer');
+            if (appFooter) styleFooter(appFooter);
         }}
         run();
         setTimeout(run, 300);
         setTimeout(run, 800);
+        setTimeout(run, 1500);
     }})();
     </script>
     """, height=0)
@@ -583,9 +588,11 @@ def main():
             min-height: {_fh} !important; max-height: {_fh} !important;
             padding: {_fp} !important; font-size: {_ffs} !important;
             background-color: #FAFAD2 !important;
-        }}</style>""",
+        }}
+        #app-footer {{ width: 100%; box-sizing: border-box; }}</style>""",
         unsafe_allow_html=True
     )
+    st.markdown('<div id="app-footer"></div>', unsafe_allow_html=True)
     if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.rerun()
