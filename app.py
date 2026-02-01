@@ -25,8 +25,9 @@ except (KeyError, FileNotFoundError):
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # 리모컨 값 (inject_custom_css에서 설정, JS로 위치 적용)
-REMOCON = {"title_top": "50px", "title_left_offset": "0px", "role_top": "110px", "role_left_offset": "0px",
-           "prompt_top": "160px", "prompt_left_offset": "0px", "smart_top": "230px", "smart_left_offset": "0px"}
+REMOCON = {"back_top": "15px", "back_left_offset": "0px", "title_top": "50px", "title_left_offset": "0px",
+           "role_top": "110px", "role_left_offset": "0px", "prompt_top": "160px", "prompt_left_offset": "0px",
+           "smart_top": "230px", "smart_left_offset": "0px"}
 
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
@@ -38,9 +39,11 @@ def inject_custom_css():
     main_top_padding = "0px"
     main_top_margin = "0px"
 
-    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정
+    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정 (JS로 직접 적용)
     back_top = "30px"
     back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
+    REMOCON["back_top"] = back_top
+    REMOCON["back_left_offset"] = back_left_offset
 
     # [3] 제목 — 절대 위치, 0px 기준 정중앙 (JS로 직접 적용)
     title_top = "-90px"
@@ -381,7 +384,9 @@ def render_smart_reply_bar(current_scenario):
                     st.session_state.messages.append({"role": "user", "content": kor})
                     st.rerun()
 
-    # JS로 제목/역할/안내/추천표현 위치 직접 적용 (CSS 선택자 한계 우회)
+    # JS로 뒤로가기/제목/역할/안내/추천표현 위치 직접 적용 (CSS 선택자 한계 우회)
+    back_top = REMOCON.get("back_top", "15px")
+    back_off = REMOCON.get("back_left_offset", "0px")
     title_top = REMOCON.get("title_top", "50px")
     title_off = REMOCON.get("title_left_offset", "0px")
     role_top = REMOCON.get("role_top", "110px")
@@ -394,6 +399,12 @@ def render_smart_reply_bar(current_scenario):
     <script>
     (function() {{
         const doc = window.parent?.document || document;
+        const applyBack = (el, top, off) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:fixed!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:auto!important;height:auto!important;z-index:999999!important;';
+        }};
+        applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
         const applyPos = (el, top, off, z) => {{
             if (!el) return;
             let block = el.closest('[data-testid="stVerticalBlock"]');
