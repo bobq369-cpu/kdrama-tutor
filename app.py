@@ -74,7 +74,7 @@ def inject_custom_css():
 
     # [7] 하단 footer 크기
     footer_height = "20px"       # 높이 (0px 로 하면 숨김)
-    footer_padding = "2px 1rem" # 내부 여백
+    footer_padding = "2px 0.5rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
 
     # [8] 채팅 입력창("한국어로 대화해보세요...") 크기 (학습 화면에서 입력창 렌더 후 CSS 주입)
