@@ -46,13 +46,13 @@ def inject_custom_css():
     REMOCON["back_left_offset"] = back_left_offset
 
     # [3] 제목 — 절대 위치, 0px 기준 정중앙 (JS로 직접 적용)
-    title_top = "-150px"
+    title_top = "-100px"
     title_left_offset = "0px"
     REMOCON["title_top"] = title_top
     REMOCON["title_left_offset"] = title_left_offset
 
     # [4] 역할 설명 — 절대 위치
-    role_top = "80px"
+    role_top = "40px"
     role_left_offset = "0px"
     REMOCON["role_top"] = role_top
     REMOCON["role_left_offset"] = role_left_offset
