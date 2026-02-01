@@ -144,7 +144,7 @@ def inject_custom_css():
                 z-index: 9 !important;
             }}
             #role-caption-wrap {{
-                font-size: 1rem !important;
+                font-size: 0.9rem !important;
                 color: black !important;
                 margin: 0 !important;
             }}
