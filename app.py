@@ -223,12 +223,13 @@ def inject_custom_css():
                 transform: translateY(-2px);
             }}
 
-            /* [7] 하단 footer 크기 */
+            /* [7] 하단 footer 크기 & 색상 */
             [data-testid="stFooter"] {{
                 min-height: {footer_height} !important;
                 max-height: {footer_height} !important;
                 padding: {footer_padding} !important;
                 font-size: {footer_font_size} !important;
+                background-color: #FAFAD2 !important;
             }}
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
