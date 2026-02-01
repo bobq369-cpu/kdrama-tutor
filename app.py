@@ -423,7 +423,8 @@ def render_smart_reply_bar(current_scenario):
             applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
             const titleEl = doc.getElementById('learning-title-wrap');
             if (titleEl) applyDirect(titleEl, '{title_top}', '{title_off}', 10);
-        applyPos(doc.getElementById('role-caption-wrap'), '{role_top}', '{role_off}', 9);
+            const roleEl = doc.getElementById('role-caption-wrap');
+            if (roleEl) applyDirect(roleEl, '{role_top}', '{role_off}', 9);
         const promptEl = doc.getElementById('start-prompt-marker');
         if (promptEl) {{
             let block = promptEl.closest('[data-testid="stVerticalBlock"]');
