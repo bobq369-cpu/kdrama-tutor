@@ -132,8 +132,9 @@ def inject_custom_css():
                 z-index: 8 !important;
             }}
 
-            /* [6] 추천 표현 바: 절대 위치 — 마커+2열을 포함하는 블록만 선택 (다른 요소와 독립) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]))) {{
+            /* [6] 추천 표현 바: 절대 위치 — 마커+컬럼을 포함하는 블록만 선택 (다른 요소와 독립) */
+            /* stColumn(st.columns) 사용 — Streamlit DOM 구조에 맞춤 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) {{
                 position: absolute !important;
                 top: {smart_top} !important;
                 left: {smart_left} !important;
@@ -149,18 +150,19 @@ def inject_custom_css():
             }}
 
             /* 추천 표현 바 내부 컬럼/버튼 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]))) [data-testid="stHorizontalBlock"] {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) [data-testid="stHorizontalBlock"],
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) > div:has([data-testid="stColumn"]) {{
                 width: 100% !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 gap: 10px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]))) [data-testid="stColumn"] {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) [data-testid="stColumn"] {{
                 flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]))) .stButton button {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button {{
                 width: 100% !important;
                 height: auto !important;
                 min-height: 60px !important;
@@ -177,7 +179,7 @@ def inject_custom_css():
                 text-align: center !important;
                 padding: 12px !important;
             }}
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stHorizontalBlock"]))) .stButton button:hover {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
             }}
