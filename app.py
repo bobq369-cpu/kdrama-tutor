@@ -40,8 +40,8 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정 (JS로 직접 적용)
-    back_top = "40px"
-    back_left_offset = "-500px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
+    back_top = "30px"
+    back_left_offset = "-300px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
     REMOCON["back_top"] = back_top
     REMOCON["back_left_offset"] = back_left_offset
 
