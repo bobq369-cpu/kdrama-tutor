@@ -77,10 +77,13 @@ def inject_custom_css():
     footer_padding = "2px 1rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
 
-    # [8] 채팅 입력창("한국어로 대화해보세요...") 크기
+    # [8] 채팅 입력창("한국어로 대화해보세요...") 크기 (학습 화면에서 입력창 렌더 후 CSS 주입)
     chat_input_height = "10px"      # 입력창 높이
     chat_input_padding = "12px 16px" # 입력창 내부 여백
     chat_input_font_size = "16px"   # placeholder/입력 글자 크기
+    REMOCON["chat_input_height"] = chat_input_height
+    REMOCON["chat_input_padding"] = chat_input_padding
+    REMOCON["chat_input_font_size"] = chat_input_font_size
 
     # ============================================================
 
@@ -545,8 +548,23 @@ def main():
     # 4. 추천 표현 바
     render_smart_reply_bar(current_scenario)
 
-    # 5. 입력창
-    if prompt := st.chat_input("한국어로 대화해보세요..."):
+    # 5. 입력창 (CSS는 위젯 렌더 후 주입해야 적용됨)
+    prompt = st.chat_input("한국어로 대화해보세요...")
+    _h = REMOCON.get("chat_input_height", "56px")
+    _pad = REMOCON.get("chat_input_padding", "12px 16px")
+    _fs = REMOCON.get("chat_input_font_size", "16px")
+    st.markdown(
+        f"""<style>
+        section[data-testid="stChatInput"] textarea,
+        [data-testid="stChatInput"] textarea,
+        .stChatInputContainer textarea,
+        .stChatInput textarea {{
+            min-height: {_h} !important; height: {_h} !important;
+            padding: {_pad} !important; font-size: {_fs} !important;
+        }}</style>""",
+        unsafe_allow_html=True
+    )
+    if prompt:
         st.session_state.messages.append({"role": "user", "content": prompt})
         st.rerun()
 
