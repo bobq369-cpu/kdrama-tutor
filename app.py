@@ -175,11 +175,14 @@ def inject_custom_css():
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton {{
                 flex: 1 !important;
                 min-width: 0 !important;
+                width: 100% !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button {{
                 width: 100% !important;
                 height: 90px !important;
                 min-height: 90px !important;
+                max-height: 90px !important;
+                box-sizing: border-box !important;
                 white-space: pre-wrap !important;
                 word-break: keep-all !important;
                 background-color: #FFFFFF !important;
@@ -187,12 +190,15 @@ def inject_custom_css():
                 color: #4B5563 !important;
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
+                display: grid !important;
+                place-items: center !important;
                 text-align: center !important;
                 padding: 10px !important;
                 line-height: 1.4 !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button > div {{
+                text-align: center !important;
+                width: 100% !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
