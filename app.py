@@ -74,7 +74,7 @@ def inject_custom_css():
 
     # [7] 하단 footer 크기
     footer_height = "25px"       # 높이 (0px 로 하면 숨김)
-    footer_padding = "8px 1rem" # 내부 여백
+    footer_padding = "2px 1rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
 
     # ============================================================
