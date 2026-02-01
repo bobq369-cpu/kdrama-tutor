@@ -24,8 +24,9 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# 리모컨 값 (inject_custom_css에서 설정, render_smart_reply_bar에서 JS로 사용)
-REMOCON = {"smart_top": "230px", "smart_left_offset": "0px"}
+# 리모컨 값 (inject_custom_css에서 설정, JS로 위치 적용)
+REMOCON = {"title_top": "50px", "title_left_offset": "0px", "role_top": "110px", "role_left_offset": "0px",
+           "prompt_top": "160px", "prompt_left_offset": "0px", "smart_top": "230px", "smart_left_offset": "0px"}
 
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
@@ -41,17 +42,23 @@ def inject_custom_css():
     back_top = "15px"
     back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
 
-    # [3] 제목 — 절대 위치, 0px 기준 정중앙
+    # [3] 제목 — 절대 위치, 0px 기준 정중앙 (JS로 직접 적용)
     title_top = "100px"
     title_left_offset = "0px"
+    REMOCON["title_top"] = title_top
+    REMOCON["title_left_offset"] = title_left_offset
 
     # [4] 역할 설명 — 절대 위치
     role_top = "110px"
     role_left_offset = "0px"
+    REMOCON["role_top"] = role_top
+    REMOCON["role_left_offset"] = role_left_offset
 
     # [5] 안내 박스 — 절대 위치
     prompt_top = "160px"
     prompt_left_offset = "0px"
+    REMOCON["prompt_top"] = prompt_top
+    REMOCON["prompt_left_offset"] = prompt_left_offset
 
     # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용)
     smart_top = "800px"
@@ -374,22 +381,42 @@ def render_smart_reply_bar(current_scenario):
                     st.session_state.messages.append({"role": "user", "content": kor})
                     st.rerun()
 
-    # JS로 추천 표현 바 위치 직접 적용 (정중앙, 0px 기준)
+    # JS로 제목/역할/안내/추천표현 위치 직접 적용 (CSS 선택자 한계 우회)
+    title_top = REMOCON.get("title_top", "50px")
+    title_off = REMOCON.get("title_left_offset", "0px")
+    role_top = REMOCON.get("role_top", "110px")
+    role_off = REMOCON.get("role_left_offset", "0px")
+    prompt_top = REMOCON.get("prompt_top", "160px")
+    prompt_off = REMOCON.get("prompt_left_offset", "0px")
     smart_top = REMOCON.get("smart_top", "230px")
-    smart_left_offset = REMOCON.get("smart_left_offset", "0px")
+    smart_off = REMOCON.get("smart_left_offset", "0px")
     st.components.v1.html(f"""
     <script>
     (function() {{
         const doc = window.parent?.document || document;
+        const applyPos = (el, top, off, z) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:absolute!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:'+z+'!important;';
+        }};
+        applyPos(doc.getElementById('learning-title-wrap'), '{title_top}', '{title_off}', 10);
+        applyPos(doc.getElementById('role-caption-wrap'), '{role_top}', '{role_off}', 9);
+        const promptEl = doc.getElementById('start-prompt-marker');
+        if (promptEl) {{
+            let block = promptEl.closest('[data-testid="stVerticalBlock"]');
+            if (block) block = block.parentElement?.closest('[data-testid="stVerticalBlock"]') || block;
+            if (block) block.style.cssText = 'position:absolute!important;top:{prompt_top}!important;left:calc(50% + {prompt_off})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:8!important;';
+        }}
         const el = doc.getElementById('smart-reply-area');
-        if (!el) return;
-        let block = el.closest('[data-testid="stVerticalBlock"]');
-        while (block) {{
-            if (block.querySelector('[data-testid="stColumn"]')) {{
-                block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:calc(50% + {smart_left_offset})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
-                break;
+        if (el) {{
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            while (block) {{
+                if (block.querySelector('[data-testid="stColumn"]')) {{
+                    block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:calc(50% + {smart_off})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
+                    break;
+                }}
+                block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
             }}
-            block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
         }}
     }})();
     </script>
