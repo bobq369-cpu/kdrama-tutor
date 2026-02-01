@@ -74,7 +74,7 @@ def inject_custom_css():
 
     # [7] 하단 footer 크기 (학습 화면에서 CSS 주입으로 적용)
     footer_height = "10px"       # 높이 (0px 로 하면 숨김)
-    footer_padding = "2px 0.5rem" # 내부 여백
+    footer_padding = "1px 0.5rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
     REMOCON["footer_height"] = footer_height
     REMOCON["footer_padding"] = footer_padding
