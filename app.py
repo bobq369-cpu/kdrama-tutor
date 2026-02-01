@@ -73,7 +73,7 @@ def inject_custom_css():
     chat_area_top = "320px"
 
     # [7] 하단 footer 크기
-    footer_height = "0px"       # 높이 (0px 로 하면 숨김)
+    footer_height = "-20px"       # 높이 (0px 로 하면 숨김)
     footer_padding = "2px 1rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
 
