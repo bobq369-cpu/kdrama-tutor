@@ -58,7 +58,7 @@ def inject_custom_css():
     REMOCON["role_left_offset"] = role_left_offset
 
     # [5] 안내 박스 — 절대 위치
-    prompt_top = "0px"
+    prompt_top = "-50px"
     prompt_left_offset = "0px"
     REMOCON["prompt_top"] = prompt_top
     REMOCON["prompt_left_offset"] = prompt_left_offset
