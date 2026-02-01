@@ -41,7 +41,7 @@ def inject_custom_css():
 
     # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정 (JS로 직접 적용)
     back_top = "-50px"
-    back_left_offset = "-200px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
+    back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
     REMOCON["back_top"] = back_top
     REMOCON["back_left_offset"] = back_left_offset
 
@@ -53,7 +53,7 @@ def inject_custom_css():
 
     # [4] 역할 설명 — 절대 위치
     role_top = "80px"
-    role_left_offset = "100px"
+    role_left_offset = "0px"
     REMOCON["role_top"] = role_top
     REMOCON["role_left_offset"] = role_left_offset
 
@@ -402,6 +402,12 @@ def render_smart_reply_bar(current_scenario):
         const applyBack = (el, top, off) => {{
             if (!el) return;
             let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block && block.querySelector('#learning-title-wrap')) {{
+                const kids = block.querySelectorAll('[data-testid="stVerticalBlock"]');
+                for (const k of kids) {{
+                    if (k.contains(el) && !k.querySelector('#learning-title-wrap')) {{ block = k; break; }}
+                }}
+            }}
             if (block) block.style.cssText = 'position:fixed!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:auto!important;height:auto!important;z-index:999999!important;';
         }};
         applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
