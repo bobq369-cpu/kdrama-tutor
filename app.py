@@ -24,6 +24,9 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
+# 리모컨 값 (inject_custom_css에서 설정, render_smart_reply_bar에서 JS로 사용)
+REMOCON = {"smart_top": "400px", "smart_left": "0px"}
+
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
     # ============================================================
@@ -50,9 +53,11 @@ def inject_custom_css():
     prompt_top = "160px"
     prompt_left = "0px"
 
-    # [6] 추천 표현 바 — 절대 위치
+    # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용, CSS 선택자 한계 우회)
     smart_top = "400px"
     smart_left = "0px"
+    REMOCON["smart_top"] = smart_top
+    REMOCON["smart_left"] = smart_left
 
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
     chat_area_top = "320px"
@@ -340,7 +345,6 @@ def parse_ai_message(content):
 
 # --- 4. 추천 표현 바 ---
 def render_smart_reply_bar(current_scenario):
-    # CSS에서 'div#smart-reply-area'가 있는 컨테이너를 통째로 이동시킴 (리모컨 연동)
     with st.container():
         st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
         st.divider()
@@ -353,6 +357,27 @@ def render_smart_reply_bar(current_scenario):
                 if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
                     st.session_state.messages.append({"role": "user", "content": kor})
                     st.rerun()
+
+    # JS로 추천 표현 바 위치 직접 적용 (CSS 선택자 한계 우회)
+    smart_top = REMOCON.get("smart_top", "230px")
+    smart_left = REMOCON.get("smart_left", "0px")
+    st.components.v1.html(f"""
+    <script>
+    (function() {{
+        const doc = window.parent?.document || document;
+        const el = doc.getElementById('smart-reply-area');
+        if (!el) return;
+        let block = el.closest('[data-testid="stVerticalBlock"]');
+        while (block) {{
+            if (block.querySelector('[data-testid="stColumn"]')) {{
+                block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:{smart_left}!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
+                break;
+            }}
+            block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
+        }}
+    }})();
+    </script>
+    """, height=0)
 
 
 # --- 5. 메인 앱 로직 ---
