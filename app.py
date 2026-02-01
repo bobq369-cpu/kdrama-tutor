@@ -39,7 +39,7 @@ def inject_custom_css():
     main_top_margin = "0px"
 
     # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정
-    back_top = "0px"
+    back_top = "30px"
     back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
 
     # [3] 제목 — 절대 위치, 0px 기준 정중앙 (JS로 직접 적용)
