@@ -87,7 +87,7 @@ def inject_custom_css():
     chat_input_box_height = "80px"      # 박스 높이
     chat_input_box_padding = "16px"     # 박스 내부 여백
     chat_input_box_radius = "16px"      # 모서리 둥글기
-    chat_input_box_max_width = "700px"  # 박스 최대 너비 (비우면 100%)
+    chat_input_box_max_width = "100px"  # 박스 최대 너비 (비우면 100%)
 
     # ============================================================
 
