@@ -77,6 +77,11 @@ def inject_custom_css():
     footer_padding = "2px 1rem" # 내부 여백
     footer_font_size = "12px"   # 글자 크기
 
+    # [8] 채팅 입력창("한국어로 대화해보세요...") 크기
+    chat_input_height = "56px"      # 입력창 높이
+    chat_input_padding = "12px 16px" # 입력창 내부 여백
+    chat_input_font_size = "16px"   # placeholder/입력 글자 크기
+
     # ============================================================
 
     st.markdown(
@@ -230,6 +235,20 @@ def inject_custom_css():
                 padding: {footer_padding} !important;
                 font-size: {footer_font_size} !important;
                 background-color: #FAFAD2 !important;
+            }}
+
+            /* [8] 채팅 입력창("한국어로 대화해보세요...") 크기 */
+            .stChatInputContainer,
+            .stChatInputContainer > div,
+            [data-testid="stChatInput"] {{
+                min-height: {chat_input_height} !important;
+                height: {chat_input_height} !important;
+            }}
+            .stChatInputContainer textarea,
+            [data-testid="stChatInput"] textarea {{
+                min-height: {chat_input_height} !important;
+                padding: {chat_input_padding} !important;
+                font-size: {chat_input_font_size} !important;
             }}
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
