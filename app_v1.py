@@ -24,6 +24,11 @@ except (KeyError, FileNotFoundError):
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
+# 리모컨 값 (inject_custom_css에서 설정, JS로 위치 적용)
+REMOCON = {"back_top": "15px", "back_left_offset": "0px", "title_top": "50px", "title_left_offset": "0px",
+           "role_top": "110px", "role_left_offset": "0px", "prompt_top": "160px", "prompt_left_offset": "0px",
+           "smart_top": "230px", "smart_left_offset": "0px"}
+
 # --- 2. CSS 설정 (위치 제어 리모컨 통합) ---
 def inject_custom_css():
     # ============================================================
@@ -34,55 +39,66 @@ def inject_custom_css():
     main_top_padding = "0px"
     main_top_margin = "0px"
 
-    # [2] 뒤로가기 버튼 (✕) 위치
-    # 왼쪽 끝에 딱 붙입니다!
-    back_x = "0px"    # 왼쪽 벽에서 20px (너무 붙지 않게 여유 줌)
-    back_y = "0px"    # 천장에서 20px
+    # [2] 뒤로가기 버튼 (✕) — 화면 기준 고정 (JS로 직접 적용)
+    back_top = "-50px"
+    back_left_offset = "0px"   # 정중앙 기준 X 오프셋 (0px = 중앙)
+    REMOCON["back_top"] = back_top
+    REMOCON["back_left_offset"] = back_left_offset
 
-    # [3] 제목 (Title) 위치
-    title_x = "0px"
-    title_y = "0px"
+    # [3] 제목 — 절대 위치, 0px 기준 정중앙 (JS로 직접 적용)
+    title_top = "-100px"
+    title_left_offset = "0px"
+    REMOCON["title_top"] = title_top
+    REMOCON["title_left_offset"] = title_left_offset
 
-    # [4] 역할 설명 (💡 역할: ...) 위치
-    role_x = "0px"
-    role_y = "0px"
+    # [4] 역할 설명 — 절대 위치
+    role_top = "80px"
+    role_left_offset = "100px"
+    REMOCON["role_top"] = role_top
+    REMOCON["role_left_offset"] = role_left_offset
 
-    # [5] 안내 박스 (👋 대화를 시작해보세요...) 위치
-    prompt_x = "0px"
-    prompt_y = "50px"  # 50px 아래로
+    # [5] 안내 박스 — 절대 위치
+    prompt_top = "200px"
+    prompt_left_offset = "0px"
+    REMOCON["prompt_top"] = prompt_top
+    REMOCON["prompt_left_offset"] = prompt_left_offset
 
-    # [6] 추천 표현 바 위치
-    smart_x = "0px"
-    smart_y = "200px"    
-    
+    # [6] 추천 표현 바 — 절대 위치 (JS로 직접 적용)
+    smart_top = "800px"
+    smart_left_offset = "0px"
+    REMOCON["smart_top"] = smart_top
+    REMOCON["smart_left_offset"] = smart_left_offset
+
+    # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
+    chat_area_top = "320px"
+
     # ============================================================
 
     st.markdown(
         f"""
         <style>
-            /* 1. 기본 헤더 숨김 & 메인 컨테이너 여백 제거 */
+            /* 1. 기본 헤더 숨김 & 메인 컨테이너 */
             header[data-testid="stHeader"] {{ display: none !important; }}
             .main .block-container {{
                 padding-top: {main_top_padding} !important;
                 margin-top: {main_top_margin} !important;
                 max-width: 700px;
+                position: relative !important;  /* 절대 위치 기준점 */
             }}
             .stApp {{ background-color: #FFFFFF; font-family: 'Pretendard', sans-serif; }}
 
-            /* ====================================================================
-               [수정 1] 뒤로가기 버튼: 왼쪽 상단 고정 (작은 원형)
-               ==================================================================== */
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) {{
+            /* [2] 뒤로가기 버튼: 화면 고정, 정중앙 (0px 기준) */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area):not(:has(> div[data-testid="stVerticalBlock"]:has(div#back-btn-area))) {{
                 position: fixed !important;
-                top: {back_y} !important;
-                left: {back_x} !important;
-                width: auto !important;  /* 내용물만큼만 크기 차지 */
+                top: {back_top} !important;
+                left: calc(50% + {back_left_offset}) !important;
+                transform: translate(-50%, 0) !important;
+                width: auto !important;
                 height: auto !important;
                 z-index: 999999 !important;
             }}
-            
-            div[data-testid="stVerticalBlock"]:has(div#back-btn-area) .stButton button {{
-                width: 32px !important;   /* 버튼 크기 작게 */
+            div[data-testid="stVerticalBlock"]:has(div#back-btn-area):not(:has(> div[data-testid="stVerticalBlock"]:has(div#back-btn-area))) .stButton button {{
+                width: 32px !important;
                 height: 32px !important;
                 border-radius: 50% !important;
                 background-color: white !important;
@@ -93,85 +109,111 @@ def inject_custom_css():
                 font-size: 14px !important;
             }}
 
-            /* 3. 제목 래퍼 */
-            #learning-title-wrap {{
-                transform: translate({title_x}, {title_y}) !important;
-                position: relative; z-index: 10;
-                margin-bottom: 10px;
+            /* [3] 제목: 절대 위치, 정중앙 (0px 기준) */
+            div[data-testid="stVerticalBlock"]:has(#learning-title-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#learning-title-wrap))) {{
+                position: absolute !important;
+                top: {title_top} !important;
+                left: calc(50% + {title_left_offset}) !important;
+                transform: translate(-50%, 0) !important;
+                width: 100% !important;
+                max-width: 700px !important;
+                margin: 0 !important;
+                z-index: 10 !important;
             }}
+            #learning-title-wrap {{ margin: 0 !important; }}
 
-            /* 4. 역할 설명 래퍼 */
+            /* [4] 역할 설명: 절대 위치, 정중앙 (0px 기준) */
+            div[data-testid="stVerticalBlock"]:has(#role-caption-wrap):not(:has(> div[data-testid="stVerticalBlock"]:has(#role-caption-wrap))) {{
+                position: absolute !important;
+                top: {role_top} !important;
+                left: calc(50% + {role_left_offset}) !important;
+                transform: translate(-50%, 0) !important;
+                width: 100% !important;
+                max-width: 700px !important;
+                margin: 0 !important;
+                z-index: 9 !important;
+            }}
             #role-caption-wrap {{
-                transform: translate({role_x}, {role_y}) !important;
-                position: relative; z-index: 9;
-                font-size: 0.875rem; color: gray; margin-bottom: 20px;
+                font-size: 0.875rem !important;
+                color: gray !important;
+                margin: 0 !important;
             }}
 
-            /* 5. 안내 박스 컨테이너 이동 */
-            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker) {{
-                transform: translate({prompt_x}, {prompt_y}) !important;
-                position: relative; 
-                z-index: 8;
+            /* [5] 안내 박스: 절대 위치, 정중앙 (0px 기준) */
+            div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker):not(:has(> div[data-testid="stVerticalBlock"]:has(div#start-prompt-marker))) {{
+                position: absolute !important;
+                top: {prompt_top} !important;
+                left: calc(50% + {prompt_left_offset}) !important;
+                transform: translate(-50%, 0) !important;
+                width: 100% !important;
+                max-width: 700px !important;
+                margin: 0 !important;
+                z-index: 8 !important;
             }}
 
-            /* ====================================================================
-               [수정 2] 추천 표현 바: 채팅창 너비에 맞춤 & 중앙 정렬 & 뭉침 방지
-               ==================================================================== */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) {{
-                transform: translate({smart_x}, {smart_y}) !important;
-                position: relative; 
-                z-index: 1; 
-                
-                width: 100% !important;        
-                max-width: 700px !important;   /* 최대 너비 700px (채팅창과 동일) */
-                
-                /* 중앙 정렬 */
-                margin-left: auto !important;
-                margin-right: auto !important;
-                left: 0 !important;
-                right: 0 !important;
-                
-                display: block !important;
+            /* [6] 추천 표현 바: 절대 위치, 정중앙 (0px 기준) — CSS + JS 보조 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) {{
+                position: absolute !important;
+                top: {smart_top} !important;
+                left: calc(50% + {smart_left_offset}) !important;
+                transform: translate(-50%, 0) !important;
+                width: 100% !important;
+                max-width: 700px !important;
+                margin: 0 !important;
+                z-index: 1 !important;
             }}
 
-            /* 내부 컬럼 컨테이너 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stHorizontalBlock"] {{
+            /* 채팅 영역: 위 요소들과 겹치지 않도록 상단 여백 (컨테이너 전체에만 적용) */
+            div[data-testid="stVerticalBlock"]:has(div#chat-area-marker):has(> div[data-testid="stVerticalBlock"]:has(div#chat-area-marker)) {{
+                padding-top: {chat_area_top} !important;
+            }}
+
+            /* 추천 표현 바 내부 컬럼/버튼 */
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) [data-testid="stHorizontalBlock"],
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) > div:has([data-testid="stColumn"]) {{
                 width: 100% !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 gap: 10px !important;
             }}
-
-            /* 각 컬럼(기둥) */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) [data-testid="stColumn"] {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) [data-testid="stColumn"] {{
                 flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
             }}
-
-            /* 버튼 디자인 */
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton {{
+                flex: 0 0 90px !important;
+                min-width: 0 !important;
                 width: 100% !important;
-                height: auto !important;
-                min-height: 60px !important;
-                
+                min-height: 90px !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button {{
+                width: 100% !important;
+                height: 90px !important;
+                min-height: 90px !important;
+                max-height: 90px !important;
+                box-sizing: border-box !important;
                 white-space: pre-wrap !important;
                 word-break: keep-all !important;
-                
                 background-color: #FFFFFF !important;
                 border: 1px solid #E5E5E5 !important;
                 color: #4B5563 !important;
                 border-radius: 12px !important;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-                
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                text-align: center;
-                padding: 12px !important;
+                display: grid !important;
+                place-items: center !important;
+                text-align: center !important;
+                padding: 10px !important;
+                line-height: 1.4 !important;
             }}
-            
-            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area) .stButton button:hover {{
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button > div {{
+                text-align: center !important;
+                width: 100% !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
             }}
@@ -226,7 +268,6 @@ SCENARIOS = {
         "role": "깐깐하지만 공정한 한국 입국 심사관",
         "context": "사용자가 한국에 막 도착해서 입국 심사를 받고 있습니다.",
         "key_phrases": {
-            "방문 목적이 무엇입니까?": "What is the purpose of your visit?",
             "여행으로 왔습니다.": "I am here for travel/tourism.",
             "얼마나 머무르실 예정입니까?": "How long will you be staying?",
             "일주일 정도 있을 겁니다.": "I will stay for about a week.",
@@ -239,7 +280,6 @@ SCENARIOS = {
         "role": "친절하고 활기찬 서울 맛집 식당 이모님",
         "context": "사용자가 식당에 들어와서 메뉴를 고르고 주문을 하려고 합니다.",
         "key_phrases": {
-            "어서 오세요! 몇 분이세요?": "Welcome! How many people?",
             "두 명이에요.": "Two people, please.",
             "여기요, 주문할게요.": "Excuse me, I'd like to order.",
             "이거 덜 맵게 해주세요.": "Please make this less spicy.",
@@ -253,9 +293,8 @@ SCENARIOS = {
         "context": "사용자가 활기찬 시장에서 물건을 구경하고 가격을 물어봅니다.",
         "key_phrases": {
             "이거 얼마예요?": "How much is this?",
-            "좀 깎아주세요.": "Please give me a discount.",
+            "깎아주세요.": "Please give me a discount.",
             "맛 좀 봐도 될까요?": "Can I taste this?",
-            "너무 비싸요.": "It's too expensive.",
             "많이 파세요!": "Have a great sale! (Goodbye greeting)"
         }
     }
@@ -332,7 +371,6 @@ def parse_ai_message(content):
 
 # --- 4. 추천 표현 바 ---
 def render_smart_reply_bar(current_scenario):
-    # CSS에서 'div#smart-reply-area'가 있는 컨테이너를 통째로 이동시킴 (리모컨 연동)
     with st.container():
         st.markdown('<div id="smart-reply-area"></div>', unsafe_allow_html=True)
         st.divider()
@@ -345,6 +383,55 @@ def render_smart_reply_bar(current_scenario):
                 if st.button(f"{kor}\n({eng})", key=f"phrase_{idx}", use_container_width=True):
                     st.session_state.messages.append({"role": "user", "content": kor})
                     st.rerun()
+
+    # JS로 뒤로가기/제목/역할/안내/추천표현 위치 직접 적용 (CSS 선택자 한계 우회)
+    back_top = REMOCON.get("back_top", "15px")
+    back_off = REMOCON.get("back_left_offset", "0px")
+    title_top = REMOCON.get("title_top", "50px")
+    title_off = REMOCON.get("title_left_offset", "0px")
+    role_top = REMOCON.get("role_top", "110px")
+    role_off = REMOCON.get("role_left_offset", "0px")
+    prompt_top = REMOCON.get("prompt_top", "160px")
+    prompt_off = REMOCON.get("prompt_left_offset", "0px")
+    smart_top = REMOCON.get("smart_top", "230px")
+    smart_off = REMOCON.get("smart_left_offset", "0px")
+    st.components.v1.html(f"""
+    <script>
+    (function() {{
+        const doc = window.parent?.document || document;
+        const applyBack = (el, top, off) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:fixed!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:auto!important;height:auto!important;z-index:999999!important;';
+        }};
+        applyBack(doc.getElementById('back-btn-area'), '{back_top}', '{back_off}');
+        const applyPos = (el, top, off, z) => {{
+            if (!el) return;
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            if (block) block.style.cssText = 'position:absolute!important;top:'+top+'!important;left:calc(50% + '+off+')!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:'+z+'!important;';
+        }};
+        applyPos(doc.getElementById('learning-title-wrap'), '{title_top}', '{title_off}', 10);
+        applyPos(doc.getElementById('role-caption-wrap'), '{role_top}', '{role_off}', 9);
+        const promptEl = doc.getElementById('start-prompt-marker');
+        if (promptEl) {{
+            let block = promptEl.closest('[data-testid="stVerticalBlock"]');
+            if (block) block = block.parentElement?.closest('[data-testid="stVerticalBlock"]') || block;
+            if (block) block.style.cssText = 'position:absolute!important;top:{prompt_top}!important;left:calc(50% + {prompt_off})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:8!important;';
+        }}
+        const el = doc.getElementById('smart-reply-area');
+        if (el) {{
+            let block = el.closest('[data-testid="stVerticalBlock"]');
+            while (block) {{
+                if (block.querySelector('[data-testid="stColumn"]')) {{
+                    block.style.cssText = 'position:absolute!important;top:{smart_top}!important;left:calc(50% + {smart_off})!important;transform:translate(-50%,0)!important;width:100%!important;max-width:700px!important;margin:0!important;z-index:1!important;';
+                    break;
+                }}
+                block = block.parentElement?.closest('[data-testid="stVerticalBlock"]');
+            }}
+        }}
+    }})();
+    </script>
+    """, height=0)
 
 
 # --- 5. 메인 앱 로직 ---
@@ -382,9 +469,10 @@ def main():
     st.markdown(f"<div id='learning-title-wrap'><h1 style='text-align: center;'>{current_scenario['icon']} {current_scenario['title']}</h1></div>", unsafe_allow_html=True)
     st.markdown(f"<div id='role-caption-wrap'>💡 역할: {html.escape(current_scenario['role'])}</div>", unsafe_allow_html=True)
 
-    # 3. 채팅창
+    # 3. 채팅창 (상단 여백용 마커 — 리모컨 chat_area_top 으로 조절)
     chat_container = st.container()
     with chat_container:
+        st.markdown('<div id="chat-area-marker"></div>', unsafe_allow_html=True)
         if not st.session_state.messages:
             # [중요] 안내 박스를 '컨테이너'에 담고 ID를 부여해서 CSS로 제어 가능하게 만듦
             with st.container():
