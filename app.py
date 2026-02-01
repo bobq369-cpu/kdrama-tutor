@@ -72,6 +72,11 @@ def inject_custom_css():
     # 채팅 영역 시작 위치 (위 요소들과 겹치지 않도록)
     chat_area_top = "320px"
 
+    # [7] 하단 footer 크기
+    footer_height = "25px"       # 높이 (0px 로 하면 숨김)
+    footer_padding = "8px 1rem" # 내부 여백
+    footer_font_size = "12px"   # 글자 크기
+
     # ============================================================
 
     st.markdown(
@@ -216,6 +221,14 @@ def inject_custom_css():
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
                 transform: translateY(-2px);
+            }}
+
+            /* [7] 하단 footer 크기 */
+            [data-testid="stFooter"] {{
+                min-height: {footer_height} !important;
+                max-height: {footer_height} !important;
+                padding: {footer_padding} !important;
+                font-size: {footer_font_size} !important;
             }}
 
             .kakao-correction {{ font-size: 13px; color: #8B0000; margin-top: 8px; padding: 8px 12px; background: #FFF5F5; border-radius: 10px; }}
