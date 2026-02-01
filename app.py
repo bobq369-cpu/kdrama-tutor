@@ -170,11 +170,16 @@ def inject_custom_css():
                 flex: 1 1 50% !important;
                 width: 50% !important;
                 min-width: 0 !important;
+                display: flex !important;
+            }}
+            div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton {{
+                flex: 1 !important;
+                min-width: 0 !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button {{
                 width: 100% !important;
-                height: auto !important;
-                min-height: 60px !important;
+                height: 90px !important;
+                min-height: 90px !important;
                 white-space: pre-wrap !important;
                 word-break: keep-all !important;
                 background-color: #FFFFFF !important;
@@ -186,7 +191,8 @@ def inject_custom_css():
                 align-items: center !important;
                 justify-content: center !important;
                 text-align: center !important;
-                padding: 12px !important;
+                padding: 10px !important;
+                line-height: 1.4 !important;
             }}
             div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]):not(:has(> div[data-testid="stVerticalBlock"]:has(div#smart-reply-area):has([data-testid="stColumn"]))) .stButton button:hover {{
                 background-color: #F9FAFB !important;
