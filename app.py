@@ -13,14 +13,25 @@ st.markdown("""
     .timeline-card {
         padding: 15px;
         border-radius: 10px;
-        background-color: #f0f2f6;
+        background-color: #f8f9fa;
         margin-bottom: 10px;
-        border-left: 5px solid #4B8BBE;
+        border-left: 5px solid #FF4B4B;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     }
-    .timeline-time { font-weight: bold; color: #4B8BBE; font-size: 0.9em; }
-    .timeline-title { font-size: 1.1em; font-weight: bold; margin: 5px 0; }
-    .timeline-note { font-size: 0.9em; color: #555; }
-    div.stButton > button { width: 100%; }
+    .timeline-time { font-weight: bold; color: #FF4B4B; font-size: 0.9em; }
+    .timeline-title { font-size: 1.1em; font-weight: bold; margin: 5px 0; color: #333; }
+    .timeline-note { font-size: 0.9em; color: #666; }
+    .day-header {
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        color: #1E1E1E;
+        padding: 10px;
+        background-color: #f0f2f6;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    div.stButton > button { width: 100%; height: 3em; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -42,7 +53,6 @@ class DailyPlan:
     region: str
     locations: List[Location]
 
-# Folium Glyphicon에 없는 아이콘 이름 매핑
 ICON_MAP = {
     "car": "road", "ship": "glass", "bicycle": "road", "apple": "gift",
     "map-marker": "camera", "shopping-cart": "gift", "tree": "tree-conifer",
@@ -134,28 +144,66 @@ travel_plan = [
     ])
 ]
 
-# --- 3. 메인 로직 ---
+# --- 3. 로직 및 UI 구성 ---
+if "day_index" not in st.session_state:
+    st.session_state.day_index = 0
+if "day_select_idx" not in st.session_state:
+    st.session_state.day_select_idx = 0
+
+def next_day():
+    if st.session_state.day_index < len(travel_plan) - 1:
+        st.session_state.day_index += 1
+        st.session_state.day_select_idx = st.session_state.day_index
+
+def prev_day():
+    if st.session_state.day_index > 0:
+        st.session_state.day_index -= 1
+        st.session_state.day_select_idx = st.session_state.day_index
+
+def jump_to_day():
+    st.session_state.day_index = st.session_state.day_select_idx
+
 st.title("🇲🇾 Malaysia Trip 2026")
 
-days_list = [f"Day {p.day} ({p.date})" for p in travel_plan]
-selected_day_idx = st.select_slider(
-    "일정을 선택하세요",
-    options=range(len(travel_plan)),
-    value=0,
-    format_func=lambda x: days_list[x]
-)
+col_prev, col_info, col_next = st.columns([1, 4, 1])
 
-selected_plan = travel_plan[selected_day_idx]
-st.markdown(f"### 📍 {selected_plan.region}")
+with col_prev:
+    st.button("◀ 이전 날짜", on_click=prev_day, use_container_width=True)
+
+with col_info:
+    current_plan = travel_plan[st.session_state.day_index]
+    st.markdown(f"""
+        <div class="day-header">
+            Day {current_plan.day}<br>
+            <span style="font-size: 0.6em; color: #555;">{html_lib.escape(current_plan.date)} | {html_lib.escape(current_plan.region)}</span>
+        </div>
+    """, unsafe_allow_html=True)
+    progress_val = (st.session_state.day_index + 1) / len(travel_plan)
+    st.progress(progress_val)
+
+with col_next:
+    st.button("다음 날짜 ▶", on_click=next_day, use_container_width=True)
+
+with st.expander("📅 특정 날짜로 바로 점프하기"):
+    st.selectbox(
+        "날짜를 선택하세요",
+        options=range(len(travel_plan)),
+        format_func=lambda i: f"Day {travel_plan[i].day} ({travel_plan[i].date}) - {travel_plan[i].region}",
+        index=st.session_state.day_index,
+        key="day_select_idx",
+        on_change=jump_to_day,
+    )
+
+st.divider()
 
 col_map, col_details = st.columns([6.5, 3.5])
 
 with col_map:
-    if selected_plan.locations:
-        start_loc = selected_plan.locations[0]
+    if current_plan.locations:
+        start_loc = current_plan.locations[0]
         m = folium.Map(location=[start_loc.lat, start_loc.lon], zoom_start=12)
         route_coords = []
-        for loc in selected_plan.locations:
+        for loc in current_plan.locations:
             icon_name = get_icon(loc.icon)
             popup_html = f"<b>{html_lib.escape(loc.name)}</b><br>{html_lib.escape(loc.note)}"
             folium.Marker(
@@ -166,37 +214,36 @@ with col_map:
             ).add_to(m)
             route_coords.append([loc.lat, loc.lon])
         if len(route_coords) > 1:
-            folium.PolyLine(route_coords, color="#3388ff", weight=5, opacity=0.7).add_to(m)
-        st_folium(m, width="100%", height=600, key=f"travel_map_day_{selected_plan.day}")
+            folium.PolyLine(route_coords, color="#FF4B4B", weight=5, opacity=0.7).add_to(m)
+        st_folium(m, width="100%", height=600, key=f"travel_map_day_{current_plan.day}")
     else:
-        st.info("이 날짜에는 표시할 위치 정보가 없습니다.")
+        st.info("이 날짜에는 위치 정보가 없습니다.")
 
 with col_details:
-    st.subheader(f"📅 {selected_plan.date}")
-    st.divider()
-    for loc in selected_plan.locations:
+    st.subheader("📋 오늘의 일정")
+    for loc in current_plan.locations:
+        safe_time = html_lib.escape(loc.time)
         safe_name = html_lib.escape(loc.name)
         safe_note = html_lib.escape(loc.note) if loc.note else "—"
         st.markdown(f"""
         <div class="timeline-card">
-            <div class="timeline-time">⏰ {html_lib.escape(loc.time)}</div>
+            <div class="timeline-time">⏰ {safe_time}</div>
             <div class="timeline-title">{safe_name}</div>
             <div class="timeline-note">{safe_note}</div>
         </div>
         """, unsafe_allow_html=True)
 
 with st.sidebar:
-    st.header("⚙️ 옵션")
-    show_all = st.checkbox("전체 경로 한눈에 보기")
-    if show_all:
-        st.info("전체 18일간의 여정을 지도에 표시합니다.")
+    st.header("⚙️ 전체 보기")
+    if st.checkbox("전체 경로 지도 보기"):
+        st.info("전체 18일간의 여정")
         m_all = folium.Map(location=[4.2105, 101.9758], zoom_start=7)
         for plan in travel_plan:
             for loc in plan.locations:
                 folium.CircleMarker(
                     location=[loc.lat, loc.lon],
-                    radius=5,
-                    color="red",
+                    radius=3,
+                    color="blue",
                     fill=True,
                     popup=f"Day {plan.day}: {html_lib.escape(loc.name)}"
                 ).add_to(m_all)
