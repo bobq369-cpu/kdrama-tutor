@@ -5,22 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나만의 여행 플래너</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
     <style>
         .tab-active {
             border-bottom: 3px solid #3b82f6;
             color: #3b82f6;
         }
         .day-card {
-            transition: all 0.3s ease;
+            transition: all 0.3s ease;git add .
+            
         }
         .day-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         #map {
-            height: 500px;
+            height: 600px;
             width: 100%;
             border-radius: 12px;
+            z-index: 0;
         }
     </style>
 </head>
@@ -28,8 +37,8 @@
     <div class="max-w-7xl mx-auto p-4 md:p-8">
         <!-- 헤더 -->
         <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 mb-8 text-white shadow-xl">
-            <h1 class="text-4xl font-bold mb-2">🗺️ 나만의 여행 플래너</h1>
-            <p class="text-blue-100">여행 일정을 추가하고 지도에서 확인하세요</p>
+            <h1 class="text-4xl font-bold mb-2">🗺️ 말레이시아 여행 플래너</h1>
+            <p class="text-blue-100">2026년 5월 여행 일정을 관리하세요</p>
         </div>
 
         <!-- 탭 -->
@@ -46,96 +55,111 @@
 
         <!-- 일정 관리 탭 -->
         <div id="content-itinerary">
-            <!-- 새 일정 추가 -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                 <h2 class="text-2xl font-bold mb-4 flex items-center">
-                    <span class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-lg">+</span>
-                    새 일정 추가
+                    <span class="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-lg" id="form-icon">+</span>
+                    <span id="form-title">새 일정 추가</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">날짜</label>
-                        <input type="date" id="new-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">날짜 (2026년 5월)</label>
+                        <select id="new-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                            <option value="">날짜 선택...</option>
+                            <option value="2026-05-01">5월 1일 (금)</option>
+                            <option value="2026-05-02">5월 2일 (토)</option>
+                            <option value="2026-05-03">5월 3일 (일)</option>
+                            <option value="2026-05-04">5월 4일 (월)</option>
+                            <option value="2026-05-05">5월 5일 (화)</option>
+                            <option value="2026-05-06">5월 6일 (수)</option>
+                            <option value="2026-05-07">5월 7일 (목)</option>
+                            <option value="2026-05-08">5월 8일 (금)</option>
+                            <option value="2026-05-09">5월 9일 (토)</option>
+                            <option value="2026-05-10">5월 10일 (일)</option>
+                            <option value="2026-05-11">5월 11일 (월)</option>
+                            <option value="2026-05-12">5월 12일 (화)</option>
+                            <option value="2026-05-13">5월 13일 (수)</option>
+                            <option value="2026-05-14">5월 14일 (목)</option>
+                            <option value="2026-05-15">5월 15일 (금)</option>
+                            <option value="2026-05-16">5월 16일 (토)</option>
+                            <option value="2026-05-17">5월 17일 (일)</option>
+                            <option value="2026-05-18">5월 18일 (월)</option>
+                            <option value="2026-05-19">5월 19일 (화)</option>
+                            <option value="2026-05-20">5월 20일 (수)</option>
+                            <option value="2026-05-21">5월 21일 (목)</option>
+                            <option value="2026-05-22">5월 22일 (금)</option>
+                            <option value="2026-05-23">5월 23일 (토)</option>
+                            <option value="2026-05-24">5월 24일 (일)</option>
+                            <option value="2026-05-25">5월 25일 (월)</option>
+                            <option value="2026-05-26">5월 26일 (화)</option>
+                            <option value="2026-05-27">5월 27일 (수)</option>
+                            <option value="2026-05-28">5월 28일 (목)</option>
+                            <option value="2026-05-29">5월 29일 (금)</option>
+                            <option value="2026-05-30">5월 30일 (토)</option>
+                            <option value="2026-05-31">5월 31일 (일)</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">지역</label>
                         <select id="new-region" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                             <option value="">지역 선택...</option>
-                            <optgroup label="🏙️ 주요 도시">
-                                <option value="쿠알라룸푸르">쿠알라룸푸르 (Kuala Lumpur)</option>
-                                <option value="페낭">페낭 (Penang)</option>
-                                <option value="조호르바루">조호르바루 (Johor Bahru)</option>
-                                <option value="말라카">말라카 (Malacca)</option>
-                                <option value="이포">이포 (Ipoh)</option>
-                                <option value="코타키나발루">코타키나발루 (Kota Kinabalu)</option>
-                                <option value="쿠칭">쿠칭 (Kuching)</option>
-                            </optgroup>
-                            <optgroup label="🏝️ 섬 & 해변">
-                                <option value="랑카위">랑카위 (Langkawi)</option>
-                                <option value="페낭섬">페낭섬 (Penang Island)</option>
-                                <option value="레당섬">레당섬 (Redang Island)</option>
-                                <option value="티오만섬">티오만섬 (Tioman Island)</option>
-                                <option value="판코르섬">판코르섬 (Pangkor Island)</option>
-                                <option value="페르헨티안제도">페르헨티안제도 (Perhentian Islands)</option>
-                            </optgroup>
-                            <optgroup label="⛰️ 고원 & 자연">
-                                <option value="카메론하이랜드">카메론 하이랜드 (Cameron Highlands)</option>
-                                <option value="겐팅하이랜드">겐팅 하이랜드 (Genting Highlands)</option>
-                                <option value="프레이저스힐">프레이저스 힐 (Fraser's Hill)</option>
-                                <option value="타만네가라">타만 네가라 (Taman Negara)</option>
-                                <option value="키나발루공원">키나발루 공원 (Kinabalu Park)</option>
-                            </optgroup>
-                            <optgroup label="🏛️ 역사 도시">
-                                <option value="조지타운">조지타운 (Georgetown)</option>
-                                <option value="말라카">말라카 (Malacca)</option>
-                                <option value="쿠알라테렝가누">쿠알라 테렝가누 (Kuala Terengganu)</option>
-                                <option value="타핑">타핑 (Taiping)</option>
-                            </optgroup>
-                            <optgroup label="🏖️ 동부 해안">
-                                <option value="쿠안탄">쿠안탄 (Kuantan)</option>
-                                <option value="콰타바루">코타바루 (Kota Bharu)</option>
-                                <option value="체라팅">체라팅 (Cherating)</option>
-                            </optgroup>
-                            <optgroup label="🌴 보르네오">
-                                <option value="미리">미리 (Miri)</option>
-                                <option value="산다칸">산다칸 (Sandakan)</option>
-                                <option value="세피록">세피록 (Sepilok)</option>
-                                <option value="문루">문루 (Mulu)</option>
-                            </optgroup>
-                            <optgroup label="✈️ 기타">
-                                <option value="공항">공항 (Airport)</option>
-                                <option value="기타">기타 (Other)</option>
-                            </optgroup>
+                            <option value="쿠알라룸푸르">쿠알라룸푸르</option>
+                            <option value="페낭">페낭</option>
+                            <option value="말라카">말라카</option>
+                            <option value="이포">이포</option>
+                            <option value="랑카위">랑카위</option>
+                            <option value="카메론하이랜드">카메론 하이랜드</option>
+                            <option value="공항">공항</option>
                         </select>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">장소명</label>
-                        <input type="text" id="new-place" placeholder="예: 바투 동굴" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">위도 (Latitude)</label>
-                        <input type="number" step="0.000001" id="new-lat" placeholder="예: 3.237884" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">경도 (Longitude)</label>
-                        <input type="number" step="0.000001" id="new-lng" placeholder="예: 101.684039" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">장소 선택</label>
+                        <select id="preset-place" onchange="usePreset()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white mb-2">
+                            <option value="">📍 인기 장소에서 선택...</option>
+                            <optgroup label="🏙️ 쿠알라룸푸르">
+                                <option value="Batu Caves|쿠알라룸푸르|3.237884,101.684039">Batu Caves</option>
+                                <option value="Petronas Twin Towers|쿠알라룸푸르|3.157469,101.711564">Petronas Twin Towers</option>
+                                <option value="Bukit Bintang|쿠알라룸푸르|3.148961,101.713412">Bukit Bintang</option>
+                            </optgroup>
+                            <optgroup label="🏝️ 랑카위">
+                                <option value="Pantai Cenang|랑카위|6.295592,99.722813">Pantai Cenang</option>
+                                <option value="Langkawi Sky Bridge|랑카위|6.371086,99.671679">Langkawi Sky Bridge</option>
+                            </optgroup>
+                            <optgroup label="🏛️ 말라카">
+                                <option value="Jonker Street|말라카|2.194829,102.248369">Jonker Street</option>
+                                <option value="Dutch Square|말라카|2.194366,102.248986">Dutch Square</option>
+                            </optgroup>
+                            <optgroup label="🌆 페낭">
+                                <option value="Georgetown Street Art|페낭|5.414596,100.338256">Georgetown Street Art</option>
+                                <option value="Penang Hill|페낭|5.408540,100.277200">Penang Hill</option>
+                            </optgroup>
+                            <optgroup label="☕ 이포">
+                                <option value="Ipoh Old Town|이포|4.597888,101.076250">Ipoh Old Town</option>
+                            </optgroup>
+                            <optgroup label="⛰️ 카메론 하이랜드">
+                                <option value="BOH Tea Plantation|카메론하이랜드|4.448080,101.423356">BOH Tea Plantation</option>
+                            </optgroup>
+                        </select>
+                        <input type="text" id="new-place" placeholder="또는 직접 입력" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">메모</label>
-                        <textarea id="new-notes" rows="2" placeholder="여행 팁이나 메모를 입력하세요" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                        <textarea id="new-notes" rows="2" placeholder="여행 팁이나 메모" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                     </div>
                 </div>
-                <button onclick="addItinerary()" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-md">
-                    ➕ 일정 추가
-                </button>
+                <div class="mt-4 flex gap-3">
+                    <button onclick="saveItinerary()" id="save-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-md">
+                        ➕ 일정 추가
+                    </button>
+                    <button onclick="cancelEdit()" id="cancel-btn" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-md">
+                        ✖️ 취소
+                    </button>
+                </div>
             </div>
 
             <!-- 일정 목록 -->
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-4">📅 나의 여행 일정</h2>
-                <div id="itinerary-list" class="space-y-4">
-                    <!-- 일정 카드들이 여기에 추가됩니다 -->
-                </div>
+                <div id="itinerary-list" class="space-y-4"></div>
             </div>
         </div>
 
@@ -143,142 +167,127 @@
         <div id="content-map" class="hidden">
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h2 class="text-2xl font-bold mb-4">🗺️ 여행 경로 지도</h2>
-                <div id="map" class="bg-gray-100 flex items-center justify-center text-gray-500">
-                    지도를 불러오는 중...
-                </div>
+                <div id="map"></div>
                 <div class="mt-4 p-4 bg-blue-50 rounded-lg">
                     <p class="text-sm text-blue-800">
-                        💡 <strong>팁:</strong> 일정을 추가하면 자동으로 지도에 표시됩니다. 
-                        일정 순서대로 경로가 그려집니다.
+                        💡 <strong>사용 방법:</strong> 마커를 클릭하면 장소 정보를 볼 수 있습니다.
                     </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBjSB3xWtZfLkWCe94D_PB5aZl4zGdCeH0&libraries=geometry"></script>
     <script>
         let itineraries = [];
+        let editingIndex = null;
         let map = null;
         let markers = [];
         let polyline = null;
 
-        // 샘플 데이터 로드
         function loadSampleData() {
             itineraries = [
-                {
-                    date: '2025-05-04',
-                    region: '쿠알라룸푸르',
-                    place: '부킷 빈탕',
-                    lat: 3.1489607,
-                    lng: 101.71341249999999,
-                    notes: '호텔 체크인 후 부킷 빈탕 야경 감상'
-                },
-                {
-                    date: '2025-05-05',
-                    region: '쿠알라룸푸르',
-                    place: 'Batu Caves',
-                    lat: 3.2378844,
-                    lng: 101.6840385,
-                    notes: '아침 일찍 방문해 인파 피하기. 계단 272개 - 편한 신발 필수!'
-                },
-                {
-                    date: '2025-05-05',
-                    region: '쿠알라룸푸르',
-                    place: 'Petronas Twin Towers',
-                    lat: 3.1574693,
-                    lng: 101.7115639,
-                    notes: '야경이 환상적! 분수쇼는 저녁 8-10시'
-                },
-                {
-                    date: '2025-05-06',
-                    region: '랑카위',
-                    place: 'Pantai Cenang',
-                    lat: 6.2955916,
-                    lng: 99.72281319999999,
-                    notes: '12:30 렌터카 인수 후 해변 자유시간. 선셋 감상 추천!'
-                },
-                {
-                    date: '2025-05-07',
-                    region: '랑카위',
-                    place: 'Langkawi Skybridge Cable Car',
-                    lat: 6.3710862,
-                    lng: 99.67167859999999,
-                    notes: 'VIP 티켓 추천! 스카이브릿지까지 걸어가면 10분. 뷰가 압권!'
-                }
+                { date: '2026-05-04', region: '쿠알라룸푸르', place: 'Bukit Bintang', lat: 3.148961, lng: 101.713412, notes: '호텔 체크인' },
+                { date: '2026-05-05', region: '쿠알라룸푸르', place: 'Batu Caves', lat: 3.237884, lng: 101.684039, notes: '계단 272개!' },
+                { date: '2026-05-05', region: '쿠알라룸푸르', place: 'Petronas Twin Towers', lat: 3.157469, lng: 101.711564, notes: '분수쇼 8-10시' },
+                { date: '2026-05-06', region: '랑카위', place: 'Pantai Cenang', lat: 6.295592, lng: 99.722813, notes: '렌터카 인수' },
+                { date: '2026-05-07', region: '랑카위', place: 'Langkawi Sky Bridge', lat: 6.371086, lng: 99.671679, notes: 'VIP 티켓 추천' }
             ];
             renderItineraries();
         }
 
-        // 탭 전환
-        function switchTab(tab) {
-            document.querySelectorAll('[id^="tab-"]').forEach(t => {
-                t.classList.remove('tab-active', 'text-blue-600');
-                t.classList.add('text-gray-600');
-            });
-            document.querySelectorAll('[id^="content-"]').forEach(c => {
-                c.classList.add('hidden');
-            });
-            
-            document.getElementById(`tab-${tab}`).classList.add('tab-active', 'text-blue-600');
-            document.getElementById(`content-${tab}`).classList.remove('hidden');
-            
-            if (tab === 'map') {
-                initMap();
-            }
+        function usePreset() {
+            const preset = document.getElementById('preset-place').value;
+            if (!preset) return;
+            const parts = preset.split('|');
+            const place = parts[0];
+            const region = parts[1];
+            document.getElementById('new-place').value = place;
+            document.getElementById('new-region').value = region;
         }
 
-        // 일정 추가
-        function addItinerary() {
+        function saveItinerary() {
             const date = document.getElementById('new-date').value;
             const region = document.getElementById('new-region').value;
             const place = document.getElementById('new-place').value;
-            const lat = parseFloat(document.getElementById('new-lat').value);
-            const lng = parseFloat(document.getElementById('new-lng').value);
             const notes = document.getElementById('new-notes').value;
 
-            if (!date || !region || !place || isNaN(lat) || isNaN(lng)) {
-                alert('모든 필수 항목을 입력해주세요!');
+            let lat = null, lng = null;
+            const preset = document.getElementById('preset-place').value;
+            if (preset) {
+                const coords = preset.split('|')[2];
+                if (coords) [lat, lng] = coords.split(',').map(parseFloat);
+            }
+
+            if (editingIndex !== null) {
+                const existing = itineraries[editingIndex];
+                if (lat == null) lat = existing.lat;
+                if (lng == null) lng = existing.lng;
+            }
+
+            if (!date || !region || !place) {
+                alert('날짜, 지역, 장소는 필수입니다!');
                 return;
             }
 
-            itineraries.push({ date, region, place, lat, lng, notes });
+            if (editingIndex !== null) {
+                itineraries[editingIndex] = { date, region, place, lat, lng, notes };
+                alert('✅ 수정 완료!');
+                cancelEdit();
+            } else {
+                itineraries.push({ date, region, place, lat, lng, notes });
+                alert('✅ 추가 완료!');
+            }
+
             itineraries.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            // 입력 필드 초기화
-            document.getElementById('new-date').value = '';
-            document.getElementById('new-region').value = '';
-            document.getElementById('new-place').value = '';
-            document.getElementById('new-lat').value = '';
-            document.getElementById('new-lng').value = '';
-            document.getElementById('new-notes').value = '';
-            
+            clearForm();
             renderItineraries();
-            alert('✅ 일정이 추가되었습니다!');
         }
 
-        // 일정 삭제
+        function editItinerary(index) {
+            editingIndex = index;
+            const item = itineraries[index];
+            document.getElementById('new-date').value = item.date;
+            document.getElementById('new-region').value = item.region;
+            document.getElementById('new-place').value = item.place;
+            document.getElementById('new-notes').value = item.notes || '';
+            document.getElementById('preset-place').value = '';
+            document.getElementById('form-title').textContent = '일정 수정';
+            document.getElementById('form-icon').textContent = '✏️';
+            document.getElementById('save-btn').innerHTML = '💾 수정 완료';
+            document.getElementById('cancel-btn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingIndex = null;
+            clearForm();
+            document.getElementById('form-title').textContent = '새 일정 추가';
+            document.getElementById('form-icon').textContent = '+';
+            document.getElementById('save-btn').innerHTML = '➕ 일정 추가';
+            document.getElementById('cancel-btn').classList.add('hidden');
+        }
+
+        function clearForm() {
+            document.getElementById('new-date').value = '';
+            document.getElementById('new-region').value = '';
+            document.getElementById('preset-place').value = '';
+            document.getElementById('new-place').value = '';
+            document.getElementById('new-notes').value = '';
+        }
+
         function deleteItinerary(index) {
-            if (confirm('이 일정을 삭제하시겠습니까?')) {
+            if (confirm('삭제하시겠습니까?')) {
                 itineraries.splice(index, 1);
+                if (editingIndex === index) cancelEdit();
+                else if (editingIndex !== null && editingIndex > index) editingIndex--;
                 renderItineraries();
             }
         }
 
-        // 일정 목록 렌더링
         function renderItineraries() {
             const container = document.getElementById('itinerary-list');
-            
             if (itineraries.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-gray-400">
-                        <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                        </svg>
-                        <p class="text-lg font-semibold">아직 일정이 없습니다</p>
-                        <p class="text-sm mt-2">위에서 새 일정을 추가해보세요!</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="text-center py-12 text-gray-400"><p class="text-lg font-semibold">아직 일정이 없습니다</p></div>';
                 return;
             }
 
@@ -290,137 +299,83 @@
                                 <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
                                     ${new Date(item.date).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
                                 </span>
-                                <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">
-                                    ${item.region}
-                                </span>
+                                <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">${item.region}</span>
                             </div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">📍 ${item.place}</h3>
-                            ${item.notes ? `<p class="text-gray-600 text-sm mb-2">💡 ${item.notes}</p>` : ''}
-                            <p class="text-xs text-gray-400">📌 ${item.lat.toFixed(6)}, ${item.lng.toFixed(6)}</p>
+                            ${item.notes ? `<p class="text-gray-600 text-sm">💡 ${item.notes}</p>` : ''}
                         </div>
-                        <button onclick="deleteItinerary(${index})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="editItinerary(${index})" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50">✏️</button>
+                            <button onclick="deleteItinerary(${index})" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50">🗑️</button>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 지도 초기화
-        function initMap() {
-            if (map) {
-                updateMap();
-                return;
-            }
-
-            if (itineraries.length === 0) {
-                document.getElementById('map').innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center">
-                        <svg class="h-16 w-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                        </svg>
-                        <p class="text-gray-500 text-lg">일정을 추가하면 지도가 표시됩니다</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const center = { lat: itineraries[0].lat, lng: itineraries[0].lng };
-            
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 6,
-                center: center,
-                styles: [
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [{ visibility: "off" }]
-                    }
-                ]
+        function switchTab(tab) {
+            document.querySelectorAll('[id^="tab-"]').forEach(t => {
+                t.classList.remove('tab-active', 'text-blue-600');
+                t.classList.add('text-gray-600');
             });
+            document.querySelectorAll('[id^="content-"]').forEach(c => c.classList.add('hidden'));
 
-            updateMap();
+            document.getElementById('tab-' + tab).classList.add('tab-active', 'text-blue-600');
+            document.getElementById('content-' + tab).classList.remove('hidden');
+
+            if (tab === 'map') {
+                setTimeout(initMap, 100);
+            }
         }
 
-        // 지도 업데이트
-        function updateMap() {
-            if (!map) return;
+        function initMap() {
+            const validPlaces = itineraries.filter(item => item.lat && item.lng);
 
-            // 기존 마커 제거
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-            
-            // 기존 경로 제거
-            if (polyline) {
-                polyline.setMap(null);
+            if (validPlaces.length === 0) {
+                document.getElementById('map').innerHTML = '<div class="h-full flex items-center justify-center bg-gray-100 rounded-xl text-gray-500" style="min-height:600px;">📍 일정에서 프리셋 장소를 선택하면 지도에 표시됩니다</div>';
+                return;
             }
 
-            if (itineraries.length === 0) return;
+            if (!map) {
+                map = L.map('map').setView([validPlaces[0].lat, validPlaces[0].lng], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+            }
 
-            // 새 마커 추가
-            const bounds = new google.maps.LatLngBounds();
-            const path = [];
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            if (polyline) map.removeLayer(polyline);
 
-            itineraries.forEach((item, index) => {
-                const position = { lat: item.lat, lng: item.lng };
-                path.push(position);
-                bounds.extend(position);
+            const bounds = [];
+            const pathCoords = [];
 
-                const marker = new google.maps.Marker({
-                    position: position,
-                    map: map,
-                    title: item.place,
-                    label: {
-                        text: (index + 1).toString(),
-                        color: 'white',
-                        fontWeight: 'bold'
-                    },
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 15,
-                        fillColor: '#3b82f6',
-                        fillOpacity: 1,
-                        strokeColor: 'white',
-                        strokeWeight: 3
-                    }
+            validPlaces.forEach((item, index) => {
+                const pos = [item.lat, item.lng];
+                bounds.push(pos);
+                pathCoords.push(pos);
+
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background:#3b82f6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);">' + (index + 1) + '</div>',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
                 });
 
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <div style="padding: 8px; max-width: 250px;">
-                            <h3 style="font-weight: bold; margin-bottom: 4px; font-size: 16px;">${item.place}</h3>
-                            <p style="color: #666; font-size: 12px; margin-bottom: 4px;">${item.region} - ${new Date(item.date).toLocaleDateString('ko-KR')}</p>
-                            ${item.notes ? `<p style="color: #666; font-size: 13px; margin-top: 8px;">${item.notes}</p>` : ''}
-                        </div>
-                    `
-                });
-
-                marker.addListener('click', () => {
-                    infoWindow.open(map, marker);
-                });
-
+                const marker = L.marker(pos, { icon }).addTo(map);
+                marker.bindPopup('<div style="padding:8px;min-width:200px;"><h3 style="font-weight:bold;margin-bottom:4px;">' + item.place + '</h3><p style="color:#666;font-size:12px;">' + item.region + ' - ' + new Date(item.date).toLocaleDateString('ko-KR') + '</p>' + (item.notes ? '<p style="margin-top:8px;font-size:13px;">' + item.notes + '</p>' : '') + '</div>');
                 markers.push(marker);
             });
 
-            // 경로 그리기
-            if (path.length > 1) {
-                polyline = new google.maps.Polyline({
-                    path: path,
-                    geodesic: true,
-                    strokeColor: '#3b82f6',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 3
-                });
-                polyline.setMap(map);
+            if (pathCoords.length > 1) {
+                polyline = L.polyline(pathCoords, { color: '#3b82f6', weight: 3 }).addTo(map);
             }
 
-            // 지도 범위 조정
-            map.fitBounds(bounds);
+            if (bounds.length > 0) {
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
         }
 
-        // 초기 로드
         loadSampleData();
     </script>
 </body>
