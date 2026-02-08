@@ -4,3 +4,4 @@ Pillow>=10.0.0
 gTTS>=2.4.0
 folium>=0.15.0
 streamlit-folium>=0.15.0
+pandas>=2.0.0
