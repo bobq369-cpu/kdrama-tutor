@@ -1,0 +1,10 @@
+# E북 구매 추적기 의존성
+streamlit>=1.41.0
+pandas>=2.0.0
+openpyxl>=3.1.0          # 엑셀(.xlsx) 가져오기용
+playwright>=1.40.0       # 자동 동기화(브라우저 로그인 + 구매내역 수집)
+beautifulsoup4>=4.12.0   # HTML 파싱 대비책
+lxml>=4.9.0              # BeautifulSoup 파서 가속
+
+# 설치 후 한 번:
+#   playwright install chromium

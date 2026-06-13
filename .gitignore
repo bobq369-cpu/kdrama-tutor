@@ -1,0 +1,22 @@
+# E북 추적기 — 개인 데이터 (저장소에 올리지 않음)
+ebook_data.db
+sessions/
+captures/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PyInstaller 빌드 산출물
+build/
+dist/
+*.manifest
+
+# Wine 크로스 빌드 작업 폴더 (Windows Python, 빌드 캐시 등)
+winbuild/
+.wine/
+
+# Streamlit 비밀
+.streamlit/secrets.toml
