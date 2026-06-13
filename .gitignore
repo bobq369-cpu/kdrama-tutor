@@ -1,0 +1,13 @@
+# E북 추적기 — 개인 데이터 (저장소에 올리지 않음)
+ebook_data.db
+sessions/
+captures/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Streamlit 비밀
+.streamlit/secrets.toml
