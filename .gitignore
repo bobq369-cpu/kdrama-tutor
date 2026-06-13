@@ -9,5 +9,10 @@ __pycache__/
 .venv/
 venv/
 
+# PyInstaller 빌드 산출물
+build/
+dist/
+*.manifest
+
 # Streamlit 비밀
 .streamlit/secrets.toml

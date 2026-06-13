@@ -27,11 +27,40 @@ streamlit run ebook_app.py
 
 브라우저에서 `http://localhost:8501` 이 열립니다.
 
+## 🎁 지인에게 보낼 Windows 프로그램(.exe) 만들기
+
+명령어를 모르는 지인도 **더블클릭 한 번**으로 쓸 수 있도록 하나의 프로그램으로 묶을 수 있습니다.
+
+> ⚠️ **빌드는 Windows PC 에서 한 번 해야 합니다.** (`.exe` 는 Windows 에서만 생성/실행됩니다.)
+> 자동 동기화는 지인 PC 에 이미 있는 **Chrome → Edge** 를 사용하므로, 브라우저를 따로 받을 필요가 없습니다.
+> (Edge 는 모든 Windows 에 기본 설치돼 있어 "브라우저 없음" 문제가 없습니다.)
+
+### 만드는 순서 (회원님이 Windows PC 에서 한 번)
+
+1. 이 저장소를 Windows PC 에 내려받습니다.
+2. **`build_windows.bat`** 를 더블클릭합니다. (Python 3.10+ 필요 — 없으면 안내가 뜸)
+3. 몇 분 뒤 **`dist\EBookTracker\`** 폴더가 생깁니다.
+4. **권장: 보내기 전에 직접 한 번 테스트** — `dist\EBookTracker\EBookTracker.exe` 를 더블클릭해
+   로그인 → 구매내역 가져오기 가 잘 되는지 확인합니다.
+   (서점 응답 형태가 계정마다 달라, 결과가 비면 `captures/` 캡처 파일을 보고 `config.py` 를 한 번 맞추면 됩니다.)
+5. 잘 되면 **`dist\EBookTracker\` 폴더 전체를 압축(zip)** 해서 지인에게 보냅니다.
+
+### 지인이 하는 일
+
+1. 받은 zip 의 압축을 풉니다.
+2. **`EBookTracker.exe`** 를 더블클릭합니다. → 잠시 뒤 앱 화면이 브라우저에 자동으로 열립니다.
+3. **로그인** → 자기 서점 계정으로 로그인(OTP 가능) → **구매내역 가져오기** → 검색!
+
+> 💡 처음 실행 시 Windows 가 "알 수 없는 게시자" 경고를 띄우면
+> **추가 정보 → 실행** 을 누르면 됩니다. (서명되지 않은 개인용 프로그램이라 나오는 정상 경고)
+
+자세한 빌드 구성은 `EBookTracker.spec`, `desktop_launcher.py`, `build_windows.bat` 를 참고하세요.
+
 ## 자동 동기화는 어떻게 동작하나요?
 
 1. **로그인** 버튼 → 서점 로그인 창(실제 크롬 브라우저)이 열립니다.
 2. 평소처럼 아이디/비밀번호를 입력하고, 필요하면 **OTP·2단계 인증**도 그대로 진행합니다.
-3. 로그인이 끝나면 앱이 **세션 쿠키만** `sessions/<서점>.json` 에 저장합니다.
+3. 로그인이 끝나면 앱이 **세션 쿠키만** 사용자 폴더(`%APPDATA%\EBookTracker\sessions\`)에 저장합니다.
 4. 다음부터는 **구매내역 가져오기** 버튼만 누르면, 저장된 세션으로 구매내역을 자동 수집합니다.
 
 > 🔒 **비밀번호는 앱에 저장되지 않습니다.** 로그인은 항상 실제 브라우저 창에서 사용자가 직접 합니다.
@@ -66,22 +95,29 @@ streamlit run ebook_app.py
 
 ## 데이터 저장 위치
 
+모든 개인 데이터는 **사용자 폴더**(Windows: `%APPDATA%\EBookTracker\`, 그 외: `~/EBookTracker/`)에
+저장됩니다. 프로그램이 읽기 전용 위치(Program Files 등)에 설치돼도 안전합니다.
+
 | 경로 | 내용 |
 |------|------|
-| `ebook_data.db` | SQLite DB — 모든 구매 기록 |
-| `sessions/` | 서점별 로그인 세션 (git 제외) |
-| `captures/` | 동기화 시 캡처한 API 응답 (튜닝용, git 제외) |
+| `…/EBookTracker/ebook_data.db` | SQLite DB — 모든 구매 기록 |
+| `…/EBookTracker/sessions/` | 서점별 로그인 세션 |
+| `…/EBookTracker/captures/` | 동기화 시 캡처한 API 응답 (튜닝용) |
 
-세 가지 모두 `.gitignore` 에 등록되어 저장소에 올라가지 않습니다.
+저장소에는 개인 데이터가 올라가지 않습니다(사용자 폴더에만 보관).
 
 ## 구조
 
 ```
+desktop_launcher.py       # 데스크톱(.exe) 진입점 — 서버 실행 + 브라우저 자동 열기
+EBookTracker.spec         # PyInstaller 빌드 설정
+build_windows.bat         # Windows 에서 더블클릭 → .exe 생성
 ebook_app.py              # Streamlit UI (검색/동기화/가져오기/관리 탭)
 ebook_tracker/
   ├─ config.py            # 서점별 URL·선택자·API 키워드
   ├─ database.py          # SQLite 저장·검색·중복제거·통계
   ├─ importer.py          # CSV/엑셀 가져오기 (컬럼 자동 매핑)
-  └─ sync.py              # Playwright 로그인 + 네트워크 캡처 추출
+  ├─ paths.py             # 사용자 데이터 폴더 위치
+  └─ sync.py              # Playwright 로그인(Chrome/Edge) + 네트워크 캡처 추출
 sample_data/              # 서점별 샘플 CSV
 ```

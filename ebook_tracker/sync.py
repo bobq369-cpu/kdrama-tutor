@@ -24,9 +24,13 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from .config import StoreConfig, get_store
+from .paths import user_data_dir
 
-SESSION_DIR = Path(__file__).resolve().parent.parent / "sessions"
-CAPTURE_DIR = Path(__file__).resolve().parent.parent / "captures"
+SESSION_DIR = user_data_dir() / "sessions"
+CAPTURE_DIR = user_data_dir() / "captures"
+
+# 브라우저 채널 우선순위: 지인 PC에 이미 있는 Chrome → Edge(Windows 기본) → 번들 Chromium
+BROWSER_CHANNELS = ["chrome", "msedge"]
 
 
 def _ensure_dirs() -> None:
@@ -148,6 +152,27 @@ def records_from_json_payloads(payloads: list[Any], store: str) -> list[dict[str
 # Playwright 흐름
 # ---------------------------------------------------------------------------
 
+def _launch_browser(p, headless: bool):
+    """설치된 Chrome → Edge → 번들 Chromium 순서로 브라우저를 띄운다.
+
+    Windows 에는 Edge 가 항상 설치돼 있으므로 별도 브라우저 다운로드 없이 동작한다.
+    """
+    last_err: Exception | None = None
+    for channel in BROWSER_CHANNELS:
+        try:
+            return p.chromium.launch(headless=headless, channel=channel)
+        except Exception as e:  # 해당 브라우저가 없으면 다음 후보로
+            last_err = e
+            continue
+    # 마지막 수단: Playwright 번들 Chromium (playwright install chromium 필요)
+    try:
+        return p.chromium.launch(headless=headless)
+    except Exception as e:
+        raise RuntimeError(
+            "사용할 브라우저를 찾지 못했습니다. Chrome 또는 Edge 가 설치돼 있어야 합니다."
+        ) from (last_err or e)
+
+
 def login_and_save_session(
     store: str,
     timeout_seconds: int = 300,
@@ -169,7 +194,7 @@ def login_and_save_session(
 
     log(f"{cfg.name} 로그인 창을 엽니다. 브라우저에서 로그인(필요시 OTP)을 완료해 주세요…")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = _launch_browser(p, headless=False)
         context = browser.new_context()
         page = context.new_page()
         page.goto(cfg.login_url, wait_until="domcontentloaded")
@@ -228,7 +253,7 @@ def fetch_orders(
 
     log(f"{cfg.name} 구매내역을 불러옵니다…")
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
+        browser = _launch_browser(p, headless=headless)
         context = browser.new_context(storage_state=str(session_path(store)))
         page = context.new_page()
 

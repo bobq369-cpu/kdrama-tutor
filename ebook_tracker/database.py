@@ -13,7 +13,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
-DB_PATH = Path(__file__).resolve().parent.parent / "ebook_data.db"
+from .paths import user_data_dir
+
+DB_PATH = user_data_dir() / "ebook_data.db"
 
 
 SCHEMA = """
