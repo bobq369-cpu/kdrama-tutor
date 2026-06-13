@@ -76,9 +76,10 @@ exe = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    # console=False -> 검은 콘솔 창 없음(완성된 프로그램 느낌).
-    # 빌드한 .exe 가 안 켜지면 아래를 console=True 로 바꿔 오류 메시지를 확인하세요.
-    console=False,
+    # console=True 로 빌드하되 desktop_launcher.hide_console() 가 시작 직후
+    # 콘솔 창을 숨긴다. (windowed 빌드는 Wine/일부 환경에서 Python 표준 스트림
+    # 초기화 충돌이 나므로, 콘솔 서브시스템으로 빌드 후 창만 숨기는 방식이 안정적)
+    console=True,
     disable_windowed_traceback=False,
     target_arch=None,
     codesign_identity=None,

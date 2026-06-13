@@ -25,6 +25,24 @@ def base_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
+def hide_console() -> None:
+    """콘솔(검은 창)을 숨겨 완성된 프로그램처럼 보이게 한다 (Windows 전용).
+
+    콘솔 서브시스템으로 빌드하면 Python 표준 스트림 초기화가 안정적이라
+    'init_sys_streams' 같은 시작 충돌을 피할 수 있다. 그 대신 시작 직후
+    콘솔 창만 숨겨 사용자에게는 검은 창이 보이지 않게 한다.
+    """
+    try:
+        import ctypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        user32 = ctypes.WinDLL("user32", use_last_error=True)
+        hwnd = kernel32.GetConsoleWindow()
+        if hwnd:
+            user32.ShowWindow(hwnd, 0)  # SW_HIDE = 0
+    except Exception:
+        pass
+
+
 def guard_std_streams() -> None:
     """콘솔 없는 빌드에서 stdout/stderr 가 None 이면 로그 파일로 대체.
 
@@ -59,6 +77,7 @@ def open_when_ready(port: int) -> None:
 
 
 def main() -> None:
+    hide_console()
     guard_std_streams()
     base = base_dir()
     app_path = base / "ebook_app.py"
