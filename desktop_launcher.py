@@ -65,6 +65,14 @@ def free_port() -> int:
     return port
 
 
+def choose_port() -> int:
+    """EBOOK_PORT 환경변수가 지정되면 그 포트를, 아니면 빈 포트를 자동 선택."""
+    env = os.environ.get("EBOOK_PORT", "").strip()
+    if env.isdigit():
+        return int(env)
+    return free_port()
+
+
 def open_when_ready(port: int) -> None:
     """서버가 응답하기 시작하면 브라우저를 연다 (최대 ~30초 대기)."""
     for _ in range(60):
@@ -81,7 +89,7 @@ def main() -> None:
     guard_std_streams()
     base = base_dir()
     app_path = base / "ebook_app.py"
-    port = free_port()
+    port = choose_port()
 
     threading.Thread(target=open_when_ready, args=(port,), daemon=True).start()
 
